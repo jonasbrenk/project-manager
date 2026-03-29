@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project View</title>
+  <style>
+    :root {--bg:#0b1020;--card:rgba(19,26,47,.92);--card2:rgba(28,38,70,.8);--text:#eef2ff;--muted:#a8b3cf;--line:rgba(255,255,255,.08);--accent:#4f7cff;--accentSoft:rgba(79,124,255,.15);--danger:#ff6a6a;--shadow:0 18px 50px rgba(0,0,0,.28);--radius:22px}
+    *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#172344 0%,var(--bg) 58%);color:var(--text);font-family:Inter,system-ui,sans-serif} button,input,textarea{font:inherit}
+    .page{width:min(1120px,calc(100% - 24px));margin:0 auto;padding:24px 0 90px}.topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:16px;flex-wrap:wrap}.back-link{text-decoration:none;color:var(--text);background:rgba(255,255,255,.05);border:1px solid var(--line);padding:10px 14px;border-radius:999px;display:inline-flex;align-items:center;gap:8px}
+    .layout{display:grid;gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(12px);padding:18px}.hero{display:grid;gap:18px}.hero-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap}.hero-title-wrap{display:flex;gap:14px;align-items:center;min-width:0}.hero-icon{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;background:var(--accentSoft);border:1px solid rgba(79,124,255,.28);font-size:1.7rem;flex-shrink:0;overflow:hidden}
+    h1,h2,h3,p{margin:0}.project-title{font-size:clamp(1.5rem,3vw,2.4rem);line-height:1.1;margin-bottom:8px;word-break:break-word}.muted{color:var(--muted);line-height:1.5}.meta-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.meta-box{padding:14px 16px;border-radius:18px;background:var(--card2);border:1px solid var(--line);min-height:86px}.meta-label{color:var(--muted);font-size:.85rem;margin-bottom:8px}.meta-value{font-size:1rem;font-weight:700;line-height:1.35;word-break:break-word}
+    .section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}.section-title{font-size:1.08rem;font-weight:700}.btn{border:0;border-radius:999px;padding:11px 15px;cursor:pointer;font-weight:600;white-space:nowrap}.btn-primary{background:var(--accent);color:white}.btn-secondary{background:rgba(255,255,255,.05);color:var(--text);border:1px solid var(--line)}.btn-danger{background:rgba(255,106,106,.12);color:#ffd9d9;border:1px solid rgba(255,106,106,.28)}.btn-ok{background:rgba(88,196,143,.12);color:#d9ffea;border:1px solid rgba(88,196,143,.28)}
+    .inline-actions{display:flex;gap:10px;flex-wrap:wrap}.links-grid,.step-tree{display:grid;gap:12px}.link-card{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.03)}.link-icon{width:50px;height:50px;display:grid;place-items:center;border-radius:16px;background:var(--accentSoft);border:1px solid rgba(79,124,255,.25);font-size:1.35rem;overflow:hidden}.link-main{min-width:0}.link-title{font-weight:700;margin-bottom:6px}.link-url{color:var(--muted);text-decoration:none;word-break:break-all;line-height:1.4}
+    .link-actions,.step-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.icon-btn{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--text);width:38px;height:38px;border-radius:999px;cursor:pointer;display:grid;place-items:center;font-weight:700;flex-shrink:0}.icon-btn.danger{color:#ffd9d9;border-color:rgba(255,106,106,.28);background:rgba(255,106,106,.12)}
+    .step-item{border:1px solid var(--line);background:rgba(255,255,255,.03);border-radius:18px;padding:14px}.step-head{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:flex-start}.step-check{margin-top:4px;width:19px;height:19px;accent-color:var(--accent);cursor:pointer}.step-title{font-weight:700;margin-bottom:6px}.step-title.done{text-decoration:line-through;color:var(--muted)}.step-sub{display:inline-flex;gap:8px;align-items:center;color:var(--muted);font-size:.9rem;flex-wrap:wrap}.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 10px;border:1px solid var(--line);background:rgba(255,255,255,.05)}.children{margin-top:12px;margin-left:18px;display:grid;gap:10px;border-left:2px solid rgba(255,255,255,.07);padding-left:12px}
+    .empty{padding:24px;border:1px dashed var(--line);border-radius:18px;text-align:center;color:var(--muted)}.modal-backdrop{position:fixed;inset:0;background:rgba(7,10,18,.68);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}.modal-backdrop.show{display:flex}.modal{width:min(720px,100%);max-height:calc(100vh - 32px);overflow:hidden;background:#0f172d;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column}.modal-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px;flex-wrap:wrap;flex-shrink:0}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}.field{display:grid;gap:8px;min-width:0}.field.full{grid-column:1/-1} label{font-size:.9rem;color:var(--muted)} input,textarea{width:100%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:14px;padding:12px 14px;outline:none;min-width:0} textarea{resize:vertical;min-height:110px}.check-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.danger-zone{border:1px solid rgba(255,106,106,.2);background:rgba(255,106,106,.06)} #loadingState{padding:28px;text-align:center;color:var(--muted)}
+    #modalForm{display:flex;flex-direction:column;min-height:0;overflow:hidden}.icon-input-row{display:flex;gap:10px;align-items:center;min-width:0}.icon-input-row input{flex:1 1 auto;min-width:0}.standard-icons-field{min-height:0}.standard-icons-field .icon-picker-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:12px;margin-top:14px;max-height:240px;overflow-y:auto;overflow-x:hidden;padding-right:4px;align-content:start}.icon-choice{position:relative;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:18px;padding:12px;cursor:pointer;color:var(--text);display:grid;gap:10px;justify-items:center;text-align:center;min-width:0}.icon-choice:hover{border-color:rgba(79,124,255,.55);background:rgba(79,124,255,.08)}.icon-choice-visual{width:46px;height:46px;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:var(--accentSoft);border:1px solid rgba(79,124,255,.25);font-size:1.25rem}.icon-choice-label{font-size:.84rem;color:var(--muted);line-height:1.25;word-break:break-word;overflow-wrap:anywhere}
+    .field,
+    .field.full,
+    .field span,
+    .icon-input-row {
+      min-width: 0;
+    }
+
+    input[type="datetime-local"] {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    
+    
+    @media (max-width:620px){
+      .meta-grid{grid-template-columns:1fr 1fr}
+      .form-grid{grid-template-columns:1fr}}
+      .page{width:min(100% - 16px,1120px);padding-top:16px}
+      .card,.modal{padding:16px;border-radius:18px}
+      .step-head,.link-card{grid-template-columns:auto 1fr}
+      .step-actions,.link-actions{grid-column:1/-1}
+      .meta-grid{grid-template-columns:1fr}
+      .children{margin-left:8px;padding-left:8px}
+      .hero-icon{width:56px;height:56px;border-radius:18px}
+
+      .link-card{
+        grid-template-columns:auto 1fr auto;
+        gap:8px;
+        padding:8px 10px;
+      }
+      .link-icon{
+        width:40px;
+        height:40px;
+        border-radius:12px;
+      }
+      .link-main{
+        min-width:0;
+        overflow: hidden;
+      }
+      .link-title{
+        margin-bottom:0;
+        font-size:.93rem;
+        line-height:1.15;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        max-width:100%;
+      }
+      .link-url{
+        font-size: 8px;
+        text-wrap: nowrap;
+        text-overflow: ellipsis;
+        /*display:none;*/
+      }
+      .link-actions{
+        grid-column:auto;
+        align-self:center;
+        gap:6px;
+      }
+      .link-actions .icon-btn{
+        width:34px;
+        height:34px;
+      }
+
+      .step-item{
+        padding:8px 10px;
+        border-radius:16px;
+      }
+      .step-head{
+        gap:7px;
+      }
+      .step-check{
+        width:17px;
+        height:17px;
+        margin-top:2px;
+      }
+      .step-title{
+        margin-bottom:2px;
+        font-size:.95rem;
+        line-height:1.15;
+      }
+      .muted{
+        line-height:1.25;
+      }
+      .step-item .muted{
+        font-size:.88rem;
+      }
+      .step-sub{
+        margin-top:6px !important;
+        gap:5px;
+      }
+      .pill{
+        padding:4px 7px;
+        font-size:.76rem;
+      }
+      .step-actions{
+        gap:6px;
+      }
+      .step-actions .icon-btn{
+        width:34px;
+        height:34px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+    }.card,.modal{padding:16px;border-radius:18px}.step-head,.link-card{grid-template-columns:auto 1fr}.step-actions,.link-actions{grid-column:1/-1}.meta-grid{grid-template-columns:1fr}.children{margin-left:10px;padding-left:10px}.hero-icon{width:56px;height:56px;border-radius:18px}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <div class="topbar"><a class="back-link" href="/">← Back to projects</a></div>
+    <div id="loadingState" class="card">Loading project...</div>
+    <div id="app" class="layout" hidden></div>
+  </main>
+  <div id="modalBackdrop" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Edit</h3><button class="icon-btn" id="closeModalBtn" type="button">×</button></div><form id="modalForm"></form></div></div>
+  <script>
+    const DEFAULT_STANDARD_ICONS = [
+      { label: "Folder", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png", removable: false },
+      { label: "Document", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c4.png", removable: false },
+      { label: "Graduation", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f393.png", removable: false },
+      { label: "Rocket", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f680.png", removable: false },
+      { label: "Code", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4bb.png", removable: false },
+      { label: "Chart", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4ca.png", removable: false },
+      { label: "Link", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f517.png", removable: false },
+      { label: "Palette", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f3a8.png", removable: false },
+      { label: "Calendar", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c5.png", removable: false },
+      { label: "Target", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f3af.png", removable: false }
+    ];
+    const STANDARD_ICONS_STORAGE_KEY = "project_manager_standard_icons";
+    let STANDARD_ICONS = loadStandardIcons();
+    const projectId = new URLSearchParams(location.search).get("id");
+    const app = document.getElementById("app");
+    const loadingState = document.getElementById("loadingState");
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalForm = document.getElementById("modalForm");
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    let project = null;
+
+    function loadStandardIcons() { try { const saved = JSON.parse(localStorage.getItem(STANDARD_ICONS_STORAGE_KEY) || "null"); if (Array.isArray(saved) && saved.length) return saved; } catch {} return [...DEFAULT_STANDARD_ICONS]; }
+    function saveStandardIcons() { localStorage.setItem(STANDARD_ICONS_STORAGE_KEY, JSON.stringify(STANDARD_ICONS)); }
+    function addToStandardIcons(iconValue, label = "Custom") { const value = String(iconValue || "").trim(); if (!value) return; if (STANDARD_ICONS.some(icon => String(icon.value).trim() === value)) return; STANDARD_ICONS.unshift({ label: String(label || "Custom").trim() || "Custom", value, removable: true }); saveStandardIcons(); }
+    function escapeHtml(value = "") { return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+    function isImageUrl(value = "") { const v = String(value).trim(); return /^https?:\/\//i.test(v) && /\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(v); }
+    function renderIcon(icon, fallback = "📌", alt = "icon") { const value = String(icon || "").trim(); return isImageUrl(value) ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(alt)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;" />` : escapeHtml(value || fallback); }
+    function formatDeadline(deadline) { if (!deadline) return "No deadline"; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return "Invalid deadline"; return dt.toLocaleString([], {year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit"}); }
+    function formatTimeLeft(seconds) { if (seconds == null) return "No deadline"; if (seconds <= 0) return "Deadline passed"; const days = Math.floor(seconds / 86400); const hours = Math.floor((seconds % 86400) / 3600); const minutes = Math.floor((seconds % 3600) / 60); if (days > 0) return `${days} days, ${hours} hours left`; if (hours > 0) return `${hours} hours, ${minutes} min left`; return `${minutes} min left`; }
+    function stepTimeLeft(deadline) { if (!deadline) return null; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return null; return Math.floor((dt.getTime() - Date.now()) / 1000); }
+    function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
+
+    async function api(url, options = {}) {
+      const res = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options });
+      if (!res.ok) throw new Error(await res.text() || "Request failed");
+      return res.headers.get("content-type")?.includes("application/json") ? res.json() : null;
+    }
+    function openModal(title, contentHtml, onSubmit) { modalTitle.textContent = title; modalForm.innerHTML = contentHtml; modalBackdrop.classList.add("show"); modalForm.onsubmit = async (event) => { event.preventDefault(); await onSubmit(new FormData(modalForm)); }; }
+    function closeModal() { modalBackdrop.classList.remove("show"); modalForm.innerHTML = ""; modalForm.onsubmit = null; }
+    function findStepAndParent(steps, targetId, parent = null) { for (let i = 0; i < steps.length; i++) { const step = steps[i]; if (step.id === targetId) return { step, parent, index: i, collection: steps }; const nested = findStepAndParent(step.children || [], targetId, step); if (nested) return nested; } return null; }
+    function updateStepRecursive(steps, targetId, updater) { return steps.map(step => step.id === targetId ? updater(step) : ({ ...step, children: updateStepRecursive(step.children || [], targetId, updater) })); }
+    function removeStepRecursive(steps, targetId) { return steps.filter(step => step.id !== targetId).map(step => ({ ...step, children: removeStepRecursive(step.children || [], targetId) })); }
+    function buildStandardIconPicker(targetInputId, fallback = "📌") {
+      return `<div class="field full standard-icons-field"><label>Standard icons</label><div class="icon-picker-grid">${STANDARD_ICONS.map(icon => `
+        <button class="icon-choice" type="button" onclick='selectStandardIcon(${JSON.stringify(targetInputId)}, ${JSON.stringify(icon.value)})'>
+          <div class="icon-choice-visual">${renderIcon(icon.value, fallback, icon.label)}</div>
+          <div class="icon-choice-label">${escapeHtml(icon.label)}</div>
+        </button>`).join("")}</div></div>`;
+    }
+    function selectStandardIcon(targetInputId, value) { const input = document.getElementById(targetInputId); if (input) input.value = value; }
+    async function saveProject(updatedProject) { project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updatedProject) }); render(); closeModal(); }
+
+    function renderStep(step) {
+      return `<div class="step-item"><div class="step-head">
+        <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onchange="toggleStepDone('${step.id}', this.checked)" />
+        <div><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(step.title || "Untitled step")}</div><p class="muted">${escapeHtml(step.description || "No description")}</p>
+        <div class="step-sub" style="margin-top:10px;">${step.until_deadline ? `<span class="pill">⏳ until deadline</span>` : ""}${step.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(step.deadline))}</span>` : ""}${step.deadline ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(stepTimeLeft(step.deadline)))}</span>` : ""}${(step.children || []).length ? `<span class="pill">↳ ${(step.children || []).length} sub-step(s)</span>` : ""}</div></div>
+        <div class="step-actions"><button class="icon-btn" type="button" onclick="openStepEditor('${step.id}')">✎</button><button class="icon-btn" type="button" onclick="openAddSubStepModal('${step.id}')">＋</button><button class="icon-btn danger" type="button" onclick="deleteStep('${step.id}')">×</button></div>
+      </div>${(step.children || []).length ? `<div class="children">${(step.children || []).map(child => renderStep(child)).join("")}</div>` : ""}</div>`;
+    }
+    function renderStepTree(steps) { return !steps.length ? `<div class="empty">No steps yet.</div>` : `<div class="step-tree">${steps.map(step => renderStep(step)).join("")}</div>`; }
+    function renderLinks() {
+      if (!project.links.length) return `<div class="empty">No links yet.</div>`;
+      return `<div class="links-grid">${project.links.map((link, index) => `<div class="link-card"><div class="link-icon">${renderIcon(link.icon, "🔗", link.title || "link icon")}</div><div class="link-main"><div class="link-title">${escapeHtml(link.title || "Untitled link")}</div><a class="link-url" href="${escapeHtml(link.url || "#")}" target="_blank" rel="noreferrer">${escapeHtml(link.url || "")}</a></div><div class="link-actions"><button class="icon-btn" type="button" onclick="openEditLinkModal(${index})">✎</button><button class="icon-btn danger" type="button" onclick="deleteLink(${index})">×</button></div></div>`).join("")}</div>`;
+    }
+    function render() {
+      document.title = project?.name ? `${project.name} · Project View` : "Project View";
+      app.hidden = false; loadingState.hidden = true;
+      app.innerHTML = `<section class="card hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div><h1 class="project-title">${escapeHtml(project.name || "Untitled Project")}</h1><p class="muted">${escapeHtml(project.description || "No description")}</p></div></div><div class="inline-actions"><button class="btn btn-secondary" type="button" onclick="openProjectEditor()">Edit project</button><button class="btn ${project.finished ? "btn-ok" : "btn-secondary"}" type="button" onclick="toggleFinished()">${project.finished ? "✓ Finished" : "Mark finished"}</button></div></div><div class="meta-grid"><div class="meta-box"><div class="meta-label">Name</div><div class="meta-value">${escapeHtml(project.name || "Untitled Project")}</div></div><div class="meta-box"><div class="meta-label">Deadline</div><div class="meta-value">${escapeHtml(formatDeadline(project.deadline))}</div></div><div class="meta-box"><div class="meta-label">Time left</div><div class="meta-value">${escapeHtml(formatTimeLeft(project.seconds_left))}</div></div><div class="meta-box"><div class="meta-label">Status</div><div class="meta-value">${project.finished ? "Finished" : "Open"}</div></div></div></section>
+      <section class="card"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Rounded link boxes with title, icon, edit and delete controls.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button></div></section>
+      <section class="card"><div class="section-head"><div><h2 class="section-title">Steps + sub-steps</h2><div class="muted">Tree hierarchy with description, done state, and optional until-deadline marker.</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddStepModal()">Add step</button></div></section>
+      <section class="card danger-zone"><div class="section-head"><div><h2 class="section-title">Delete project</h2><div class="muted">This removes the current project permanently.</div></div><button class="btn btn-danger" type="button" onclick="deleteProject()">Delete project</button></div></section>`;
+    }
+
+    function openProjectEditor() {
+      openModal("Edit project", `<div class="form-grid"><div class="field"><label>Name</label><input name="name" value="${escapeHtml(project.name || "")}" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="projectIconInput" name="icon" value="${escapeHtml(project.icon || "📌")}" placeholder="📌 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('projectIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("projectIconInput", "📌")}<div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0,16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
+        const updated = deepClone(project); updated.name = String(formData.get("name") || "").trim(); updated.icon = String(formData.get("icon") || "").trim() || "📌"; updated.description = String(formData.get("description") || "").trim(); const deadlineRaw = String(formData.get("deadline") || "").trim(); updated.deadline = deadlineRaw ? new Date(deadlineRaw).toISOString() : null; addToStandardIcons(updated.icon, updated.name || "Project"); await saveProject(updated);
+      });
+    }
+    function openAddLinkModal() {
+      openModal("Add link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" placeholder="Link title" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="newLinkIconInput" name="icon" placeholder="🔗 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('newLinkIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("newLinkIconInput", "🔗")}<div class="field full"><label>URL</label><input name="url" placeholder="https://example.com" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Add link</button></div>`, async (formData) => {
+        const updated = deepClone(project); const newLink = { id: crypto.randomUUID(), title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" }; addToStandardIcons(newLink.icon, newLink.title || "Link"); updated.links.push(newLink); await saveProject(updated);
+      });
+    }
+    function openEditLinkModal(index) {
+      const link = project.links[index]; if (!link) return;
+      openModal("Edit link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" value="${escapeHtml(link.title || "")}" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="editLinkIconInput" name="icon" value="${escapeHtml(link.icon || "🔗")}" placeholder="🔗 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('editLinkIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("editLinkIconInput", "🔗")}<div class="field full"><label>URL</label><input name="url" value="${escapeHtml(link.url || "")}" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
+        const updated = deepClone(project); updated.links[index] = { ...updated.links[index], title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" }; addToStandardIcons(updated.links[index].icon, updated.links[index].title || "Link"); await saveProject(updated);
+      });
+    }
+    async function deleteLink(index) { if (!confirm("Delete this link?")) return; const updated = deepClone(project); updated.links.splice(index,1); await saveProject(updated); }
+    function stepFormHtml(step = null, submitLabel = "Save") {
+      return `<div class="form-grid"><div class="field full"><label>Title</label><input name="title" value="${escapeHtml(step?.title || "")}" required /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(step?.description || "")}</textarea></div><div class="field full"><label>Step deadline</label><input name="deadline" type="datetime-local" value="${step?.deadline ? new Date(step.deadline).toISOString().slice(0,16) : ""}" /></div><div class="field full"><label class="check-row"><input name="done" type="checkbox" ${step?.done ? "checked" : ""} />Mark as done</label></div><div class="field full"><label class="check-row"><input name="until_deadline" type="checkbox" ${step?.until_deadline ? "checked" : ""} />Show “until deadline”</label></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">${submitLabel}</button></div>`;
+    }
+    function openAddStepModal() { openModal("Add step", stepFormHtml(null, "Add step"), async (formData) => { const updated = deepClone(project); updated.steps.push({ id: crypto.randomUUID(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: String(formData.get("deadline") || "").trim() ? new Date(String(formData.get("deadline")).trim()).toISOString() : null, children: [] }); await saveProject(updated); }); }
+    function openAddSubStepModal(parentId) { openModal("Add sub-step", stepFormHtml(null, "Add sub-step"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps, parentId, step => ({ ...step, children: [...(step.children || []), { id: crypto.randomUUID(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: String(formData.get("deadline") || "").trim() ? new Date(String(formData.get("deadline")).trim()).toISOString() : null, children: [] }] })); await saveProject(updated); }); }
+    function openStepEditor(stepId) { const found = findStepAndParent(project.steps, stepId); if (!found) return; openModal("Edit step", stepFormHtml(found.step, "Save"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps, stepId, step => ({ ...step, title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: String(formData.get("deadline") || "").trim() ? new Date(String(formData.get("deadline")).trim()).toISOString() : null })); await saveProject(updated); }); }
+    async function toggleStepDone(stepId, done) { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps, stepId, step => ({ ...step, done })); await saveProject(updated); }
+    async function deleteStep(stepId) { if (!confirm("Delete this step and all sub-steps?")) return; const updated = deepClone(project); updated.steps = removeStepRecursive(updated.steps, stepId); await saveProject(updated); }
+    async function toggleFinished() { project = await api(`/api/projects/${projectId}/finish`, { method: "PATCH", body: JSON.stringify({ finished: !project.finished }) }); render(); }
+    async function deleteProject() { if (!confirm("Delete this project permanently?")) return; await api(`/api/projects/${projectId}`, { method: "DELETE" }); location.href = "/"; }
+    async function loadProject() { if (!projectId) { loadingState.textContent = "Missing project id in URL. Use /project?id=PROJECT_ID"; return; } try { project = await api(`/api/projects/${projectId}`); render(); } catch (error) { loadingState.textContent = "Could not load project."; console.error(error); } }
+
+    closeModalBtn.addEventListener("click", closeModal); modalBackdrop.addEventListener("click", (event) => { if (event.target === modalBackdrop) closeModal(); }); document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeModal(); });
+    window.selectStandardIcon = selectStandardIcon; window.openProjectEditor = openProjectEditor; window.openAddLinkModal = openAddLinkModal; window.openEditLinkModal = openEditLinkModal; window.deleteLink = deleteLink; window.openAddStepModal = openAddStepModal; window.openAddSubStepModal = openAddSubStepModal; window.openStepEditor = openStepEditor; window.toggleStepDone = toggleStepDone; window.deleteStep = deleteStep; window.toggleFinished = toggleFinished; window.deleteProject = deleteProject; window.closeModal = closeModal;
+    loadProject();
+  </script>
+</body>
+</html>
