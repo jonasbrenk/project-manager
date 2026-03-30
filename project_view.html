@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project View</title>
+
   <style>
     :root {--bg:#0b1020;--card:rgba(19,26,47,.92);--card2:rgba(28,38,70,.8);--text:#eef2ff;--muted:#a8b3cf;--line:rgba(255,255,255,.08);--accent:#4f7cff;--accentSoft:rgba(79,124,255,.15);--danger:#ff6a6a;--shadow:0 18px 50px rgba(0,0,0,.28);--radius:22px}
     *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#172344 0%,var(--bg) 58%);color:var(--text);font-family:Inter,system-ui,sans-serif} button,input,textarea{font:inherit}
@@ -57,6 +58,7 @@
       .children{margin-left:10px;padding-left:10px}
     }
   </style>
+
 </head>
 <body>
   <main class="page">
@@ -64,7 +66,17 @@
     <div id="loadingState" class="card">Loading project...</div>
     <div id="app" class="layout" hidden></div>
   </main>
-  <div id="modalBackdrop" class="modal-backdrop"><div class="modal"><div class="modal-head"><h3 id="modalTitle">Edit</h3><button class="icon-btn" id="closeModalBtn" type="button">×</button></div><form id="modalForm"></form></div></div>
+
+  <div id="modalBackdrop" class="modal-backdrop">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3 id="modalTitle">Edit</h3>
+        <button class="icon-btn" id="closeModalBtn" type="button">×</button>
+      </div>
+      <form id="modalForm" style="overflow-y: auto; max-height: 70vh; padding: 4px;"></form>
+    </div>
+  </div>
+
   <script>
     const DEFAULT_STANDARD_ICONS = [
       { label: "Folder", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png", removable: false },
@@ -89,6 +101,12 @@
     const closeModalBtn = document.getElementById("closeModalBtn");
     let project = null;
 
+    // FIX: Fallback ID generator because crypto.randomUUID fails on non-HTTPS/older mobile
+    function generateId() {
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+      return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
     function loadStandardIcons() { try { const saved = JSON.parse(localStorage.getItem(STANDARD_ICONS_STORAGE_KEY) || "null"); if (Array.isArray(saved) && saved.length) return saved; } catch {} return [...DEFAULT_STANDARD_ICONS]; }
     function saveStandardIcons() { localStorage.setItem(STANDARD_ICONS_STORAGE_KEY, JSON.stringify(STANDARD_ICONS)); }
     function addToStandardIcons(iconValue, label = "Custom") { const value = String(iconValue || "").trim(); if (!value) return; if (STANDARD_ICONS.some(icon => String(icon.value).trim() === value)) return; STANDARD_ICONS.unshift({ label: String(label || "Custom").trim() || "Custom", value, removable: true }); saveStandardIcons(); }
@@ -99,17 +117,36 @@
     function formatTimeLeft(seconds) { if (seconds == null) return "No deadline"; if (seconds <= 0) return "Deadline passed"; const days = Math.floor(seconds / 86400); const hours = Math.floor((seconds % 86400) / 3600); const minutes = Math.floor((seconds % 3600) / 60); if (days > 0) return `${days} days, ${hours} hours left`; if (hours > 0) return `${hours} hours, ${minutes} min left`; return `${minutes} min left`; }
     function stepTimeLeft(deadline) { if (!deadline) return null; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return null; return Math.floor((dt.getTime() - Date.now()) / 1000); }
     function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
+    function parseDateSafe(val) { const str = String(val || "").trim(); if (!str) return null; const dt = new Date(str); return Number.isNaN(dt.getTime()) ? null : dt.toISOString(); }
 
     async function api(url, options = {}) {
       const res = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options });
       if (!res.ok) throw new Error(await res.text() || "Request failed");
       return res.headers.get("content-type")?.includes("application/json") ? res.json() : null;
     }
-    function openModal(title, contentHtml, onSubmit) { modalTitle.textContent = title; modalForm.innerHTML = contentHtml; modalBackdrop.classList.add("show"); modalForm.onsubmit = async (event) => { event.preventDefault(); await onSubmit(new FormData(modalForm)); }; }
+
+    function openModal(title, contentHtml, onSubmit) {
+      modalTitle.textContent = title;
+      modalForm.innerHTML = contentHtml;
+      modalBackdrop.classList.add("show");
+      modalForm.onsubmit = async (event) => {
+        event.preventDefault();
+        const btn = modalForm.querySelector('button[type="submit"]');
+        if (btn) btn.disabled = true; // Prevent double-tap
+        try {
+          await onSubmit(new FormData(modalForm));
+        } catch (err) {
+          alert("Error: " + err.message);
+          if (btn) btn.disabled = false;
+        }
+      };
+    }
+
     function closeModal() { modalBackdrop.classList.remove("show"); modalForm.innerHTML = ""; modalForm.onsubmit = null; }
-    function findStepAndParent(steps, targetId, parent = null) { for (let i = 0; i < steps.length; i++) { const step = steps[i]; if (step.id === targetId) return { step, parent, index: i, collection: steps }; const nested = findStepAndParent(step.children || [], targetId, step); if (nested) return nested; } return null; }
-    function updateStepRecursive(steps, targetId, updater) { return steps.map(step => step.id === targetId ? updater(step) : ({ ...step, children: updateStepRecursive(step.children || [], targetId, updater) })); }
-    function removeStepRecursive(steps, targetId) { return steps.filter(step => step.id !== targetId).map(step => ({ ...step, children: removeStepRecursive(step.children || [], targetId) })); }
+    function findStepAndParent(steps, targetId, parent = null) { for (let i = 0; i < (steps || []).length; i++) { const step = steps[i]; if (step.id === targetId) return { step, parent, index: i, collection: steps }; const nested = findStepAndParent(step.children || [], targetId, step); if (nested) return nested; } return null; }
+    function updateStepRecursive(steps, targetId, updater) { return (steps || []).map(step => step.id === targetId ? updater(step) : ({ ...step, children: updateStepRecursive(step.children || [], targetId, updater) })); }
+    function removeStepRecursive(steps, targetId) { return (steps || []).filter(step => step.id !== targetId).map(step => ({ ...step, children: removeStepRecursive(step.children || [], targetId) })); }
+    
     function buildStandardIconPicker(targetInputId, fallback = "📌") {
       return `<div class="field full standard-icons-field"><label>Standard icons</label><div class="icon-picker-grid">${STANDARD_ICONS.map(icon => `
         <button class="icon-choice" type="button" onclick='selectStandardIcon(${JSON.stringify(targetInputId)}, ${JSON.stringify(icon.value)})'>
@@ -117,8 +154,14 @@
           <div class="icon-choice-label">${escapeHtml(icon.label)}</div>
         </button>`).join("")}</div></div>`;
     }
+    
     function selectStandardIcon(targetInputId, value) { const input = document.getElementById(targetInputId); if (input) input.value = value; }
-    async function saveProject(updatedProject) { project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updatedProject) }); render(); closeModal(); }
+    
+    async function saveProject(updatedProject) { 
+      project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updatedProject) }); 
+      render(); 
+      closeModal(); 
+    }
 
     function renderStep(step) {
       return `<div class="step-item"><div class="step-head">
@@ -128,51 +171,90 @@
         <div class="step-actions"><button class="icon-btn" type="button" onclick="openStepEditor('${step.id}')">✎</button><button class="icon-btn" type="button" onclick="openAddSubStepModal('${step.id}')">＋</button><button class="icon-btn danger" type="button" onclick="deleteStep('${step.id}')">×</button></div>
       </div>${(step.children || []).length ? `<div class="children">${(step.children || []).map(child => renderStep(child)).join("")}</div>` : ""}</div>`;
     }
-    function renderStepTree(steps) { return !steps.length ? `<div class="empty">No steps yet.</div>` : `<div class="step-tree">${steps.map(step => renderStep(step)).join("")}</div>`; }
-    function renderLinks() {
-      if (!project.links.length) return `<div class="empty">No links yet.</div>`;
-      return `<div class="links-grid">${project.links.map((link, index) => `<div class="link-card"><div class="link-icon">${renderIcon(link.icon, "🔗", link.title || "link icon")}</div><div class="link-main"><div class="link-title">${escapeHtml(link.title || "Untitled link")}</div><a class="link-url" href="${escapeHtml(link.url || "#")}" target="_blank" rel="noreferrer">${escapeHtml(link.url || "")}</a></div><div class="link-actions"><button class="icon-btn" type="button" onclick="openEditLinkModal(${index})">✎</button><button class="icon-btn danger" type="button" onclick="deleteLink(${index})">×</button></div></div>`).join("")}</div>`;
-    }
+
+    function renderStepTree(steps) { const s = steps || []; return !s.length ? `<div class="empty">No steps yet.</div>` : `<div class="step-tree">${s.map(step => renderStep(step)).join("")}</div>`; }
+    
+function renderLinks() {
+  const l = project.links || [];
+  if (!l.length) return `<div class="empty">No links yet.</div>`;
+  
+  // Get the current base URL (http://ip:port)
+  const currentOrigin = window.location.origin;
+
+  return `<div class="links-grid">${l.map((link, index) => {
+    const rawUrl = String(link.url || "");
+    
+    // Check for the keyword and replace it
+    const processedUrl = rawUrl.includes("PROJECTS/") 
+      ? rawUrl.replace("PROJECTS/", currentOrigin + "/") 
+      : rawUrl;
+
+    return `
+      <div class="link-card">
+        <div class="link-icon">${renderIcon(link.icon, "🔗", link.title || "link icon")}</div>
+        <div class="link-main">
+          <div class="link-title">${escapeHtml(link.title || "Untitled link")}</div>
+          <a class="link-url" href="${escapeHtml(processedUrl)}" target="_blank" rel="noreferrer">
+            ${escapeHtml(processedUrl)}
+          </a>
+        </div>
+        <div class="link-actions">
+          <button class="icon-btn" type="button" onclick="openEditLinkModal(${index})">✎</button>
+          <button class="icon-btn danger" type="button" onclick="deleteLink(${index})">×</button>
+        </div>
+      </div>`;
+  }).join("")}</div>`;
+}
+
     function render() {
-      document.title = project?.name ? `${project.name} · Project View` : "Project View";
+      if (!project) return;
+      document.title = project.name ? `${project.name} · Project View` : "Project View";
       app.hidden = false; loadingState.hidden = true;
       app.innerHTML = `<section class="card hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div><h1 class="project-title">${escapeHtml(project.name || "Untitled Project")}</h1><p class="muted">${escapeHtml(project.description || "No description")}</p></div></div><div class="inline-actions"><button class="btn btn-secondary" type="button" onclick="openProjectEditor()">Edit project</button><button class="btn ${project.finished ? "btn-ok" : "btn-secondary"}" type="button" onclick="toggleFinished()">${project.finished ? "✓ Finished" : "Mark finished"}</button></div></div><div class="meta-grid"><div class="meta-box"><div class="meta-label">Name</div><div class="meta-value">${escapeHtml(project.name || "Untitled Project")}</div></div><div class="meta-box"><div class="meta-label">Deadline</div><div class="meta-value">${escapeHtml(formatDeadline(project.deadline))}</div></div><div class="meta-box"><div class="meta-label">Time left</div><div class="meta-value">${escapeHtml(formatTimeLeft(project.seconds_left))}</div></div><div class="meta-box"><div class="meta-label">Status</div><div class="meta-value">${project.finished ? "Finished" : "Open"}</div></div></div></section>
-      <section class="card"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Rounded link boxes with title, icon, edit and delete controls.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button></div></section>
-      <section class="card"><div class="section-head"><div><h2 class="section-title">Steps + sub-steps</h2><div class="muted">Tree hierarchy with description, done state, and optional until-deadline marker.</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddStepModal()">Add step</button></div></section>
-      <section class="card danger-zone"><div class="section-head"><div><h2 class="section-title">Delete project</h2><div class="muted">This removes the current project permanently.</div></div><button class="btn btn-danger" type="button" onclick="deleteProject()">Delete project</button></div></section>`;
+      <section class="card"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Manage your bookmarks.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button></div></section>
+      <section class="card"><div class="section-head"><div><h2 class="section-title">Steps + sub-steps</h2><div class="muted">Project tasks and hierarchy.</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddStepModal()">Add step</button></div></section>
+      <section class="card danger-zone"><div class="section-head"><div><h2 class="section-title">Delete project</h2><div class="muted">Irreversible action.</div></div><button class="btn btn-danger" type="button" onclick="deleteProject()">Delete project</button></div></section>`;
     }
 
     function openProjectEditor() {
-      openModal("Edit project", `<div class="form-grid"><div class="field"><label>Name</label><input name="name" value="${escapeHtml(project.name || "")}" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="projectIconInput" name="icon" value="${escapeHtml(project.icon || "📌")}" placeholder="📌 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('projectIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("projectIconInput", "📌")}<div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0,16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
-        const updated = deepClone(project); updated.name = String(formData.get("name") || "").trim(); updated.icon = String(formData.get("icon") || "").trim() || "📌"; updated.description = String(formData.get("description") || "").trim(); const deadlineRaw = String(formData.get("deadline") || "").trim(); updated.deadline = deadlineRaw ? new Date(deadlineRaw).toISOString() : null; addToStandardIcons(updated.icon, updated.name || "Project"); await saveProject(updated);
+      openModal("Edit project", `<div class="form-grid"><div class="field"><label>Name</label><input name="name" value="${escapeHtml(project.name || "")}" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="projectIconInput" name="icon" value="${escapeHtml(project.icon || "📌")}" placeholder="📌 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('projectIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("projectIconInput", "📌")}<div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0,16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
+        const updated = deepClone(project); updated.name = String(formData.get("name") || "").trim(); updated.icon = String(formData.get("icon") || "").trim() || "📌"; updated.description = String(formData.get("description") || "").trim(); 
+        updated.deadline = parseDateSafe(formData.get("deadline")); addToStandardIcons(updated.icon, updated.name || "Project"); await saveProject(updated);
       });
     }
-    function openAddLinkModal() {
-      openModal("Add link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" placeholder="Link title" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="newLinkIconInput" name="icon" placeholder="🔗 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('newLinkIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("newLinkIconInput", "🔗")}<div class="field full"><label>URL</label><input name="url" placeholder="https://example.com" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Add link</button></div>`, async (formData) => {
-        const updated = deepClone(project); const newLink = { id: crypto.randomUUID(), title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" }; addToStandardIcons(newLink.icon, newLink.title || "Link"); updated.links.push(newLink); await saveProject(updated);
-      });
-    }
-    function openEditLinkModal(index) {
-      const link = project.links[index]; if (!link) return;
-      openModal("Edit link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" value="${escapeHtml(link.title || "")}" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="editLinkIconInput" name="icon" value="${escapeHtml(link.icon || "🔗")}" placeholder="🔗 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('editLinkIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("editLinkIconInput", "🔗")}<div class="field full"><label>URL</label><input name="url" value="${escapeHtml(link.url || "")}" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
-        const updated = deepClone(project); updated.links[index] = { ...updated.links[index], title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" }; addToStandardIcons(updated.links[index].icon, updated.links[index].title || "Link"); await saveProject(updated);
-      });
-    }
-    async function deleteLink(index) { if (!confirm("Delete this link?")) return; const updated = deepClone(project); updated.links.splice(index,1); await saveProject(updated); }
-    function stepFormHtml(step = null, submitLabel = "Save") {
-      return `<div class="form-grid"><div class="field full"><label>Title</label><input name="title" value="${escapeHtml(step?.title || "")}" required /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(step?.description || "")}</textarea></div><div class="field full"><label>Step deadline</label><input name="deadline" type="datetime-local" value="${step?.deadline ? new Date(step.deadline).toISOString().slice(0,16) : ""}" /></div><div class="field full"><label class="check-row"><input name="done" type="checkbox" ${step?.done ? "checked" : ""} />Mark as done</label></div><div class="field full"><label class="check-row"><input name="until_deadline" type="checkbox" ${step?.until_deadline ? "checked" : ""} />Show “until deadline”</label></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">${submitLabel}</button></div>`;
-    }
-    function openAddStepModal() { openModal("Add step", stepFormHtml(null, "Add step"), async (formData) => { const updated = deepClone(project); updated.steps.push({ id: crypto.randomUUID(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: String(formData.get("deadline") || "").trim() ? new Date(String(formData.get("deadline")).trim()).toISOString() : null, children: [] }); await saveProject(updated); }); }
-    function openAddSubStepModal(parentId) { openModal("Add sub-step", stepFormHtml(null, "Add sub-step"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps, parentId, step => ({ ...step, children: [...(step.children || []), { id: crypto.randomUUID(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: String(formData.get("deadline") || "").trim() ? new Date(String(formData.get("deadline")).trim()).toISOString() : null, children: [] }] })); await saveProject(updated); }); }
-    function openStepEditor(stepId) { const found = findStepAndParent(project.steps, stepId); if (!found) return; openModal("Edit step", stepFormHtml(found.step, "Save"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps, stepId, step => ({ ...step, title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: String(formData.get("deadline") || "").trim() ? new Date(String(formData.get("deadline")).trim()).toISOString() : null })); await saveProject(updated); }); }
-    async function toggleStepDone(stepId, done) { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps, stepId, step => ({ ...step, done })); await saveProject(updated); }
-    async function deleteStep(stepId) { if (!confirm("Delete this step and all sub-steps?")) return; const updated = deepClone(project); updated.steps = removeStepRecursive(updated.steps, stepId); await saveProject(updated); }
-    async function toggleFinished() { project = await api(`/api/projects/${projectId}/finish`, { method: "PATCH", body: JSON.stringify({ finished: !project.finished }) }); render(); }
-    async function deleteProject() { if (!confirm("Delete this project permanently?")) return; await api(`/api/projects/${projectId}`, { method: "DELETE" }); location.href = "/"; }
-    async function loadProject() { if (!projectId) { loadingState.textContent = "Missing project id in URL. Use /project?id=PROJECT_ID"; return; } try { project = await api(`/api/projects/${projectId}`); render(); } catch (error) { loadingState.textContent = "Could not load project."; console.error(error); } }
 
-    closeModalBtn.addEventListener("click", closeModal); modalBackdrop.addEventListener("click", (event) => { if (event.target === modalBackdrop) closeModal(); }); document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeModal(); });
-    window.selectStandardIcon = selectStandardIcon; window.openProjectEditor = openProjectEditor; window.openAddLinkModal = openAddLinkModal; window.openEditLinkModal = openEditLinkModal; window.deleteLink = deleteLink; window.openAddStepModal = openAddStepModal; window.openAddSubStepModal = openAddSubStepModal; window.openStepEditor = openStepEditor; window.toggleStepDone = toggleStepDone; window.deleteStep = deleteStep; window.toggleFinished = toggleFinished; window.deleteProject = deleteProject; window.closeModal = closeModal;
+    function openAddLinkModal() {
+      openModal("Add link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" placeholder="Link title" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="newLinkIconInput" name="icon" placeholder="🔗 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('newLinkIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("newLinkIconInput", "🔗")}<div class="field full"><label>URL</label><input name="url" placeholder="https://example.com" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Add link</button></div>`, async (formData) => {
+        const updated = deepClone(project); const newLink = { id: generateId(), title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" };
+        updated.links = updated.links || []; updated.links.push(newLink); addToStandardIcons(newLink.icon, newLink.title || "Link"); await saveProject(updated);
+      });
+    }
+
+    function openEditLinkModal(index) {
+      const link = (project.links || [])[index]; if (!link) return;
+      openModal("Edit link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" value="${escapeHtml(link.title || "")}" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="editLinkIconInput" name="icon" value="${escapeHtml(link.icon || "🔗")}" placeholder="🔗 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('editLinkIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("editLinkIconInput", "🔗")}<div class="field full"><label>URL</label><input name="url" value="${escapeHtml(link.url || "")}" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
+        const updated = deepClone(project); updated.links[index] = { ...updated.links[index], title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" }; await saveProject(updated);
+      });
+    }
+
+    function stepFormHtml(step = null, submitLabel = "Save") {
+      return `<div class="form-grid"><div class="field full"><label>Title</label><input name="title" value="${escapeHtml(step?.title || "")}" required /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(step?.description || "")}</textarea></div><div class="field full"><label>Step deadline</label><input name="deadline" type="datetime-local" value="${step?.deadline ? new Date(step.deadline).toISOString().slice(0,16) : ""}" /></div><div class="field full"><label class="check-row"><input name="done" type="checkbox" ${step?.done ? "checked" : ""} />Mark as done</label></div><div class="field full"><label class="check-row"><input name="until_deadline" type="checkbox" ${step?.until_deadline ? "checked" : ""} />Show “until deadline”</label></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">${submitLabel}</button></div>`;
+    }
+
+    function openAddStepModal() { openModal("Add step", stepFormHtml(null, "Add step"), async (formData) => { const updated = deepClone(project); updated.steps = updated.steps || []; updated.steps.push({ id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: parseDateSafe(formData.get("deadline")), children: [] }); await saveProject(updated); }); }
+    function openAddSubStepModal(parentId) { openModal("Add sub-step", stepFormHtml(null, "Add sub-step"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], parentId, step => ({ ...step, children: [...(step.children || []), { id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: parseDateSafe(formData.get("deadline")), children: [] }] })); await saveProject(updated); }); }
+    function openStepEditor(stepId) { const found = findStepAndParent(project.steps || [], stepId); if (!found) return; openModal("Edit step", stepFormHtml(found.step, "Save"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: parseDateSafe(formData.get("deadline")) })); await saveProject(updated); }); }
+
+    async function toggleStepDone(stepId, done) { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, done })); await saveProject(updated); }
+    async function deleteStep(stepId) { if (!confirm("Delete this?")) return; const updated = deepClone(project); updated.steps = removeStepRecursive(updated.steps || [], stepId); await saveProject(updated); }
+    async function toggleFinished() { project = await api(`/api/projects/${projectId}/finish`, { method: "PATCH", body: JSON.stringify({ finished: !project.finished }) }); render(); }
+    async function deleteProject() { if (!confirm("Permanent delete?")) return; await api(`/api/projects/${projectId}`, { method: "DELETE" }); location.href = "/"; }
+    async function loadProject() { try { project = await api(`/api/projects/${projectId}`); render(); } catch (e) { loadingState.textContent = "Error loading project."; } }
+
+    closeModalBtn.addEventListener("click", closeModal);
+    modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+    window.selectStandardIcon = selectStandardIcon; window.openProjectEditor = openProjectEditor; window.openAddLinkModal = openAddLinkModal; window.openEditLinkModal = openEditLinkModal; window.deleteLink = (i) => { if(confirm("Delete link?")) { const u = deepClone(project); u.links.splice(i,1); saveProject(u); } }; window.openAddStepModal = openAddStepModal; window.openAddSubStepModal = openAddSubStepModal; window.openStepEditor = openStepEditor; window.toggleStepDone = toggleStepDone; window.deleteStep = deleteStep; window.toggleFinished = toggleFinished; window.deleteProject = deleteProject; window.closeModal = closeModal;
     loadProject();
   </script>
 </body>

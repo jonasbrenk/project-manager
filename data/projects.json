@@ -85,6 +85,12 @@
           "title": "Word - Studienarbeit",
           "url": "https://dhbwstg-my.sharepoint.com/:w:/g/personal/inf23096_lehre_dhbw-stuttgart_de/IQD_94harqCyQrCmeltYrIWkAUTLA2BekWsH-hXHlUFCKtQ?e=h8FEfY",
           "icon": "https://static.vecteezy.com/system/resources/previews/027/179/344/non_2x/microsoft-word-icon-logo-symbol-free-png.png"
+        },
+        {
+          "id": "83289ce1-2003-4986-bd08-6d072eea1e5d",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/9308a44a-ca6a-4212-b66a-fe97198eeec8",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
         }
       ],
       "steps": [
@@ -263,12 +269,12 @@
         }
       ],
       "created_at": "2026-03-28T18:50:10.399131+00:00",
-      "updated_at": "2026-03-28T20:22:52.888706+00:00"
+      "updated_at": "2026-03-30T07:38:34.913753+00:00"
     },
     {
       "id": "1533328988ab4467a82b856e1bb1651b",
       "name": "T3000",
-      "deadline": "2026-06-17T16:00:00.000Z",
+      "deadline": "2026-06-17T12:00:00.000Z",
       "description": "Abgabe der Arbeit auf Moodle",
       "finished": false,
       "icon": "https://img.icons8.com/fluent/1200/microsoft-powerpoint-2019.jpg",
@@ -344,7 +350,7 @@
         }
       ],
       "created_at": "2026-03-28T19:02:54.943096+00:00",
-      "updated_at": "2026-03-28T20:58:35.638885+00:00"
+      "updated_at": "2026-03-29T21:04:39.355451+00:00"
     },
     {
       "id": "896c422ec6264ee9976cc5e06e770b6a",
@@ -357,43 +363,43 @@
         {
           "id": "45f1985a-7116-4540-b72c-ac74362fc629",
           "title": "DB Architekturen",
-          "url": "http://127.0.0.1:5000/project?id=0a62e0e1402c405c9e809e2fe2358924",
+          "url": "PROJECTS/project?id=0a62e0e1402c405c9e809e2fe2358924",
           "icon": "https://dbdb.io/media/logos/arangodb.svg"
         },
         {
           "id": "04aba2c7-2114-4e14-8f48-f420a4f8003a",
           "title": "Interaktive Systeme",
-          "url": "http://127.0.0.1:5000/project?id=4e997db96de74f0093839c592c4fdcec",
+          "url": "PROJECTS/project?id=4e997db96de74f0093839c592c4fdcec",
           "icon": "https://cdn-icons-png.flaticon.com/512/13320/13320606.png"
         },
         {
           "id": "c98d99d9-d4cd-43be-9f30-8604aaf610b2",
           "title": "Integrationsseminar",
-          "url": "http://127.0.0.1:5000/project?id=afe6158ec59649b78a93f49c4b41dce6",
+          "url": "PROJECTS/project?id=afe6158ec59649b78a93f49c4b41dce6",
           "icon": "https://www.inonet.com/wp-content/uploads/2023/07/sustainability-3295757_1280-705x470.jpg"
         },
         {
           "id": "f293a947-ebe1-4deb-93ad-a4c11db44053",
           "title": "IT Architekturen",
-          "url": "http://127.0.0.1:5000/project?id=694e64142b8044a5b9ec306cb9f78065",
+          "url": "PROJECTS/project?id=694e64142b8044a5b9ec306cb9f78065",
           "icon": "https://www.clipartmax.com/png/small/347-3476750_system-architecture-icon-clipart-computer-icons-data-system-design-icon-png.png"
         },
         {
           "id": "211d75cd-1a81-4c06-8093-51eae41c385b",
           "title": "DevOps",
-          "url": "http://127.0.0.1:5000/project?id=7384b607e613453babcb977005d8a2a1",
+          "url": "PROJECTS/project?id=7384b607e613453babcb977005d8a2a1",
           "icon": "https://as2.ftcdn.net/jpg/05/48/32/61/1000_F_548326184_s97Y02hKTjxCzd2WZiOI9QattZOHHSWU.jpg"
         },
         {
           "id": "09ffee2d-b721-4ce7-bf6c-c2c5eb8c06a4",
           "title": "IT-Security",
-          "url": "http://127.0.0.1:5000/project?id=50a5273de8b14869b0463a9350bd3139",
+          "url": "PROJECTS/project?id=50a5273de8b14869b0463a9350bd3139",
           "icon": "https://img.freepik.com/premium-vector/world-internet-protection-security-icon-design_996135-41122.jpg"
         },
         {
           "id": "2a91e52d-233c-4e1b-9272-ffc4f11e1a5b",
           "title": "Verteilte Systeme",
-          "url": "http://127.0.0.1:5000/project?id=a41ddf173b7d43e783f64c34a5590b17",
+          "url": "PROJECTS/project?id=a41ddf173b7d43e783f64c34a5590b17",
           "icon": "https://c8.alamy.com/comp/P6YKY8/distribution-network-flat-icon-P6YKY8.jpg"
         },
         {
@@ -405,12 +411,12 @@
       ],
       "steps": [],
       "created_at": "2026-03-28T19:37:32.537086+00:00",
-      "updated_at": "2026-03-28T20:06:28.868774+00:00"
+      "updated_at": "2026-03-29T21:11:57.614963+00:00"
     },
     {
       "id": "0a62e0e1402c405c9e809e2fe2358924",
       "name": "DB-Architekturen",
-      "deadline": "2026-04-03T22:00:00.000Z",
+      "deadline": "2026-04-02T20:00:00.000Z",
       "description": "E-Book mit Quellen fertigstellen",
       "finished": false,
       "icon": "https://dbdb.io/media/logos/arangodb.svg",
@@ -424,7 +430,7 @@
       ],
       "steps": [],
       "created_at": "2026-03-28T19:42:28.152594+00:00",
-      "updated_at": "2026-03-28T19:47:24.600368+00:00"
+      "updated_at": "2026-03-29T21:12:45.544679+00:00"
     },
     {
       "id": "afe6158ec59649b78a93f49c4b41dce6",
@@ -439,11 +445,17 @@
           "title": "Moodle",
           "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24208",
           "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        },
+        {
+          "id": "73af6202-9fe4-4aa1-8e35-31577b7f6f2e",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/0e9271b5-84f9-47f1-a652-8af38ad59642",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
         }
       ],
       "steps": [],
       "created_at": "2026-03-28T19:50:22.974361+00:00",
-      "updated_at": "2026-03-28T20:52:52.819495+00:00"
+      "updated_at": "2026-03-30T07:40:24.703364+00:00"
     },
     {
       "id": "694e64142b8044a5b9ec306cb9f78065",
@@ -458,11 +470,17 @@
           "title": "Moodle",
           "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24197",
           "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        },
+        {
+          "id": "115ea008-ae5f-441d-887a-6d9654e10d6c",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/5208221e-adf5-48c5-90e7-d54e9311fa08",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
         }
       ],
       "steps": [],
       "created_at": "2026-03-28T19:51:58.306358+00:00",
-      "updated_at": "2026-03-28T20:53:00.573309+00:00"
+      "updated_at": "2026-03-30T07:40:51.866865+00:00"
     },
     {
       "id": "7384b607e613453babcb977005d8a2a1",
@@ -493,14 +511,54 @@
       "links": [
         {
           "id": "80a015b3-1402-45bb-9260-0f5fa7b3bd62",
-          "title": "Moodle",
+          "title": "Moodle (EMPTY)",
           "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24199",
           "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        },
+        {
+          "id": "205aa72c-f394-4430-8bc1-e56e4b7856fa",
+          "title": "Vorlesungsstoff",
+          "url": "https://wwwlehre.dhbw-stuttgart.de/~jost/Datenschutz_Datensicherheit/",
+          "icon": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f517.png"
+        },
+        {
+          "id": "cb9a0cee-79c6-45b3-9c04-5c22c5038761",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/4e303dce-1222-4447-80fa-3a7a6630e2a5",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
         }
       ],
-      "steps": [],
+      "steps": [
+        {
+          "id": "93ecd723-5dbe-403e-a2ad-3a0a53c4d17e",
+          "title": "Vorlesungsstoff sichten",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "0f0846a1-eea4-450a-9c28-16186c29d7bd",
+          "title": "Lernen",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "13b6bc57-eb2b-4608-a1aa-1f2493ebb195",
+          "title": "Zerficken",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        }
+      ],
       "created_at": "2026-03-28T19:55:38.284796+00:00",
-      "updated_at": "2026-03-28T20:53:18.007859+00:00"
+      "updated_at": "2026-03-30T07:37:58.764915+00:00"
     },
     {
       "id": "a41ddf173b7d43e783f64c34a5590b17",
@@ -515,11 +573,17 @@
           "title": "Moodle",
           "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24198",
           "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        },
+        {
+          "id": "84a9067a-baa2-42cc-9e66-15489066b1d0",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/a67bf747-e9dc-4845-b68d-4fb9a443d3b4",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
         }
       ],
       "steps": [],
       "created_at": "2026-03-28T19:57:27.824352+00:00",
-      "updated_at": "2026-03-28T20:53:26.825666+00:00"
+      "updated_at": "2026-03-30T07:39:35.865462+00:00"
     },
     {
       "id": "4e997db96de74f0093839c592c4fdcec",
@@ -528,10 +592,29 @@
       "description": "????\n\nTODO: Find out",
       "finished": false,
       "icon": "https://cdn-icons-png.flaticon.com/512/13320/13320606.png",
-      "links": [],
+      "links": [
+        {
+          "id": "031afb94-5212-4a96-a88e-b76c3ff530b3",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/e40f698c-4c7a-4b95-98bb-62556a28991f",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
       "steps": [],
       "created_at": "2026-03-28T19:59:12.073409+00:00",
-      "updated_at": "2026-03-28T19:59:32.701198+00:00"
+      "updated_at": "2026-03-30T07:39:01.897174+00:00"
+    },
+    {
+      "id": "12b45ba021c54ce7af3f302d9bef6023",
+      "name": "Südamerika",
+      "deadline": "2026-10-30T23:00:00.000Z",
+      "description": "",
+      "finished": false,
+      "icon": "https://www.landkarten-shop.de/images/product_images/original_images/mapwm048/suedamerika-physisch.jpg",
+      "links": [],
+      "steps": [],
+      "created_at": "2026-03-29T17:49:20.912450+00:00",
+      "updated_at": "2026-03-29T17:49:20.912450+00:00"
     }
   ]
 }
