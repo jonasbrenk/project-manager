@@ -2,3 +2,5 @@
 log.txt
 nohup.out
 data/*
+data/
+/data/
