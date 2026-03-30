@@ -1,0 +1,620 @@
+{
+  "projects": [
+    {
+      "id": "11046e9681c14b93a4259e1d5697493a",
+      "name": "Bachelorarbeit",
+      "deadline": "2026-09-28T22:00:00.000Z",
+      "description": "",
+      "finished": false,
+      "icon": "https://lektorat-bauer.de/wp-content/uploads/2020/10/Design-ohne-Titel25.jpg",
+      "links": [
+        {
+          "id": "6dd0e4a0-52da-47f2-8d35-c2261517b5c4",
+          "title": "OneNote",
+          "url": "https://dhbwstg-my.sharepoint.com/personal/inf23096_lehre_dhbw-stuttgart_de/_layouts/Doc.aspx?sourcedoc={586DF163-8EDF-486D-901F-B6243E7FBA60}&end=()&end onenote:https://dhbwstg-my.sharepoint.com/personal/inf23096_lehre_dhbw-stuttgart_de/Documents/Bachelorarbeit/BA/",
+          "icon": "https://it-blogger.net/wp-content/uploads/blog/mobile/onenote-2025.png"
+        },
+        {
+          "id": "d961f4a8-321a-44fc-9b32-d900a0c0a90a",
+          "title": "Teams - Stephan Miller",
+          "url": "https://teams.microsoft.com/l/chat/19:0325b897-4891-414f-ba13-d775efce425d_53a2196a-e736-469d-a045-21fb981a96c7@unq.gbl.spaces/conversations?context=%7B%22contextType%22%3A%22chat%22%7D",
+          "icon": "https://img.icons8.com/fluent/1200/microsoft-teams-2025.jpg"
+        },
+        {
+          "id": "e67dc5e9-a7c6-4f19-b251-8e44fba34cd2",
+          "title": "Web-Mail DHBW",
+          "url": "https://lehre-webmail.dhbw-stuttgart.de/roundcubemail/?_task=mail&_mbox=INBOX",
+          "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Roundcube_logo_icon.svg/1280px-Roundcube_logo_icon.svg.png"
+        }
+      ],
+      "steps": [
+        {
+          "id": "0c1da414-89de-411d-b6a9-d818807979af",
+          "title": "Thema finden",
+          "description": "- Teams anschreiben (gemacht)\n- Optionen bekommen (nicht geklappt)\n- Thema festlegen",
+          "done": true,
+          "until_deadline": false,
+          "children": [
+            {
+              "id": "f2868b66-59ff-4161-9f2a-9e1b45f5eb3b",
+              "title": "Einsatz bei Stephan Miller",
+              "description": "Analyse & Modellentwicklung roadside Compute für autonomes Fahren",
+              "done": true,
+              "until_deadline": false,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "d6b70aac-a3cd-4f67-92fe-eeac573420df",
+          "title": "Thema fertig formulieren (BA Thema Abgabe)",
+          "description": "Bis zum 30.03.2026",
+          "done": false,
+          "until_deadline": false,
+          "children": [
+            {
+              "id": "16143a39-80c4-4474-b70f-cc51c7e374b3",
+              "title": "Thema abgeben",
+              "description": "Moodle",
+              "done": false,
+              "until_deadline": true,
+              "children": []
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-28T18:39:35.715722+00:00",
+      "updated_at": "2026-03-28T18:57:05.320251+00:00"
+    },
+    {
+      "id": "96b89c965c7149e3857dbdb4d3cdeca3",
+      "name": "Studienarbeit",
+      "deadline": "2026-06-10T22:00:00.000Z",
+      "description": "Mit Kevin Kienle\n\nBenchmarking & Optimierung von Nmap",
+      "finished": false,
+      "icon": "https://cdn-icons-png.flaticon.com/512/8920/8920811.png",
+      "links": [
+        {
+          "id": "f23ef686-ae46-452a-8a73-b255e88d963b",
+          "title": "OneNote",
+          "url": "https://dhbwstg-my.sharepoint.com/personal/inf23096_lehre_dhbw-stuttgart_de/_layouts/Doc.aspx?sourcedoc={43CF6484-5D5E-40FD-BFA1-8516C7E5EE41}&end=()&end onenote:https://dhbwstg-my.sharepoint.com/personal/inf23096_lehre_dhbw-stuttgart_de/Documents/Studienarbeit/studienarbeit_new/",
+          "icon": "https://it-blogger.net/wp-content/uploads/blog/mobile/onenote-2025.png"
+        },
+        {
+          "id": "db9f7b53-96d5-4456-a957-9a61867a6e4a",
+          "title": "Word - Studienarbeit",
+          "url": "https://dhbwstg-my.sharepoint.com/:w:/g/personal/inf23096_lehre_dhbw-stuttgart_de/IQD_94harqCyQrCmeltYrIWkAUTLA2BekWsH-hXHlUFCKtQ?e=h8FEfY",
+          "icon": "https://static.vecteezy.com/system/resources/previews/027/179/344/non_2x/microsoft-word-icon-logo-symbol-free-png.png"
+        },
+        {
+          "id": "83289ce1-2003-4986-bd08-6d072eea1e5d",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/9308a44a-ca6a-4212-b66a-fe97198eeec8",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
+      "steps": [
+        {
+          "id": "7bd2eb4b-edcd-4fdf-8853-ce8b234b975e",
+          "title": "Einleitung schreiben",
+          "description": "4 Seiten",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "2fefc117-c516-4028-9d37-b56302d58761",
+          "title": "Grundlagenteil schreiben",
+          "description": "20 Seiten",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "0494cadd-46fb-413e-92c5-8d38a1b0e718",
+          "title": "Praxisteil schreiben",
+          "description": "24 Seiten",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "1e8b300a-920a-42e9-bfc5-4ba8e44be1fc",
+          "title": "Fazit und Ausblick schreiben",
+          "description": "5 Seiten",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "8c23cbb6-7577-4255-b284-edbfd6f04c99",
+          "title": "--------------------------------------------------------------------------------------------",
+          "description": "--------------------------------------------------------------------------------------------",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "36e5482e-3e86-49d8-8ae5-7020f6524a85",
+          "title": "Implementierung",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "1b5ead1f-207f-45b8-a04e-25b6a1212a2d",
+              "title": "Benchmarking-Kriterien und Kandidaten festlegen",
+              "description": "Onmap <>Nmap\n\n- Onmap-abhängig\n\n- Portscans: alle\n- Host discovery: alle --> da host discovery sehr sensibel, gutes Setup nötig\n\nAlso:\n- 2 physische minimal OS Hosts (Ubuntu)  für cleanes Networking, Ethernet Kabel gegen Jitter, separat gegen Verfälschung",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "1250183b-4082-427b-b606-cd336423cce8",
+              "title": "Setup-Skripte für Connectivity schreiben",
+              "description": "",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "469c0bd6-00a8-4af3-91cb-72c18a3b23ab",
+              "title": "Provisioning SKript schreiben (Prototyp)",
+              "description": "Auch: Manifest Logik festlegen",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "fea0e453-60e9-4a09-b1c6-5fdeb010bad0",
+              "title": "SSH-Verbindung, Scanning und Provisioning Testen",
+              "description": "",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "a95a5571-7719-4845-81fe-d301d1e07c70",
+              "title": "Manifest Loading und SSH-provisioning automatisieren",
+              "description": "Installation & Host  configuration weiter automatisieren (visudo method impl.)",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "63652465-a1d8-4d0d-b1d8-66813d0b3d6c",
+              "title": "XML-Output Parser bauen",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "f5dfd076-617a-4f19-b7f3-02cbdee6a947",
+              "title": "Benchmarking Skripte schreiben",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "4fdff051-aac1-42b6-bdcc-f7dd56c0175b",
+          "title": "Benchmarking durchführen",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "3af47d1b-fa27-4e80-8e39-09173e403081",
+          "title": "Optimierungen Identifizieren",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "cf28dc39-b938-48f8-8b10-490959245dc7",
+              "title": "Optimierungen vornehmen",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "2bfa6183-00c3-41dc-8cf3-06081a683d98",
+              "title": "Optimierungen Dokumentieren",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "f5a66c45-9da1-4d39-9be1-77824d3e121b",
+          "title": "Erneutes Benchmarking, Validierung,Momentaufnahme",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "e6bb899e-a834-4c11-9c35-3485b12d89bc",
+          "title": "Fertigstellen der Wissenschaftlichen Arbeit",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        }
+      ],
+      "created_at": "2026-03-28T18:50:10.399131+00:00",
+      "updated_at": "2026-03-30T07:38:34.913753+00:00"
+    },
+    {
+      "id": "1533328988ab4467a82b856e1bb1651b",
+      "name": "T3000",
+      "deadline": "2026-06-17T12:00:00.000Z",
+      "description": "Abgabe der Arbeit auf Moodle",
+      "finished": false,
+      "icon": "https://img.icons8.com/fluent/1200/microsoft-powerpoint-2019.jpg",
+      "links": [
+        {
+          "id": "2c80647b-59a7-4037-a378-41f371c29bae",
+          "title": "OneNote",
+          "url": "https://nokia-my.sharepoint.com/personal/jonas_brenk_nokia_com/_layouts/Doc.aspx?sourcedoc={9A9EB1D2-F7A6-4CA5-8708-5EFA4489863A}&end=()&end onenote:https://nokia-my.sharepoint.com/personal/jonas_brenk_nokia_com/Documents/Documents/Praxisphasen/Praxis%206%20-%20PowerBI/notes/",
+          "icon": "https://it-blogger.net/wp-content/uploads/blog/mobile/onenote-2025.png"
+        },
+        {
+          "id": "b9424fca-82e4-42a4-a489-6aaeab9c4662",
+          "title": "C:\\Users\\brenk\\OneDrive - Nokia\\Documents\\Praxisphasen\\Praxis 6 - PowerBI",
+          "url": "https://nokia-my.sharepoint.com/:f:/r/personal/jonas_brenk_nokia_com/Documents/Documents/Praxisphasen/Praxis%206%20-%20PowerBI?csf=1&web=1&e=9scdGE",
+          "icon": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png"
+        },
+        {
+          "id": "2e4c8730-7c22-4465-a5ef-2db454f9cbde",
+          "title": "Power BI Example",
+          "url": "https://app.powerbi.com/links/aOb4Zh0xHw?ctid=5d471751-9675-428d-917b-70f44f9630b0&pbi_source=linkShare",
+          "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/68/9e/1d/689e1ddc-7bb3-2b8c-25cf-48e3119e3e04/AppIcon-0-1x_U007emarketing-0-8-0-0-0-85-220-0.png/1200x630wa.png"
+        },
+        {
+          "id": "1b92ca97-81e9-4965-941f-970f46bc242c",
+          "title": "Presentation (Presented Version)",
+          "url": "https://nokia-my.sharepoint.com/:p:/r/personal/jonas_brenk_nokia_com/Documents/Documents/Praxisphasen/Praxis%206%20-%20PowerBI/T3000/presentation/dev_artifacts/project_documentation_vx.pptx?d=w07689bf3b0ce4ad1a8edad2f5e874536&csf=1&web=1&e=EMeuuH",
+          "icon": "https://img.icons8.com/fluent/1200/microsoft-powerpoint-2019.jpg"
+        },
+        {
+          "id": "bebddc4f-cd21-4ebe-8a34-18bd3beabee5",
+          "title": "Presentation (Sent Version)",
+          "url": "https://nokia-my.sharepoint.com/:p:/r/personal/jonas_brenk_nokia_com/Documents/Documents/Praxisphasen/Praxis%206%20-%20PowerBI/T3000/presentation/dev_artifacts/Development-of-Custom-PowerBI-Visuals.pptx?d=w9334f4c8c688456da438452f1f662932&csf=1&web=1&e=acu04L",
+          "icon": "https://img.icons8.com/fluent/1200/microsoft-powerpoint-2019.jpg"
+        }
+      ],
+      "steps": [
+        {
+          "id": "8a7c348f-d080-4d1a-bec3-47507ac45935",
+          "title": "Add Implementation Part",
+          "description": "Explain last Prototype Structure, way of working, etc.\nExplain more about the working of the tools\nAdd clear, professional comments to each slide",
+          "done": false,
+          "until_deadline": true,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "801e3b45-06b5-4c2d-a7e5-351f8bb4b585",
+          "title": "Add Scientific Sources",
+          "description": "Mostly done, but add some more\nSearch for books etc.",
+          "done": false,
+          "until_deadline": true,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "a07d9b3b-fb4d-49c2-a8e1-9f2aae1b618f",
+          "title": "Abgeben auf Moodle",
+          "description": "Fertig ausformulierte, wissenschaftliche Präsenation",
+          "done": false,
+          "until_deadline": true,
+          "deadline": null,
+          "children": [
+            {
+              "id": "366604f9-9cf3-4638-a89e-e7dca71ebea0",
+              "title": "Zuvor: Falko Rode schicken --> Damit er bewerten kann",
+              "description": "",
+              "done": false,
+              "until_deadline": true,
+              "deadline": null,
+              "children": []
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-28T19:02:54.943096+00:00",
+      "updated_at": "2026-03-29T21:04:39.355451+00:00"
+    },
+    {
+      "id": "896c422ec6264ee9976cc5e06e770b6a",
+      "name": "Semester 6",
+      "deadline": "2026-05-02T20:00:00.000Z",
+      "description": "Letztes Semester",
+      "finished": false,
+      "icon": "https://img.freepik.com/vektoren-premium/6-buchstaben-bildungslogo-vorlage-bildungslogo-konzept-mit-alphabet-6-vektorelement_752325-1144.jpg",
+      "links": [
+        {
+          "id": "45f1985a-7116-4540-b72c-ac74362fc629",
+          "title": "DB Architekturen",
+          "url": "PROJECTS/project?id=0a62e0e1402c405c9e809e2fe2358924",
+          "icon": "https://dbdb.io/media/logos/arangodb.svg"
+        },
+        {
+          "id": "04aba2c7-2114-4e14-8f48-f420a4f8003a",
+          "title": "Interaktive Systeme",
+          "url": "PROJECTS/project?id=4e997db96de74f0093839c592c4fdcec",
+          "icon": "https://cdn-icons-png.flaticon.com/512/13320/13320606.png"
+        },
+        {
+          "id": "c98d99d9-d4cd-43be-9f30-8604aaf610b2",
+          "title": "Integrationsseminar",
+          "url": "PROJECTS/project?id=afe6158ec59649b78a93f49c4b41dce6",
+          "icon": "https://www.inonet.com/wp-content/uploads/2023/07/sustainability-3295757_1280-705x470.jpg"
+        },
+        {
+          "id": "f293a947-ebe1-4deb-93ad-a4c11db44053",
+          "title": "IT Architekturen",
+          "url": "PROJECTS/project?id=694e64142b8044a5b9ec306cb9f78065",
+          "icon": "https://www.clipartmax.com/png/small/347-3476750_system-architecture-icon-clipart-computer-icons-data-system-design-icon-png.png"
+        },
+        {
+          "id": "211d75cd-1a81-4c06-8093-51eae41c385b",
+          "title": "DevOps",
+          "url": "PROJECTS/project?id=7384b607e613453babcb977005d8a2a1",
+          "icon": "https://as2.ftcdn.net/jpg/05/48/32/61/1000_F_548326184_s97Y02hKTjxCzd2WZiOI9QattZOHHSWU.jpg"
+        },
+        {
+          "id": "09ffee2d-b721-4ce7-bf6c-c2c5eb8c06a4",
+          "title": "IT-Security",
+          "url": "PROJECTS/project?id=50a5273de8b14869b0463a9350bd3139",
+          "icon": "https://img.freepik.com/premium-vector/world-internet-protection-security-icon-design_996135-41122.jpg"
+        },
+        {
+          "id": "2a91e52d-233c-4e1b-9272-ffc4f11e1a5b",
+          "title": "Verteilte Systeme",
+          "url": "PROJECTS/project?id=a41ddf173b7d43e783f64c34a5590b17",
+          "icon": "https://c8.alamy.com/comp/P6YKY8/distribution-network-flat-icon-P6YKY8.jpg"
+        },
+        {
+          "id": "ec0ef76a-2963-4287-813e-7af21ee9ce0d",
+          "title": "OneDrive Files",
+          "url": "https://nokia-my.sharepoint.com/:f:/r/personal/jonas_brenk_nokia_com/Documents/Documents/DHBW/2026?csf=1&web=1&e=IrDn7r",
+          "icon": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-03-28T19:37:32.537086+00:00",
+      "updated_at": "2026-03-30T08:50:39.850536+00:00"
+    },
+    {
+      "id": "0a62e0e1402c405c9e809e2fe2358924",
+      "name": "DB-Architekturen",
+      "deadline": "2026-04-02T20:00:00.000Z",
+      "description": "E-Book mit Quellen fertigstellen",
+      "finished": false,
+      "icon": "https://dbdb.io/media/logos/arangodb.svg",
+      "links": [
+        {
+          "id": "05cbe2f0-e2a6-407d-9101-e910d29101d0",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24200",
+          "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-03-28T19:42:28.152594+00:00",
+      "updated_at": "2026-03-29T21:12:45.544679+00:00"
+    },
+    {
+      "id": "afe6158ec59649b78a93f49c4b41dce6",
+      "name": "Integrationsseminar",
+      "deadline": "2026-04-07T22:00:00.000Z",
+      "description": "Abgabe MOVIE auf Moodle",
+      "finished": false,
+      "icon": "https://www.inonet.com/wp-content/uploads/2023/07/sustainability-3295757_1280-705x470.jpg",
+      "links": [
+        {
+          "id": "6b14632a-528c-4dc3-ac00-21f780a088c1",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24208",
+          "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        },
+        {
+          "id": "73af6202-9fe4-4aa1-8e35-31577b7f6f2e",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/0e9271b5-84f9-47f1-a652-8af38ad59642",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-03-28T19:50:22.974361+00:00",
+      "updated_at": "2026-03-30T07:40:24.703364+00:00"
+    },
+    {
+      "id": "694e64142b8044a5b9ec306cb9f78065",
+      "name": "IT Architekturen",
+      "deadline": "2026-04-23T22:00:00.000Z",
+      "description": "Präsentation mit:\n- Jona Scholz\n- Levin Beck\n- Luis Geiger",
+      "finished": false,
+      "icon": "https://www.clipartmax.com/png/small/347-3476750_system-architecture-icon-clipart-computer-icons-data-system-design-icon-png.png",
+      "links": [
+        {
+          "id": "7919bce6-e51e-48a4-9525-a940d909dfa4",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24197",
+          "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        },
+        {
+          "id": "115ea008-ae5f-441d-887a-6d9654e10d6c",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/5208221e-adf5-48c5-90e7-d54e9311fa08",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-03-28T19:51:58.306358+00:00",
+      "updated_at": "2026-03-30T07:40:51.866865+00:00"
+    },
+    {
+      "id": "7384b607e613453babcb977005d8a2a1",
+      "name": "DevOps",
+      "deadline": "2026-04-26T22:00:00.000Z",
+      "description": "Abgabe transformiertes Code-Repo",
+      "finished": false,
+      "icon": "https://as2.ftcdn.net/jpg/05/48/32/61/1000_F_548326184_s97Y02hKTjxCzd2WZiOI9QattZOHHSWU.jpg",
+      "links": [
+        {
+          "id": "360a191b-79e5-40c8-a81e-f76039315a6b",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=25218",
+          "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-03-28T19:54:24.453642+00:00",
+      "updated_at": "2026-03-28T20:53:09.660566+00:00"
+    },
+    {
+      "id": "50a5273de8b14869b0463a9350bd3139",
+      "name": "IT-Security",
+      "deadline": "2026-04-27T06:30:00.000Z",
+      "description": "KLAUSUR",
+      "finished": false,
+      "icon": "https://img.freepik.com/premium-vector/world-internet-protection-security-icon-design_996135-41122.jpg",
+      "links": [
+        {
+          "id": "80a015b3-1402-45bb-9260-0f5fa7b3bd62",
+          "title": "Moodle (EMPTY)",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24199",
+          "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        },
+        {
+          "id": "205aa72c-f394-4430-8bc1-e56e4b7856fa",
+          "title": "Vorlesungsstoff",
+          "url": "https://wwwlehre.dhbw-stuttgart.de/~jost/Datenschutz_Datensicherheit/",
+          "icon": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f517.png"
+        },
+        {
+          "id": "cb9a0cee-79c6-45b3-9c04-5c22c5038761",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/4e303dce-1222-4447-80fa-3a7a6630e2a5",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
+      "steps": [
+        {
+          "id": "93ecd723-5dbe-403e-a2ad-3a0a53c4d17e",
+          "title": "Vorlesungsstoff sichten",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "0f0846a1-eea4-450a-9c28-16186c29d7bd",
+          "title": "Lernen",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "13b6bc57-eb2b-4608-a1aa-1f2493ebb195",
+          "title": "Zerficken",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        }
+      ],
+      "created_at": "2026-03-28T19:55:38.284796+00:00",
+      "updated_at": "2026-03-30T07:37:58.764915+00:00"
+    },
+    {
+      "id": "a41ddf173b7d43e783f64c34a5590b17",
+      "name": "Verteilte Systeme",
+      "deadline": "2026-04-29T13:30:00.000Z",
+      "description": "KLAUSUR\n\n+\n\nHausarbeit:\n- Mit Kevin\n- Tor Netzwerk\n- am 01.05.2026 abgeben",
+      "finished": false,
+      "icon": "https://c8.alamy.com/comp/P6YKY8/distribution-network-flat-icon-P6YKY8.jpg",
+      "links": [
+        {
+          "id": "4f0f397c-8765-4dd0-bed1-511c9cb94ade",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24198",
+          "icon": "https://www.uni-hamburg.de/26525057/moodle-circle-414x414-4da4b9566dd436feb1d0cd2995bf62c44e3f789b.png"
+        },
+        {
+          "id": "84a9067a-baa2-42cc-9e66-15489066b1d0",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/a67bf747-e9dc-4845-b68d-4fb9a443d3b4",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-03-28T19:57:27.824352+00:00",
+      "updated_at": "2026-03-30T07:39:35.865462+00:00"
+    },
+    {
+      "id": "4e997db96de74f0093839c592c4fdcec",
+      "name": "Interaktive Systeme",
+      "deadline": "2026-03-31T22:00:00.000Z",
+      "description": "????\n\nTODO: Find out",
+      "finished": false,
+      "icon": "https://cdn-icons-png.flaticon.com/512/13320/13320606.png",
+      "links": [
+        {
+          "id": "031afb94-5212-4a96-a88e-b76c3ff530b3",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/e40f698c-4c7a-4b95-98bb-62556a28991f",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-03-28T19:59:12.073409+00:00",
+      "updated_at": "2026-03-30T07:39:01.897174+00:00"
+    },
+    {
+      "id": "12b45ba021c54ce7af3f302d9bef6023",
+      "name": "Südamerika",
+      "deadline": "2026-10-30T23:00:00.000Z",
+      "description": "",
+      "finished": false,
+      "icon": "https://www.landkarten-shop.de/images/product_images/original_images/mapwm048/suedamerika-physisch.jpg",
+      "links": [],
+      "steps": [],
+      "created_at": "2026-03-29T17:49:20.912450+00:00",
+      "updated_at": "2026-03-29T17:49:20.912450+00:00"
+    }
+  ]
+}
