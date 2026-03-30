@@ -6,154 +6,148 @@
   <link rel="icon" type="image/jpeg" href="/static/icon.jpg?v=2">
   <title>Project Manager</title>
   <style>
-    :root {
-      --bg:#0b1020; --card:rgba(19,26,47,.92); --card2:rgba(28,38,70,.8); --text:#eef2ff;
-      --muted:#a8b3cf; --line:rgba(255,255,255,.08); --accent:#4f7cff; --accentSoft:rgba(79,124,255,.16);
-      --danger:#ff6a6a; --shadow:0 18px 50px rgba(0,0,0,.28); --radius:22px;
-    }
-    *{box-sizing:border-box} html,body{margin:0;min-height:100%;background:radial-gradient(circle at top,#172344 0%,var(--bg) 58%);color:var(--text);font-family:Inter,system-ui,sans-serif}
-    button,input,textarea{font:inherit}
-    .page{width:min(1120px,calc(100% - 24px));margin:0 auto;padding:24px 0 80px;display:grid;gap:18px}
-    .hero,.project-list{display:grid;gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(12px);padding:18px}
-    .hero-card{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}.title{font-size:clamp(1.8rem,4vw,2.8rem);margin:0 0 6px}.subtitle,.muted{color:var(--muted);line-height:1.5}
-    .stats{display:flex;gap:12px;flex-wrap:wrap}
-    .stat{
-      min-width: 96px;
-      flex: 1 1 96px;
-      padding: 12px 14px;
-      background: var(--card2);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-    }
-    .stat-label{color:var(--muted);font-size:.84rem;margin-bottom:8px}.stat-value{font-size:1.28rem;font-weight:700}
-    .panel-head{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.panel-title{margin:0;font-size:1.1rem}
-    .form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.field{display:grid;gap:8px}.span-2{grid-column:span 2}.span-4{grid-column:1/-1} label{font-size:.9rem;color:var(--muted)}
-    input,textarea{width:100%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);border-radius:14px;padding:12px 14px;outline:none} textarea{min-height:100px;resize:vertical}
-    input:focus,textarea:focus{border-color:rgba(79,124,255,.7);box-shadow:0 0 0 3px rgba(79,124,255,.15)}
-    .actions,.inline{display:flex;gap:10px;flex-wrap:wrap}.actions{justify-content:flex-end;margin-top:16px}.icon-input-row{display:flex;gap:10px;align-items:center}.icon-input-row input{flex:1 1 auto;min-width:0}
-    .btn{border:0;border-radius:999px;padding:12px 16px;cursor:pointer;font-weight:600}.btn-primary{background:var(--accent);color:#fff}.btn-secondary{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--line)}
-    .project-card{display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;padding:18px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.015));border:1px solid var(--line);text-decoration:none;color:inherit}
-    .project-card:hover{border-color:rgba(79,124,255,.55)} .project-icon{width:58px;height:58px;display:grid;place-items:center;border-radius:18px;background:var(--accentSoft);font-size:1.55rem;border:1px solid rgba(79,124,255,.28);overflow:hidden}.project-main{min-width:0}
-    .project-name{margin:0 0 8px;font-size:1.1rem;font-weight:700}.project-desc{margin:0;color:var(--muted);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.project-meta{display:grid;gap:6px;text-align:right}.badge{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:9px 12px;background:rgba(255,255,255,.05);border:1px solid var(--line);font-size:.92rem}.done{color:#58c48f}
-    .empty{padding:28px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:18px}
-    .icon-picker{position:fixed;inset:0;background:rgba(7,10,18,.68);display:none;align-items:center;justify-content:center;padding:16px;z-index:60}.icon-picker.show{display:flex}.icon-picker-panel{width:min(760px,100%);max-height:calc(100vh - 32px);overflow:hidden;background:#0f172d;border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column}
-    .icon-picker-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:12px;margin-top:14px;overflow-y:auto;overflow-x:hidden;max-height:320px;padding-right:4px;align-content:start}.icon-choice{position:relative;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:18px;padding:12px;cursor:pointer;color:var(--text);display:grid;gap:10px;justify-items:center;text-align:center;min-width:0}.icon-choice:hover{border-color:rgba(79,124,255,.55);background:rgba(79,124,255,.08)}
-    .icon-choice-visual{width:46px;height:46px;border-radius:14px;overflow:hidden;display:grid;place-items:center;background:var(--accentSoft);border:1px solid rgba(79,124,255,.25);font-size:1.25rem}.icon-choice-label{font-size:.84rem;color:var(--muted);line-height:1.25;word-break:break-word;overflow-wrap:anywhere}
-    .page > .card{margin-top:18px}
-    .field,
-    .field.full,
-    .icon-input-row {
-      min-width: 0;
-    }
+:root {
+  --bg: #0b1020; --card: rgba(19, 26, 47, .92); --card2: rgba(28, 38, 70, .8);
+  --text: #eef2ff; --muted: #a8b3cf; --line: rgba(255, 255, 255, .08);
+  --accent: #4f7cff; --accentSoft: rgba(79, 124, 255, .16); --danger: #ff6a6a;
+  --shadow: 0 18px 50px rgba(0,0,0,.28); --radius: 22px;
+}
 
-    input,
-    textarea,
-    input[type="datetime-local"] {
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      box-sizing: border-box;
-    }
+* { box-sizing: border-box; }
+html, body { 
+  margin: 0; min-height: 100%; color: var(--text); 
+  font-family: Inter, system-ui, sans-serif;
+  background: radial-gradient(circle at top, #172344 0%, var(--bg) 58%);
+}
 
-    @media (max-width: 820px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
+/* Layout Containers */
+.page { width: min(1120px, calc(100% - 24px)); margin: 0 auto; padding: 24px 0 80px; display: grid; gap: 18px; }
+.hero, .project-list { display: grid; gap: 18px; }
 
-      .span-2,
-      .span-4 {
-        grid-column: auto;
-      }
+/* Components: Cards & Panels */
+.card { 
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); 
+  box-shadow: var(--shadow); backdrop-filter: blur(12px); padding: 18px; 
+}
+.hero-card { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
+.panel-head { display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
 
-      .project-card {
-        grid-template-columns: auto 1fr;
-      }
+/* Typography */
+.title { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 6px; }
+.panel-title { margin: 0; font-size: 1.1rem; }
+.subtitle, .muted, label { color: var(--muted); line-height: 1.5; font-size: .9rem; }
 
-      .project-meta {
-        grid-column: 1 / -1;
-        text-align: left;
-        display: flex;
-        flex-wrap: wrap;
-      }
-    }
+/* Stats */
+.stats { display: flex; gap: 12px; flex-wrap: wrap; }
+.stat { 
+  flex: 1 1 96px; padding: 12px 14px; background: var(--card2); 
+  border: 1px solid var(--line); border-radius: 18px; 
+}
+.stat-label { font-size: .84rem; margin-bottom: 8px; color: var(--muted); }
+.stat-value { font-size: 1.28rem; font-weight: 700; }
 
-    @media (max-width: 560px) {
-      .page {
-        width: min(100% - 16px, 1120px);
-        padding-top: 16px;
-      }
+/* Forms & Inputs */
+.form-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.field { display: grid; gap: 8px; min-width: 0; }
+.span-2 { grid-column: span 2; }
+.span-4 { grid-column: 1 / -1; }
+.icon-input-row { display: flex; gap: 10px; align-items: center; }
 
-      .card {
-        padding: 16px;
-        border-radius: 18px;
-      }
+input, textarea { 
+  width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--line); 
+  color: var(--text); border-radius: 14px; padding: 12px 14px; outline: none; font: inherit;
+}
+textarea { min-height: 100px; resize: vertical; }
+input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0 0 3px rgba(79,124,255,.15); }
 
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
+/* Buttons */
+.actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+.btn { border: 0; border-radius: 999px; padding: 12px 16px; cursor: pointer; font-weight: 600; font: inherit; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-secondary { background: rgba(255, 255, 255, .06); color: var(--text); border: 1px solid var(--line); }
 
-      .project-card {
-        padding: 14px;
-        gap: 12px;
-      }
+/* Project List Items */
+.project-card { 
+  display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; 
+  padding: 18px; border-radius: 20px; border: 1px solid var(--line); text-decoration: none; color: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+}
+.project-card:hover { border-color: rgba(79,124,255,.55); }
+.project-icon { 
+  width: 58px; height: 58px; display: grid; place-items: center; border-radius: 18px; 
+  background: var(--accentSoft); font-size: 1.55rem; border: 1px solid rgba(79,124,255,.28); overflow: hidden;
+}
+.project-name { margin: 0 0 8px; font-size: 1.1rem; font-weight: 700; }
+.project-desc { 
+  margin: 0; color: var(--muted); line-height: 1.45; 
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.project-meta { display: grid; gap: 6px; text-align: right; }
+.badge { 
+  display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; 
+  padding: 9px 12px; background: rgba(255,255,255,.05); border: 1px solid var(--line); font-size: .92rem;
+}
+.done { color: #58c48f; }
+.empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 18px; }
 
-      .project-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 16px;
-      }
+/* Icon Picker */
+.icon-picker { 
+  position: fixed; inset: 0; background: rgba(7,10,18,.68); 
+  display: none; align-items: center; justify-content: center; padding: 16px; z-index: 60; 
+}
+.icon-picker.show { display: flex; }
+.icon-picker-panel { 
+  width: min(760px, 100%); max-height: calc(100vh - 32px); background: #0f172d; 
+  border: 1px solid var(--line); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; 
+}
+.icon-picker-grid { 
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 12px; 
+  margin-top: 14px; overflow-y: auto; padding-right: 4px; 
+}
+.icon-choice { 
+  background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 18px; 
+  padding: 12px; cursor: pointer; color: var(--text); display: grid; gap: 10px; justify-items: center; font: inherit;
+}
+.icon-choice:hover { border-color: rgba(79,124,255,.55); background: rgba(79,124,255,.08); }
+.icon-choice-visual { 
+  width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; 
+  background: var(--accentSoft); border: 1px solid rgba(79,124,255,.25); font-size: 1.25rem; 
+}
 
-      .actions .btn {
-        flex: 1 1 auto;
-      }
-    }
+.project-card { position: relative; } /* Needed for absolute positioning */
 
-    .field,
-    .field.full,
-    .icon-input-row,
-    .form-grid {
-      min-width: 0;
-    }
+.hide-toggle {
+  position: absolute; top: 12px; right: 12px;
+  padding: 6px 12px; font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.05em; border-radius: 8px; z-index: 10;
+  transition: all 0.2s ease; opacity: 0.8;
+}
+.project-card:hover .hide-toggle { opacity: 1; border-color: var(--accent); }
 
-    input,
-    textarea {
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      box-sizing: border-box;
-    }
-
-    input[type="datetime-local"] {
-      display: block;
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      inline-size: 100%;
-      box-sizing: border-box;
-      -webkit-appearance: none;
-      appearance: none;
-      font-size: 16px;
-    }
-
-  @media (max-width: 560px) {
-    .stats {
-      gap: 8px;
-      flex-wrap: nowrap;
-      flex-grow:2;
-    }
-
-    .stat {
-      min-width: 0;
-      flex: 1 1 0;
-      padding: 10px 12px;
-    }
-
-    .stat-value {
-      font-size: 1.05rem;
-    }
-  }
-        
  
+
+/* Responsiveness */
+@media (max-width: 820px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .span-2, .span-4 { grid-column: auto; }
+  .project-card { grid-template-columns: auto 1fr; }
+  .project-meta { grid-column: 1/-1; text-align: left; flex-direction: row; display: flex; flex-wrap: wrap; }
+}
+
+@media (max-width: 560px) {
+  .page { width: calc(100% - 16px); padding-top: 16px; }
+  .card { padding: 16px; border-radius: 18px; }
+  .stats { flex-wrap: nowrap; flex-grow: 2; }
+  .stat { padding: 10px 12px; }
+  .stat-value { font-size: 1.05rem; }
+  .project-card { padding: 14px; gap: 12px; }
+  .project-icon { width: 50px; height: 50px; }
+  .actions .btn { flex: 1; }
+  .hide-toggle { top: 8px; right: 8px; padding: 8px 10px; }
+  .project-meta { margin-top: 8px; } /* Space for the button */
+} 
+
+
  </style>
 </head>
 <body>
@@ -194,6 +188,12 @@
       <div class="panel-head"><div><h2 class="panel-title">All projects</h2><div class="muted">Sorted by nearest deadline.</div></div></div>
       <div id="projectList" class="project-list"></div>
     </section>
+    <details class="card" id="hiddenSection" style="display: none; margin-top: 18px;">
+      <summary class="panel-head" style="cursor: pointer;">
+        <div><h2 class="panel-title">Hidden Projects</h2><div class="muted">Projects hidden from the main view.</div></div>
+      </summary>
+      <div id="hiddenList" class="project-list"></div>
+    </details>
   </main>
 
   <script>
@@ -216,6 +216,8 @@
     const allCount = document.getElementById("allCount");
     const openCount = document.getElementById("openCount");
     const doneCount = document.getElementById("doneCount");
+
+
 
     function loadStandardIcons() {
       try {
@@ -257,20 +259,74 @@
     function closeIconPicker() { document.getElementById("iconPicker")?.remove(); }
     function selectStandardIcon(targetInputId, value) { const input = document.getElementById(targetInputId); if (input) input.value = value; closeIconPicker(); }
 
-    async function loadProjects() {
-      const res = await fetch("/api/projects");
-      const projects = await res.json();
-      allCount.textContent = projects.length;
-      doneCount.textContent = projects.filter(p => p.finished).length;
-      openCount.textContent = projects.filter(p => !p.finished).length;
-      if (!projects.length) { projectList.innerHTML = `<div class="empty">No projects yet.</div>`; return; }
-      projectList.innerHTML = projects.map(project => `
-        <a class="project-card" href="/project?id=${encodeURIComponent(project.id)}">
-          <div class="project-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div>
-          <div class="project-main"><h3 class="project-name">${escapeHtml(project.name)}</h3><p class="project-desc">${escapeHtml(project.description || "No description")}</p></div>
-          <div class="project-meta"><div class="badge">${escapeHtml(formatDeadline(project.deadline))}</div><div class="badge ${project.finished ? "done" : ""}">${project.finished ? "✓ Finished" : escapeHtml(formatTimeLeft(project.seconds_left))}</div></div>
-        </a>`).join("");
-    }
+const HIDDEN_KEY = "pm_hidden_ids";
+let hiddenIds = new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]"));
+
+function toggleHide(e, id) {
+  e.preventDefault(); e.stopPropagation();
+  hiddenIds.has(id) ? hiddenIds.delete(id) : hiddenIds.add(id);
+  localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hiddenIds]));
+  loadProjects();
+}
+
+async function loadProjects() {
+  const res = await fetch("/api/projects");
+  const projects = await res.json();
+  
+  allCount.textContent = projects.length;
+  doneCount.textContent = projects.filter(p => p.finished).length;
+  openCount.textContent = projects.filter(p => !p.finished).length;
+
+  const renderCard = (p) => {
+    const isHidden = hiddenIds.has(p.id);
+    return `
+      <a class="project-card" href="/project?id=${encodeURIComponent(p.id)}" 
+         style="display: flex; align-items: flex-start; gap: 16px; position: relative;">
+        
+        <div class="project-icon" style="flex-shrink: 0;">
+          ${renderIcon(p.icon, "📌", p.name)}
+        </div>
+        
+        <div style="flex: 1; display: flex; flex-direction: column; min-width: 0; gap: 12px;">
+          
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+            <div style="min-width: 0;">
+              <h3 class="project-name" style="margin: 0 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                ${escapeHtml(p.name)}
+              </h3>
+              <p class="project-desc" style="margin: 0;">
+                ${escapeHtml(p.description || "No description")}
+              </p>
+            </div>
+            <button class="btn-secondary" 
+                    style="flex-shrink: 0; padding: 4px 10px; font-size: 0.7rem;" 
+                    onclick="toggleHide(event, '${p.id}')">
+              ${isHidden ? "Show" : "Hide"}
+            </button>
+          </div>
+          
+          <div class="project-meta" style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <div class="badge">${escapeHtml(formatDeadline(p.deadline))}</div>
+            <div class="badge ${p.finished ? "done" : ""}">${p.finished ? "✓ Finished" : escapeHtml(formatTimeLeft(p.seconds_left))}</div>
+          </div>
+          
+        </div>
+      </a>`;
+  };
+
+  const visible = projects.filter(p => !hiddenIds.has(p.id));
+  const hidden = projects.filter(p => hiddenIds.has(p.id));
+
+  projectList.innerHTML = visible.length ? visible.map(renderCard).join("") : `<div class="empty">No active projects.</div>`;
+  
+  const hSection = document.getElementById("hiddenSection");
+  if (hidden.length) {
+    hSection.style.display = "block";
+    document.getElementById("hiddenList").innerHTML = hidden.map(renderCard).join("");
+  } else {
+    hSection.style.display = "none";
+  }
+}
 
     projectForm.addEventListener("submit", async (event) => {
       event.preventDefault();
