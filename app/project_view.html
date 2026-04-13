@@ -39,7 +39,8 @@
       --bgBottom: #0b1020;
       --surfaceSoft: rgba(255, 255, 255, .05);
       --panelBg: #0f172d;
-      --toggleOff: rgba(255, 255, 255, .16)
+      --toggleOff: rgba(255, 255, 255, .16);
+      --doneFade: .56
     }
 
     html[data-theme="light"] {
@@ -64,7 +65,8 @@
       --bgBottom: #dfe9ff;
       --surfaceSoft: rgba(20, 34, 59, .04);
       --panelBg: #ffffff;
-      --toggleOff: rgba(21, 34, 59, .16)
+      --toggleOff: rgba(21, 34, 59, .16);
+      --doneFade: .5
     }
 
     * {
@@ -124,7 +126,13 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       backdrop-filter: blur(12px);
-      padding: 18px
+      padding: 18px;
+      position: relative;
+      z-index: 0
+    }
+
+    .card.has-open-menu {
+      z-index: 40
     }
 
     .hero {
@@ -320,10 +328,10 @@
     /* Standard link card */
     .link-card {
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: auto minmax(0, 1fr);
       gap: 14px;
       align-items: center;
-      padding: 14px 52px 14px 14px;
+      padding: 14px;
       border-radius: 18px;
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, .03);
@@ -386,7 +394,8 @@
       min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 0
+      gap: 0;
+      padding-right: 42px
     }
 
     .proj-link-header {
@@ -411,10 +420,12 @@
     }
 
     .proj-link-meta {
-      display: flex;
-      flex-wrap: wrap;
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 6px;
-      margin-top: 4px
+      margin-top: 4px;
+      justify-self: stretch
     }
 
     .proj-status-badge {
@@ -521,7 +532,7 @@
     }
 
     .card-menu-wrap.open {
-      z-index: 8
+      z-index: 120
     }
 
     .card-menu-trigger {
@@ -543,7 +554,7 @@
       box-shadow: var(--shadow);
       display: none;
       gap: 6px;
-      z-index: 9
+      z-index: 121
     }
 
     .card-menu.show {
@@ -598,15 +609,18 @@
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, .03);
       border-radius: 18px;
-      padding: 14px 52px 14px 14px;
-      position: relative
+      padding: 14px;
+      position: relative;
+      display: grid;
+      gap: 10px
     }
 
     .step-head {
       display: grid;
       grid-template-columns: auto 1fr;
       gap: 12px;
-      align-items: flex-start
+      align-items: flex-start;
+      padding-right: 42px
     }
 
     .step-check {
@@ -627,18 +641,23 @@
       color: var(--muted)
     }
 
+    .step-main.done-state,
+    .step-sub.done-state {
+      opacity: var(--doneFade)
+    }
+
     .step-main {
       min-width: 0;
       width: 100%
     }
 
     .step-sub {
-      display: inline-flex;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
-      align-items: center;
       color: var(--muted);
       font-size: .9rem;
-      flex-wrap: wrap
+      width: 100%
     }
 
     .pill {
@@ -648,17 +667,23 @@
       border-radius: 999px;
       padding: 7px 10px;
       border: 1px solid var(--line);
-      background: var(--surfaceSoft)
+      background: var(--surfaceSoft);
+      width: 100%;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
     }
 
     .children {
-      margin-top: 8px;
+      margin-top: 4px;
       margin-left: 18px;
       display: grid;
       gap: 10px;
       border-left: 2px solid rgba(255, 255, 255, .07);
       padding-left: 12px;
-      width: calc(100% + 30px)
+      min-width: 0;
+      box-sizing: border-box
     }
 
     .children>.step-item {
@@ -995,7 +1020,7 @@
       .link-card {
         grid-template-columns: auto 1fr;
         gap: 8px;
-        padding: 10px 44px 8px 10px
+        padding: 10px 10px 8px 10px
       }
 
       .link-icon {
@@ -1026,18 +1051,22 @@
       }
 
       .step-item {
-        padding: 10px 44px 8px 10px;
+        padding: 10px 10px 8px 10px;
         border-radius: 16px
       }
 
       .step-head {
-        gap: 7px
+        gap: 7px;
+        padding-right: 34px
       }
 
       .step-check {
         width: 17px;
         height: 17px;
-        margin-top: 2px
+        margin-top: 2px;
+        border-radius: 999px;
+        overflow: hidden;
+        background-clip: padding-box
       }
 
       .step-title {
@@ -1055,9 +1084,9 @@
       }
 
       .step-sub {
-        margin-top: 6px !important;
+        margin-top: 0 !important;
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr);
         gap: 6px;
         width: 100%
       }
@@ -1075,14 +1104,15 @@
 
       .proj-link-meta {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr);
         width: 100%
       }
 
       .children {
         margin-left: 10px;
         padding-left: 10px;
-        width: calc(100% + 20px)
+        min-width: 0;
+        box-sizing: border-box
       }
 
       .substep-count-pill {
@@ -1094,6 +1124,10 @@
       .link-card-project {
         grid-template-columns: auto minmax(0, 1fr);
         align-items: start;
+      }
+
+      .proj-link-body {
+        padding-right: 34px
       }
 
       .proj-link-icon {
@@ -1346,10 +1380,10 @@
           </div>
           ${error ? `<div class="proj-link-desc" style="color:var(--danger)">Could not load project.</div>` : ""}
           ${proj?.description ? `<div class="proj-link-desc">${renderFormattedText(proj.description, "", true)}</div>` : ""}
-          <div class="proj-link-meta">
-            ${proj?.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(proj.deadline))}</span>` : !loading && !error ? `<span class="pill" style="color:var(--muted)">No deadline</span>` : ""}
-            ${proj?.seconds_left != null ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(proj.seconds_left))}</span>` : ""}
-          </div>
+        </div>
+        <div class="proj-link-meta">
+          ${proj?.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(proj.deadline))}</span>` : !loading && !error ? `<span class="pill" style="color:var(--muted)">No deadline</span>` : ""}
+          ${proj?.seconds_left != null ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(proj.seconds_left))}</span>` : ""}
         </div>
       </div>`;
     }
@@ -1451,9 +1485,9 @@
       ]);
       return `<div class="step-item">${menu}<div class="step-head">
         <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onchange="toggleStepDone('${step.id}', this.checked)" />
-        <div class="step-main"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div><div class="muted">${renderFormattedText(step.description, "No description", true)}</div>
-        <div class="step-sub" style="margin-top:10px;">${step.until_deadline ? `<span class="pill">⏳ until deadline</span>` : ""}${step.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(step.deadline))}</span>` : ""}${step.deadline ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(stepTimeLeft(step.deadline)))}</span>` : ""}${(step.children || []).length ? `<span class="pill substep-count-pill">↳ ${(step.children || []).length} sub-step(s)</span>` : ""}</div></div>
-      </div>${(step.children || []).length ? `<div class="children">${(step.children || []).map(child => renderStep(child)).join("")}</div>` : ""}</div>`;
+        <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div><div class="muted">${renderFormattedText(step.description, "No description", true)}</div>
+        </div>
+      </div><div class="step-sub ${step.done ? "done-state" : ""}">${step.until_deadline ? `<span class="pill">⏳ until deadline</span>` : ""}${step.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(step.deadline))}</span>` : ""}${step.deadline ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(stepTimeLeft(step.deadline)))}</span>` : ""}${(step.children || []).length ? `<span class="pill substep-count-pill">↳ ${(step.children || []).length} sub-step(s)</span>` : ""}</div>${(step.children || []).length ? `<div class="children">${(step.children || []).map(child => renderStep(child)).join("")}</div>` : ""}</div>`;
     }
 
     function renderStepTree(steps) { const s = steps || []; return !s.length ? `<div class="empty">No steps yet.</div>` : `<div class="step-tree">${s.map(step => renderStep(step)).join("")}</div>`; }
@@ -1494,11 +1528,13 @@
 
     function render() {
       if (!project) return;
+      const linksMenuOpen = !!openContextMenuId && (openContextMenuId.startsWith("link-menu-") || openContextMenuId.startsWith("project-link-menu-"));
+      const stepsMenuOpen = !!openContextMenuId && openContextMenuId.startsWith("step-menu-");
       document.title = project.name ? `${project.name} · Project View` : "Project View";
       app.hidden = false; loadingState.hidden = true;
       app.innerHTML = `<section class="card hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div class="hero-copy"><h1 class="project-title">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</h1><div class="muted">${renderFormattedText(project.description, "No description")}</div></div></div><div class="inline-actions"><button class="btn btn-secondary" type="button" onclick="openProjectEditor()">Edit project</button><button class="btn ${project.finished ? "btn-ok" : "btn-secondary"}" type="button" onclick="toggleFinished()">${project.finished ? "✓ Finished" : "Mark finished"}</button></div></div><div class="meta-grid"><div class="meta-box"><div class="meta-label">Name</div><div class="meta-value">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</div></div><div class="meta-box"><div class="meta-label">Deadline</div><div class="meta-value">${escapeHtml(formatDeadline(project.deadline))}</div></div><div class="meta-box"><div class="meta-label">Time left</div><div class="meta-value">${escapeHtml(formatTimeLeft(project.seconds_left))}</div></div><div class="meta-box"><div class="meta-label">Status</div><div class="meta-value">${project.finished ? "Finished" : "Open"}</div></div></div></section>
-      <section class="card"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Websites, files and project links.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button><button class="btn btn-secondary" type="button" onclick="openAddProjectLinkModal()">🔗 Link project</button></div></section>
-      <section class="card"><div class="section-head"><div><h2 class="section-title">WILL-DO List</h2><div class="muted">Project tasks and hierarchy.</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddStepModal()">Add step</button></div></section>
+      <section class="card${linksMenuOpen ? " has-open-menu" : ""}"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Websites, files and project links.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button><button class="btn btn-secondary" type="button" onclick="openAddProjectLinkModal()">🔗 Link project</button></div></section>
+      <section class="card${stepsMenuOpen ? " has-open-menu" : ""}"><div class="section-head"><div><h2 class="section-title">WILL-DO List</h2><div class="muted">Project tasks and hierarchy.</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddStepModal()">Add step</button></div></section>
       <section class="card danger-zone"><div class="section-head"><div><h2 class="section-title">Delete project</h2><div class="muted">Irreversible action.</div></div><button class="btn btn-danger" type="button" onclick="deleteProject()">Delete project</button></div></section>`;
 
       // Fetch any uncached linked project data and re-render when ready
