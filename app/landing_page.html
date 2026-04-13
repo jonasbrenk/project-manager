@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/jpeg" href="/static/icon.jpg?v=2">
+  <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png?v=3">
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png?v=3">
+  <link rel="manifest" href="/site.webmanifest?v=1">
+  <meta name="theme-color" content="#0b1020">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Projects">
   <title>Project Manager</title>
   <script>
     (() => {
@@ -156,10 +162,26 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-secondary { background: var(--surfaceSoft); color: var(--text); border: 1px solid var(--line); }
 .settings-btn {
-  padding-inline: 14px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   position: absolute;
   top: 18px;
   right: 18px;
+}
+
+.settings-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+
+.settings-trigger svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex-shrink: 0;
 }
 
 /* Project List Items */
@@ -251,16 +273,21 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 
 .floating-actions-menu {
   position: absolute; right: 0; bottom: calc(100% + 10px);
-  min-width: 180px; padding: 8px; border-radius: 16px;
+  min-width: 196px; padding: 10px; border-radius: 18px;
   border: 1px solid var(--line); background: var(--panelBg); box-shadow: var(--shadow);
-  display: none; gap: 6px;
+  display: none; gap: 8px;
 }
 
 .floating-actions-menu.show { display: grid; }
 
 .menu-item {
   width: 100%; border: 1px solid transparent; border-radius: 12px;
-  background: var(--surfaceSoft); color: var(--text); padding: 10px 12px; text-align: left; cursor: pointer;
+  background: var(--surfaceSoft); color: var(--text); padding: 12px 14px; text-align: left; cursor: pointer;
+  font-family: "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+  font-size: .9rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
 
 .menu-item:hover { border-color: rgba(79,124,255,.4); background: rgba(79,124,255,.1); }
@@ -272,6 +299,11 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   background: var(--panelBg);
   color: var(--text);
   border: 1px solid var(--line);
+  font-family: "SF Pro Display", "Segoe UI", Inter, system-ui, sans-serif;
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  line-height: 1;
 }
 
 .delete-toolbar .btn-primary {
@@ -407,9 +439,9 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   .icon-input-row { grid-template-columns: minmax(0, 1fr) 44px 40px; gap: 8px; }
   .icon-preview { width: 44px; height: 44px; }
   .template-icon-btn { width: 40px; height: 40px; }
-  .floating-trigger { width: 64px; height: 64px; font-size: 1.65rem; }
-  .floating-actions-menu { min-width: 208px; gap: 10px; }
-  .menu-item { min-height: 52px; font-size: 1rem; }
+  .floating-trigger { width: 58px; height: 58px; font-size: 1.5rem; }
+  .floating-actions-menu { min-width: 196px; gap: 8px; }
+  .menu-item { min-height: 48px; font-size: .96rem; }
   .delete-toolbar {
     right: 12px;
     bottom: 12px;
@@ -479,7 +511,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
           <p class="subtitle">Handle your longterm and everyday tasks seamlessly.</p>
         </div>
         <div style="display:grid;gap:12px;justify-items:end;">
-          <button class="btn btn-secondary settings-btn" type="button" onclick="openSettingsModal()">Settings</button>
+          <button class="btn btn-secondary settings-btn settings-trigger" type="button" onclick="openSettingsModal()" aria-label="Open settings"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.75v2.1"></path><path d="M12 19.15v2.1"></path><path d="m4.93 4.93 1.49 1.49"></path><path d="m17.58 17.58 1.49 1.49"></path><path d="M2.75 12h2.1"></path><path d="M19.15 12h2.1"></path><path d="m4.93 19.07 1.49-1.49"></path><path d="m17.58 6.42 1.49-1.49"></path></svg></button>
           <div class="stats">
             <div class="stat"><div class="stat-label">All projects</div><div class="stat-value" id="allCount">0</div></div>
             <div class="stat"><div class="stat-label">Open</div><div class="stat-value" id="openCount">0</div></div>
@@ -522,11 +554,13 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   <div id="createProjectBackdrop" class="modal-backdrop">
     <div class="modal-panel" onclick="event.stopPropagation()">
       <div class="panel-head">
-        <div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button class="panel-x" type="button" onclick="closeCreateProjectModal()" aria-label="Close">×</button>
+          <div>
           <h2 class="panel-title">Create project</h2>
           <div class="muted">Add project icon, deadline, and description.</div>
+          </div>
         </div>
-        <button class="panel-x" type="button" onclick="closeCreateProjectModal()" aria-label="Close">×</button>
       </div>
       <form id="projectForm">
         <div class="form-grid">
