@@ -223,6 +223,15 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   width: 100%; min-width: 0; padding: 9px 12px; background: var(--surfaceSoft); border: 1px solid var(--line); font-size: .65rem;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.badge.danger {
+  color: var(--dangerText);
+  border-color: var(--dangerBorder);
+  background: var(--dangerSoft);
+}
+.badge.warning {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
+}
 .done { color: #58c48f; }
 .project-card.selected-for-delete {
   border-color: var(--accent);
@@ -511,7 +520,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
           <p class="subtitle">Handle your longterm and everyday tasks seamlessly.</p>
         </div>
         <div style="display:grid;gap:12px;justify-items:end;">
-          <button class="btn btn-secondary settings-btn settings-trigger" type="button" onclick="openSettingsModal()" aria-label="Open settings"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 2.75v2.1"></path><path d="M12 19.15v2.1"></path><path d="m4.93 4.93 1.49 1.49"></path><path d="m17.58 17.58 1.49 1.49"></path><path d="M2.75 12h2.1"></path><path d="M19.15 12h2.1"></path><path d="m4.93 19.07 1.49-1.49"></path><path d="m17.58 6.42 1.49-1.49"></path></svg></button>
+          <button class="btn btn-secondary settings-btn settings-trigger" type="button" onclick="openSettingsModal()" aria-label="Open settings"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clip-rule="evenodd"/></svg></button>
           <div class="stats">
             <div class="stat"><div class="stat-label">All projects</div><div class="stat-value" id="allCount">0</div></div>
             <div class="stat"><div class="stat-label">Open</div><div class="stat-value" id="openCount">0</div></div>
@@ -745,6 +754,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     function closeSettingsModal() { settingsBackdrop.classList.remove("show"); }
     function formatDeadline(deadline) { if (!deadline) return "No deadline"; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return "Invalid deadline"; return dt.toLocaleString([], {year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit"}); }
     function formatTimeLeft(seconds) { if (seconds == null) return "No deadline"; if (seconds <= 0) return "Deadline passed"; const days = Math.floor(seconds / 86400); const hours = Math.floor((seconds % 86400) / 3600); const minutes = Math.floor((seconds % 3600) / 60); if (days > 0) return `${days}d ${hours}h left`; if (hours > 0) return `${hours}h ${minutes}m left`; return `${minutes}m left`; }
+    function isDueSoon(seconds) { return seconds != null && seconds > 0 && seconds <= 7 * 24 * 60 * 60; }
     function buildIconPickerHtml(targetInputId, fallback) {
       return `
         <div id="iconPicker" class="icon-picker show" data-target-input-id="${targetInputId}" data-fallback="${fallback}">
@@ -978,9 +988,9 @@ async function loadProjects() {
           </div>
         </div>
         ${visibilityMode ? `<button class="btn btn-secondary visibility-toggle" type="button" onclick="togglePendingVisibility(event, '${p.id}')">${isVisible ? "Visible" : "Hidden"}</button>` : ""}
-        <div class="project-meta">
-          <div class="badge">${escapeHtml("📅 " + formatDeadline(p.deadline))}</div>
-          <div class="badge ${p.finished ? "done" : ""}">${p.finished ? "✓ Finished" : escapeHtml("⏱ " + formatTimeLeft(p.seconds_left))}</div>
+          <div class="project-meta">
+          <div class="badge ${isDueSoon(p.seconds_left) ? "warning" : ""}">${escapeHtml("📅 " + formatDeadline(p.deadline))}</div>
+          <div class="badge ${p.finished ? "done" : p.seconds_left != null && p.seconds_left <= 0 ? "danger" : isDueSoon(p.seconds_left) ? "warning" : ""}">${p.finished ? "✓ Finished" : escapeHtml("⏱ " + formatTimeLeft(p.seconds_left))}</div>
         </div>
       </a>`;
   };
