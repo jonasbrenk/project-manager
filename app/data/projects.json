@@ -1,0 +1,1510 @@
+{
+  "projects": [
+    {
+      "id": "11046e9681c14b93a4259e1d5697493a",
+      "name": "Bachelorarbeit",
+      "deadline": "2026-09-06T21:59:00.000Z",
+      "description": "15. Juni: Beginn Bearbeitung der BA \n07. September: Abgabe BA\n30. September: Abgabe Gutachten BA",
+      "finished": false,
+      "icon": "https://lektorat-bauer.de/wp-content/uploads/2020/10/Design-ohne-Titel25.jpg",
+      "links": [
+        {
+          "id": "6dd0e4a0-52da-47f2-8d35-c2261517b5c4",
+          "title": "OneNote",
+          "url": "https://dhbwstg-my.sharepoint.com/personal/inf23096_lehre_dhbw-stuttgart_de/_layouts/Doc.aspx?sourcedoc={586DF163-8EDF-486D-901F-B6243E7FBA60}&end=()&end onenote:https://dhbwstg-my.sharepoint.com/personal/inf23096_lehre_dhbw-stuttgart_de/Documents/Bachelorarbeit/BA/",
+          "icon": "https://it-blogger.net/wp-content/uploads/blog/mobile/onenote-2025.png"
+        },
+        {
+          "id": "d961f4a8-321a-44fc-9b32-d900a0c0a90a",
+          "title": "Teams - Stephan Miller",
+          "url": "https://teams.microsoft.com/l/chat/19:0325b897-4891-414f-ba13-d775efce425d_53a2196a-e736-469d-a045-21fb981a96c7@unq.gbl.spaces/conversations?context=%7B%22contextType%22%3A%22chat%22%7D",
+          "icon": "https://img.icons8.com/fluent/1200/microsoft-teams-2025.jpg"
+        },
+        {
+          "id": "e67dc5e9-a7c6-4f19-b251-8e44fba34cd2",
+          "title": "Web-Mail DHBW",
+          "url": "https://lehre-webmail.dhbw-stuttgart.de/roundcubemail/?_task=mail&_mbox=INBOX",
+          "icon": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Roundcube_logo_icon.svg/1280px-Roundcube_logo_icon.svg.png"
+        },
+        {
+          "id": "95zl2qrn21mnjh3x0g",
+          "title": "ChatGPT",
+          "url": "https://chatgpt.com/g/g-p-69bc7fa59d708191897f7afdfc284878",
+          "icon": "https://img.icons8.com/sf-regular-filled/1200/chatgpt.jpg"
+        }
+      ],
+      "steps": [
+        {
+          "id": "0c1da414-89de-411d-b6a9-d818807979af",
+          "title": "Thema finden",
+          "description": "- Teams anschreiben (gemacht)\n- Optionen bekommen (nicht geklappt)\n- Thema festlegen",
+          "done": true,
+          "until_deadline": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "f2868b66-59ff-4161-9f2a-9e1b45f5eb3b",
+              "title": "Einsatz bei Stephan Miller",
+              "description": "Analyse & Modellentwicklung roadside Compute für autonomes Fahren",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "2bw7mrr113hmnj7padr",
+              "title": "Thema fertig formulieren",
+              "description": "",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "mcmlkbpayqmnj7phk9",
+              "title": "Thema abgeben",
+              "description": "",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "jllevx2du3imnj7qcg5",
+          "title": "Abgabe auf Moodle",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": "2026-09-07T19:59:00.000Z",
+          "children": []
+        },
+        {
+          "id": "qqjp1qu4fzemnj7r4e3",
+          "title": "Betreuer: Abgabe Bewertung",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": "2026-09-30T21:59:00.000Z",
+          "children": []
+        }
+      ],
+      "created_at": "2026-03-28T18:39:35.715722+00:00",
+      "updated_at": "2026-04-07T21:16:28.288926+00:00"
+    },
+    {
+      "id": "96b89c965c7149e3857dbdb4d3cdeca3",
+      "name": "Studienarbeit",
+      "deadline": "2026-06-11T21:59:00.000Z",
+      "description": "Mit Kevin Kienle\n\nBenchmarking & Optimierung von Nmap",
+      "finished": false,
+      "icon": "https://cdn-icons-png.flaticon.com/512/8920/8920811.png",
+      "links": [
+        {
+          "id": "f23ef686-ae46-452a-8a73-b255e88d963b",
+          "title": "OneNote",
+          "url": "https://dhbwstg-my.sharepoint.com/personal/inf23096_lehre_dhbw-stuttgart_de/_layouts/Doc.aspx?sourcedoc={43CF6484-5D5E-40FD-BFA1-8516C7E5EE41}&end=()&end onenote:https://dhbwstg-my.sharepoint.com/personal/inf23096_lehre_dhbw-stuttgart_de/Documents/Studienarbeit/studienarbeit_new/",
+          "icon": "https://it-blogger.net/wp-content/uploads/blog/mobile/onenote-2025.png"
+        },
+        {
+          "id": "db9f7b53-96d5-4456-a957-9a61867a6e4a",
+          "title": "Word - Studienarbeit",
+          "url": "https://dhbwstg-my.sharepoint.com/:w:/g/personal/inf23096_lehre_dhbw-stuttgart_de/IQD_94harqCyQrCmeltYrIWkAUTLA2BekWsH-hXHlUFCKtQ?e=h8FEfY",
+          "icon": "https://static.vecteezy.com/system/resources/previews/027/179/344/non_2x/microsoft-word-icon-logo-symbol-free-png.png"
+        },
+        {
+          "id": "83289ce1-2003-4986-bd08-6d072eea1e5d",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/9308a44a-ca6a-4212-b66a-fe97198eeec8",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        },
+        {
+          "id": "hicntp1ju4qmnjh4p2n",
+          "title": "ChatGPT",
+          "url": "https://chatgpt.com/g/g-p-695d397e2da48191a8ce4bb215448056",
+          "icon": "https://img.icons8.com/sf-regular-filled/1200/chatgpt.jpg"
+        }
+      ],
+      "steps": [
+        {
+          "id": "7bd2eb4b-edcd-4fdf-8853-ce8b234b975e",
+          "title": "Ausarbeitung",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "2a4467cf-ea1c-4bd5-942c-a1b11999bcc6",
+              "title": "Einleitung",
+              "description": "4 Seiten",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "91314996-fcfe-454b-a840-8b9bd3162354",
+              "title": "Grundlagenteil",
+              "description": "20 Seiten",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "65a034e1-eb22-458a-8820-a2fd5ed541e7",
+              "title": "Praxisteil",
+              "description": "24 Seiten",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "e0d93d52-7915-4b70-9d29-816ed29610fd",
+              "title": "Fazit und Ausblick",
+              "description": "5 Seiten",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "36e5482e-3e86-49d8-8ae5-7020f6524a85",
+          "title": "Implementierung",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "1b5ead1f-207f-45b8-a04e-25b6a1212a2d",
+              "title": "Benchmarking-Kriterien und Kandidaten festlegen",
+              "description": "Onmap <>Nmap\n\n- Onmap-abhängig\n\n- Portscans: alle\n- Host discovery: alle --> da host discovery sehr sensibel, gutes Setup nötig\n\nAlso:\n- 2 physische minimal OS Hosts (Ubuntu)  für cleanes Networking, Ethernet Kabel gegen Jitter, separat gegen Verfälschung",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "1250183b-4082-427b-b606-cd336423cce8",
+              "title": "Setup-Skripte für Connectivity schreiben",
+              "description": "",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "469c0bd6-00a8-4af3-91cb-72c18a3b23ab",
+              "title": "Provisioning SKript schreiben (Prototyp)",
+              "description": "Auch: Manifest Logik festlegen",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "fea0e453-60e9-4a09-b1c6-5fdeb010bad0",
+              "title": "SSH-Verbindung, Scanning und Provisioning Testen",
+              "description": "",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "a95a5571-7719-4845-81fe-d301d1e07c70",
+              "title": "Manifest Loading und SSH-provisioning automatisieren",
+              "description": "Installation & Host  configuration weiter automatisieren (visudo method impl.)",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "63652465-a1d8-4d0d-b1d8-66813d0b3d6c",
+              "title": "XML-Output Parser bauen",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "f5dfd076-617a-4f19-b7f3-02cbdee6a947",
+              "title": "Benchmarking Skripte schreiben",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "tbd0i6udtu9mng8jxjh",
+              "title": "Provisioning Skript überarbeiten",
+              "description": "Auf finale Yaml anpassen\n\nCleanup und setup sauber exposen\n\ndeterministische Erzeugung\n\nexit codes, logs",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "j614lxxsz8mng8lpyh",
+                  "title": "Readiness check einbauen",
+                  "description": "nach jedem Provisioning ausführen\nZiel:\nwarten bis Netz ready",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "wz6ovrtpwiimng8m3ez",
+              "title": "Main.py",
+              "description": "Benchmarking Entrypoint",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "h8rxa1l7rphmng8nqed",
+                  "title": "Run-Loop implementieren",
+                  "description": "Alternierungslogik (Nmap <> Onmap zuerst)\n\nSchleife:\n- Pro Szenario\n- warmup\n- for both scanners:\nprovision first then benchmark",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "trgq41dlnpnmng8sc83",
+                  "title": "Runner (Onmap, Nmap) Implementieren",
+                  "description": "kriegt fixen Type für Scan\n\nkonvertiert in tool spezifischen command\n\n(command base könnte auch in config oder manifest)\n\nRunner start() gibt den aktiven prozess zurück",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "z5acq68xd99mng8ytsy",
+                  "title": "Measurements implementieren",
+                  "description": "Class Based\n\none main measurement class holds list of all measurement classes and starts them all",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "4fdff051-aac1-42b6-bdcc-f7dd56c0175b",
+          "title": "Benchmarking durchführen",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "3af47d1b-fa27-4e80-8e39-09173e403081",
+          "title": "Optimierungen Identifizieren",
+          "description": "- onmap macht keine host discovery vor port scanning\n---> mehrere tote Hosts lassen scan time explodieren",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "cf28dc39-b938-48f8-8b10-490959245dc7",
+              "title": "Optimierungen vornehmen",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "2bfa6183-00c3-41dc-8cf3-06081a683d98",
+              "title": "Optimierungen Dokumentieren",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "f5a66c45-9da1-4d39-9be1-77824d3e121b",
+          "title": "Erneutes Benchmarking, Validierung,Momentaufnahme",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "e6bb899e-a834-4c11-9c35-3485b12d89bc",
+          "title": "Fertigstellen der Wissenschaftlichen Arbeit",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": "2026-06-11T15:20:00.000Z",
+          "children": []
+        }
+      ],
+      "created_at": "2026-03-28T18:50:10.399131+00:00",
+      "updated_at": "2026-04-13T11:38:14.288498+00:00"
+    },
+    {
+      "id": "1533328988ab4467a82b856e1bb1651b",
+      "name": "T3000",
+      "deadline": "2026-06-18T19:59:00.000Z",
+      "description": "Abgabe der Präsentation auf Moodle",
+      "finished": false,
+      "icon": "https://img.icons8.com/fluent/1200/microsoft-powerpoint-2019.jpg",
+      "links": [
+        {
+          "id": "2c80647b-59a7-4037-a378-41f371c29bae",
+          "title": "OneNote",
+          "url": "https://nokia-my.sharepoint.com/personal/jonas_brenk_nokia_com/_layouts/Doc.aspx?sourcedoc={9A9EB1D2-F7A6-4CA5-8708-5EFA4489863A}&end=()&end onenote:https://nokia-my.sharepoint.com/personal/jonas_brenk_nokia_com/Documents/Documents/Praxisphasen/Praxis%206%20-%20PowerBI/notes/",
+          "icon": "https://it-blogger.net/wp-content/uploads/blog/mobile/onenote-2025.png"
+        },
+        {
+          "id": "b9424fca-82e4-42a4-a489-6aaeab9c4662",
+          "title": "C:\\Users\\brenk\\OneDrive - Nokia\\Documents\\Praxisphasen\\Praxis 6 - PowerBI",
+          "url": "https://nokia-my.sharepoint.com/:f:/r/personal/jonas_brenk_nokia_com/Documents/Documents/Praxisphasen/Praxis%206%20-%20PowerBI?csf=1&web=1&e=9scdGE",
+          "icon": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png"
+        },
+        {
+          "id": "2e4c8730-7c22-4465-a5ef-2db454f9cbde",
+          "title": "Power BI Example",
+          "url": "https://app.powerbi.com/links/aOb4Zh0xHw?ctid=5d471751-9675-428d-917b-70f44f9630b0&pbi_source=linkShare",
+          "icon": "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/68/9e/1d/689e1ddc-7bb3-2b8c-25cf-48e3119e3e04/AppIcon-0-1x_U007emarketing-0-8-0-0-0-85-220-0.png/1200x630wa.png"
+        },
+        {
+          "id": "1b92ca97-81e9-4965-941f-970f46bc242c",
+          "title": "Presentation (Presented Version)",
+          "url": "https://nokia-my.sharepoint.com/:p:/r/personal/jonas_brenk_nokia_com/Documents/Documents/Praxisphasen/Praxis%206%20-%20PowerBI/T3000/presentation/dev_artifacts/project_documentation_vx.pptx?d=w07689bf3b0ce4ad1a8edad2f5e874536&csf=1&web=1&e=EMeuuH",
+          "icon": "https://img.icons8.com/fluent/1200/microsoft-powerpoint-2019.jpg"
+        },
+        {
+          "id": "bebddc4f-cd21-4ebe-8a34-18bd3beabee5",
+          "title": "Presentation (Sent Version)",
+          "url": "https://nokia-my.sharepoint.com/:p:/r/personal/jonas_brenk_nokia_com/Documents/Documents/Praxisphasen/Praxis%206%20-%20PowerBI/T3000/presentation/dev_artifacts/Development-of-Custom-PowerBI-Visuals.pptx?d=w9334f4c8c688456da438452f1f662932&csf=1&web=1&e=acu04L",
+          "icon": "https://img.icons8.com/fluent/1200/microsoft-powerpoint-2019.jpg"
+        },
+        {
+          "id": "p0d6qyk4ofmnjh9dow",
+          "title": "ChatGPT",
+          "url": "https://chatgpt.com/g/g-p-6995bce5c4fc8191a6894f9b1a171e9d",
+          "icon": "https://img.icons8.com/sf-regular-filled/1200/chatgpt.jpg"
+        }
+      ],
+      "steps": [
+        {
+          "id": "8a7c348f-d080-4d1a-bec3-47507ac45935",
+          "title": "Add Implementation Part",
+          "description": "Explain last Prototype Structure, way of working, etc.\nExplain more about the working of the tools\nAdd clear, professional comments to each slide",
+          "done": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "801e3b45-06b5-4c2d-a7e5-351f8bb4b585",
+          "title": "Add Scientific Sources",
+          "description": "Mostly done, but add some more\nSearch for books etc.",
+          "done": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "a07d9b3b-fb4d-49c2-a8e1-9f2aae1b618f",
+          "title": "Abgeben auf Moodle",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": "2026-06-18T19:59:00.000Z",
+          "children": [
+            {
+              "id": "366604f9-9cf3-4638-a89e-e7dca71ebea0",
+              "title": "Dann: Falko Rode schicken",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "w31u5tfpp9amnj7vsmj",
+              "title": "Abgabe Bewertung: Falko Rode",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": "2026-07-17T21:59:00.000Z",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "k5o3cdu7kifmnj7uzia",
+          "title": "Abgabe Reflexionsbericht",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": "2026-09-07T21:59:00.000Z",
+          "children": []
+        }
+      ],
+      "created_at": "2026-03-28T19:02:54.943096+00:00",
+      "updated_at": "2026-04-13T13:04:43.262273+00:00"
+    },
+    {
+      "id": "896c422ec6264ee9976cc5e06e770b6a",
+      "name": "Semester 6",
+      "deadline": "2026-05-02T20:00:00.000Z",
+      "description": "Letztes Semester",
+      "finished": false,
+      "icon": "https://img.freepik.com/vektoren-premium/6-buchstaben-bildungslogo-vorlage-bildungslogo-konzept-mit-alphabet-6-vektorelement_752325-1144.jpg",
+      "links": [
+        {
+          "id": "45f1985a-7116-4540-b72c-ac74362fc629",
+          "title": "DB Architekturen",
+          "url": "PROJECTS/project?id=0a62e0e1402c405c9e809e2fe2358924",
+          "icon": "https://dbdb.io/media/logos/arangodb.svg"
+        },
+        {
+          "id": "04aba2c7-2114-4e14-8f48-f420a4f8003a",
+          "title": "Interaktive Systeme",
+          "url": "PROJECTS/project?id=4e997db96de74f0093839c592c4fdcec",
+          "icon": "https://cdn-icons-png.flaticon.com/512/13320/13320606.png"
+        },
+        {
+          "id": "c98d99d9-d4cd-43be-9f30-8604aaf610b2",
+          "title": "Integrationsseminar",
+          "url": "PROJECTS/project?id=afe6158ec59649b78a93f49c4b41dce6",
+          "icon": "https://www.inonet.com/wp-content/uploads/2023/07/sustainability-3295757_1280-705x470.jpg"
+        },
+        {
+          "id": "f293a947-ebe1-4deb-93ad-a4c11db44053",
+          "title": "IT Architekturen",
+          "url": "PROJECTS/project?id=694e64142b8044a5b9ec306cb9f78065",
+          "icon": "https://www.clipartmax.com/png/small/347-3476750_system-architecture-icon-clipart-computer-icons-data-system-design-icon-png.png"
+        },
+        {
+          "id": "211d75cd-1a81-4c06-8093-51eae41c385b",
+          "title": "DevOps",
+          "url": "PROJECTS/project?id=7384b607e613453babcb977005d8a2a1",
+          "icon": "https://as2.ftcdn.net/jpg/05/48/32/61/1000_F_548326184_s97Y02hKTjxCzd2WZiOI9QattZOHHSWU.jpg"
+        },
+        {
+          "id": "09ffee2d-b721-4ce7-bf6c-c2c5eb8c06a4",
+          "title": "IT-Security",
+          "url": "PROJECTS/project?id=50a5273de8b14869b0463a9350bd3139",
+          "icon": "https://img.freepik.com/premium-vector/world-internet-protection-security-icon-design_996135-41122.jpg"
+        },
+        {
+          "id": "2a91e52d-233c-4e1b-9272-ffc4f11e1a5b",
+          "title": "Verteilte Systeme",
+          "url": "PROJECTS/project?id=a41ddf173b7d43e783f64c34a5590b17",
+          "icon": "https://c8.alamy.com/comp/P6YKY8/distribution-network-flat-icon-P6YKY8.jpg"
+        },
+        {
+          "id": "ec0ef76a-2963-4287-813e-7af21ee9ce0d",
+          "title": "OneDrive",
+          "url": "https://nokia-my.sharepoint.com/:f:/r/personal/jonas_brenk_nokia_com/Documents/Documents/DHBW/2026?csf=1&web=1&e=IrDn7r",
+          "icon": "https://st4.depositphotos.com/2454451/26433/v/450/depositphotos_264331972-stock-illustration-new-onedrive-icon-popular-program.jpg"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-03-28T19:37:32.537086+00:00",
+      "updated_at": "2026-04-08T02:14:41.502581+00:00"
+    },
+    {
+      "id": "0a62e0e1402c405c9e809e2fe2358924",
+      "name": "DB-Architekturen",
+      "deadline": "2026-04-02T20:00:00.000Z",
+      "description": "E-Book mit Quellen fertigstellen",
+      "finished": true,
+      "icon": "https://dbdb.io/media/logos/arangodb.svg",
+      "links": [
+        {
+          "id": "05cbe2f0-e2a6-407d-9101-e910d29101d0",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24200",
+          "icon": "https://www.mildred-scheel-schule.info/wp-content/uploads/2023/10/2023-10-03-moodle-1.png"
+        }
+      ],
+      "steps": [
+        {
+          "id": "8wbkx8ir7admnj1ohcp",
+          "title": "Movie",
+          "description": "",
+          "done": true,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "r7vsz3chybmnxa2gz1",
+          "title": "Ebook",
+          "description": "- pünktlich abgegeben mit Formatfehlern\n- Email geschickt mit überarbeiteter Version um ~01:20",
+          "done": true,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        }
+      ],
+      "created_at": "2026-03-28T19:42:28.152594+00:00",
+      "updated_at": "2026-04-13T14:18:20.942179+00:00"
+    },
+    {
+      "id": "afe6158ec59649b78a93f49c4b41dce6",
+      "name": "Integrationsseminar",
+      "deadline": "2026-04-15T03:59:00.000Z",
+      "description": "Movie-Projekt",
+      "finished": false,
+      "icon": "https://www.inonet.com/wp-content/uploads/2023/07/sustainability-3295757_1280-705x470.jpg",
+      "links": [
+        {
+          "id": "6b14632a-528c-4dc3-ac00-21f780a088c1",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24208",
+          "icon": "https://www.mildred-scheel-schule.info/wp-content/uploads/2023/10/2023-10-03-moodle-1.png"
+        },
+        {
+          "id": "73af6202-9fe4-4aa1-8e35-31577b7f6f2e",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/0e9271b5-84f9-47f1-a652-8af38ad59642",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        },
+        {
+          "id": "um3gewxkm2mnjhifge",
+          "title": "ChatGPT",
+          "url": "https://chatgpt.com/share/69d0411e-bacc-8390-bd07-94de2cb5e785",
+          "icon": "https://img.icons8.com/sf-regular-filled/1200/chatgpt.jpg"
+        }
+      ],
+      "steps": [
+        {
+          "id": "ryn14p4jwdmnj1tety",
+          "title": "Let the team work",
+          "description": "Thema: Pflege 2, Moderner Pflegeroboter",
+          "done": true,
+          "until_deadline": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "h93g8u6t4cvmnj1ttyq",
+          "title": "Maybe offer help in the group if necessary",
+          "description": "Ensure im part of the team and i am mentioned",
+          "done": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "8wkefrs0f9rmnj1uok4",
+          "title": "Abgabe Movie auf Moodle",
+          "description": "(wird das Team erledigen), < 2min",
+          "done": true,
+          "until_deadline": false,
+          "deadline": "2026-04-08T21:59:00.000Z",
+          "children": []
+        },
+        {
+          "id": "wwx43a5jksmnn8zrye",
+          "title": "Konferenzbeitrag",
+          "description": "- Powerpoint +/ PDF auf Moodle",
+          "done": false,
+          "until_deadline": false,
+          "deadline": "2026-04-15T04:00:00.000Z",
+          "children": [
+            {
+              "id": "d01csqcblkmnn91seo",
+              "title": "20min Live Vortrag",
+              "description": "JEDER muss was sagen",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "egfpuuwoosgmnn94x7q",
+                  "title": "Fragen im Online Forum (bis 21.04.)",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "0qz82o8lofysmnn936l4",
+              "title": "Beantwortung am 22. bis 12:00",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": "2026-04-22T10:00:00.000Z",
+              "children": []
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-28T19:50:22.974361+00:00",
+      "updated_at": "2026-04-11T15:55:24.854984+00:00"
+    },
+    {
+      "id": "694e64142b8044a5b9ec306cb9f78065",
+      "name": "IT Architekturen",
+      "deadline": "2026-04-24T11:00:00.000Z",
+      "description": "Case Study + Präsentation 15:00 bis 15:40",
+      "finished": false,
+      "icon": "https://www.clipartmax.com/png/small/347-3476750_system-architecture-icon-clipart-computer-icons-data-system-design-icon-png.png",
+      "links": [
+        {
+          "id": "7919bce6-e51e-48a4-9525-a940d909dfa4",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24197",
+          "icon": "https://www.mildred-scheel-schule.info/wp-content/uploads/2023/10/2023-10-03-moodle-1.png"
+        },
+        {
+          "id": "115ea008-ae5f-441d-887a-6d9654e10d6c",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/5208221e-adf5-48c5-90e7-d54e9311fa08",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
+      "steps": [
+        {
+          "id": "4m6h487qtr8mnj21ud0",
+          "title": "Kontakt mit Team aufnehmen",
+          "description": "- Jona Scholz\n- Levin Beck\n- Luis Geiger",
+          "done": false,
+          "deadline": null,
+          "children": []
+        },
+        {
+          "id": "5751dbx6e8bmnj22co7",
+          "title": "Case Study durchführen",
+          "description": "",
+          "done": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "8puj7ni265cmnj22vjn",
+              "title": "Heraufinden, was",
+              "description": "",
+              "done": false,
+              "deadline": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "9qd6ze0wcbwmnj22nma",
+          "title": "Präsentation vorbereiten",
+          "description": "",
+          "done": false,
+          "deadline": null,
+          "children": []
+        }
+      ],
+      "created_at": "2026-03-28T19:51:58.306358+00:00",
+      "updated_at": "2026-04-08T02:16:31.330938+00:00"
+    },
+    {
+      "id": "7384b607e613453babcb977005d8a2a1",
+      "name": "DevOps",
+      "deadline": "2026-04-27T21:59:00.000Z",
+      "description": "Abgabe transformiertes Code-Repo",
+      "finished": false,
+      "icon": "https://as2.ftcdn.net/jpg/05/48/32/61/1000_F_548326184_s97Y02hKTjxCzd2WZiOI9QattZOHHSWU.jpg",
+      "links": [
+        {
+          "id": "360a191b-79e5-40c8-a81e-f76039315a6b",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=25218",
+          "icon": "https://www.mildred-scheel-schule.info/wp-content/uploads/2023/10/2023-10-03-moodle-1.png"
+        },
+        {
+          "id": "qusqk40m7gmnjh5nv4",
+          "title": "ChatGPT",
+          "url": "https://chatgpt.com/g/g-p-69ac440d1e008191820953ada63b18ef",
+          "icon": "https://img.icons8.com/sf-regular-filled/1200/chatgpt.jpg"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-03-28T19:54:24.453642+00:00",
+      "updated_at": "2026-04-08T02:16:51.685401+00:00"
+    },
+    {
+      "id": "50a5273de8b14869b0463a9350bd3139",
+      "name": "IT-Sicherheit",
+      "deadline": "2026-04-27T06:30:00.000Z",
+      "description": "Klausur",
+      "finished": false,
+      "icon": "https://img.freepik.com/premium-vector/world-internet-protection-security-icon-design_996135-41122.jpg",
+      "links": [
+        {
+          "id": "80a015b3-1402-45bb-9260-0f5fa7b3bd62",
+          "title": "Moodle (EMPTY)",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24199",
+          "icon": "https://www.mildred-scheel-schule.info/wp-content/uploads/2023/10/2023-10-03-moodle-1.png"
+        },
+        {
+          "id": "205aa72c-f394-4430-8bc1-e56e4b7856fa",
+          "title": "Vorlesungsstoff",
+          "url": "https://wwwlehre.dhbw-stuttgart.de/~jost/Datenschutz_Datensicherheit/",
+          "icon": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f517.png"
+        },
+        {
+          "id": "cb9a0cee-79c6-45b3-9c04-5c22c5038761",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/4e303dce-1222-4447-80fa-3a7a6630e2a5",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        },
+        {
+          "id": "af18d13c-07ec-4346-876e-09c83854f604",
+          "title": "Files",
+          "url": "https://nokia-my.sharepoint.com/:f:/r/personal/jonas_brenk_nokia_com/Documents/Documents/DHBW/2026/IT_Sicherheit?csf=1&web=1&e=i9nI4d",
+          "icon": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png"
+        }
+      ],
+      "steps": [
+        {
+          "id": "93ecd723-5dbe-403e-a2ad-3a0a53c4d17e",
+          "title": "Vorlesungsstoff sichten",
+          "description": "",
+          "done": true,
+          "until_deadline": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "lrxszdfkcdemnj1n7kd",
+              "title": "Plan machen",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "0f0846a1-eea4-450a-9c28-16186c29d7bd",
+          "title": "Lernen",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "b5bdfdb5-2798-448d-a4c5-81648a8003d9",
+              "title": "1. Grundlagen und Schutzziele",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "5a819c51-4843-4594-b9c1-e2d0eabb907f",
+                  "title": "Safety vs Security vs Privacy vs Protection",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "3eaa4628-c928-49cd-bf85-ec3dba9e1c6a",
+                  "title": "CIA Triangle",
+                  "description": "Confidenciality\nIntegrity\nAvailability",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "72eb95e0-8a84-47e8-9219-711e9e19d568",
+                  "title": "Kosten vs SIcherheit, 100% unmöglich",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "6a7eb8af-ef57-4455-9a66-9bad479c0213",
+              "title": "2. Rechtlicher Rahmen, Standards",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "9b6a03ed-2e93-41d1-9faf-4ef6594e16b0",
+                  "title": "DSGVO (Datenschutzgrundverordnung)",
+                  "description": "3 Ziele, 7 Betroffenenrechte, Grundsätze, personenbezogene Daten",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "f27bb231-049b-4293-acef-d0de4da4b3df",
+                  "title": "§202a StGB (Ausspähen von Daten)",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "ba3408a5-d71f-4ba1-951e-ae02a37215a7",
+                  "title": "Standards: BSI, ISO/IEC 27001, NIST, Common Criteria",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "c495ab54-d382-404a-9d25-cddb7d33ed2f",
+              "title": "3. Sicherheitsbedrohungen",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "206bc22c-5f1c-438f-8b57-0da92c047bc4",
+                  "title": "System-Ebene",
+                  "description": "Buffer Overflows",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "bd6a4ab8-c899-493b-99e2-342df65aa723",
+                  "title": "Web-Anwendungen",
+                  "description": "SQL Injection, Cross-Site Scripting (XSS), Cross-Site Request Forgery (CSRF)",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "f367aafa-8333-4efa-ae86-7a7d28ca4914",
+                  "title": "Faktor Mensch",
+                  "description": "Social Engineering, Phishing",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "35ad3e15-41e5-4086-95b5-600c57f16ddd",
+                  "title": "Klassifizierungen",
+                  "description": "CVE (Vulnerabilities), CPE (Platforms). CCE (Configurations), CWE/SANS Top 25",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "480bb601-6a8e-4802-bfae-8410ff6110f9",
+              "title": "4. Symmetrische Kryptologie",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "5fd7095a-da61-45a8-a08b-d29e00482494",
+                  "title": "Prinzipien",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": [
+                    {
+                      "id": "6acb1c39-4e50-485b-9e21-8a4f940ec5cf",
+                      "title": "Kerckhoffs Prinzip",
+                      "description": "Sicherheit nur durch Schlüssel-Geheimhaltung",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    },
+                    {
+                      "id": "1128d349-4944-4b2f-b300-537e32ecdb28",
+                      "title": "Konfusion, Substitution",
+                      "description": "",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    },
+                    {
+                      "id": "c5a20fc0-1d9c-4fcd-a97c-ccd56d130e13",
+                      "title": "Diffusion, Permutation",
+                      "description": "",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "cfac35dc-a92b-4d50-aeb0-bf2d779fb3ce",
+                  "title": "Stromchiffren",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": [
+                    {
+                      "id": "6fca6a45-aa47-4f52-8315-e868c20e7900",
+                      "title": "Bitweise Verschlüsselung (XOR), One-Time-Pad (OTP)",
+                      "description": "",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    },
+                    {
+                      "id": "2b1e5d1a-d6c7-4faf-9d6c-cdefad206f58",
+                      "title": "Synchron vs Asynchron",
+                      "description": "",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "02a6d0fa-af7e-497d-b7b6-5c5f80c7197b",
+                  "title": "Blockchiffren (AES - Advanced Encryption Standard)",
+                  "description": "128-Bit Blöcke, keine Feistel-Chiffre",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": [
+                    {
+                      "id": "67ab65c0-bba8-4716-a60e-b778a4f13d52",
+                      "title": "Mathematik",
+                      "description": "Galois-Feld (GF (1^8)) --> rechnen, Nutzung irreduzibler Polynome",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    },
+                    {
+                      "id": "f60b9db3-bc96-48a0-94c0-bd78a89a16d5",
+                      "title": "Schichtenmodell",
+                      "description": "SubBytes (S-Box), ShiftRows, MixColumns (Spaltentransformation), AddRoundKey (XOR mit Rundenschlüssel)",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "ce76cd72-88a2-436e-ba0b-8bee64346c7c",
+                  "title": "Betriebsmodi",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": [
+                    {
+                      "id": "38f3b035-26f8-4b44-886e-35c71bc52846",
+                      "title": "ECB (unsicher bei Mustern) vs CBC (Verwendung von Initialisierungsvekturen IV)",
+                      "description": "",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "c70705c0-4532-4e5c-b0b7-04e85aaf4188",
+              "title": "5. Asymmetrische Kryptologie und Signaturen",
+              "description": "Grundkonzept: Public Key & Private Key",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "0944eb85-5201-4f60-8328-ad66688fd4cc",
+                  "title": "Einwegfunktionen mit Falltür: Faktorisierungsproblem, diskreter Logarithmus",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "b9ff7676-3908-4ee9-ac01-19145df03333",
+                  "title": "RSA",
+                  "description": "Berechnung von, n, ó(n), e und d (Euklidischer Algorithmus) --> Effiziente Implementierung: Square-and-Multiply",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "0d8f202e-2c82-4d32-bd77-e8db6a0113ae",
+                  "title": "Elliptische Kurven (ECC)",
+                  "description": "Sicherheit durch ECDLP, Vorteile bei Speichereffizienz und Performance für Embedded Systems",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "296b6363-bb76-48e4-840e-06f6b8811f06",
+                  "title": "Hashfunktionen",
+                  "description": "Einweg, Kollisionsresistenz (MD5, SHA-1, SHA-2, SHA-3)",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "74c29eed-2314-4ca1-b811-d45806a9b1ba",
+                  "title": "Digitale Signaturen",
+                  "description": "Hash --> Sign --> Validate ||| Verfahren wie DSA oder ECDSA",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "d9128778-c42e-4a01-8088-09366658a95b",
+              "title": "6. Schlüsselmanagement und Protokolle",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "1247c09f-b683-47b8-a864-b06b92498624",
+                  "title": "Diffie Hellmann (DHKE)",
+                  "description": "Schlüsselaustausch über unsichere Kanäle, mathematische Basis durch primitive Einheitswurzeln, \"Perfect Forward Secrecy\"",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "109c4260-f906-488a-8220-a73798b89f9d",
+                  "title": "Protokolle für Authentizität",
+                  "description": "Kerberos (Zeitstempel), Otway-Rees (Nonces gegen Replay-Angriffe)",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "6598e803-92a3-4873-b8bc-5651f2346d34",
+                  "title": "Hybrid-Verfahren",
+                  "description": "Kombination: asymmetrische Verschlüsselung des Sitzungsschlüssels, symmetrische Datenübertragung",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "46b3e147-ecea-4ac9-b0eb-8f758702b193",
+              "title": "7. Identifikation und Authentisierung",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "0246eab2-eb17-4467-9e5e-c4e14586d4e1",
+                  "title": "Verfahrensklassen",
+                  "description": "Wissen (Password), Besitz (Smartcard/Token), Eigenschaft (Biometrie)",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "374c758a-1aaf-412d-9182-f279878bcd09",
+                  "title": "Challenge-Response (CR)",
+                  "description": "Vermeidung der Passwort-Übertragung  || Symmetrisch vs Asymmetrisch",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "9323adbe-add8-4ef7-88fd-c7a2065cab50",
+                  "title": "Zero-Knowledge (Fiat-Shamir)",
+                  "description": "Nachweis des Wissens ohne preisgeben (Commitment --> Challenge --> Response)",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "8fbadbaf-c12f-4f64-a566-e5d77ffd07c5",
+                  "title": "Hardware-Sicherheit",
+                  "description": "Elektronischer Personalausweis (nPA), PACE-Protokoll, U2F-Registrierung, Login-Process",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "ee8205d6-fc98-40dc-88a0-b58ae6a62981",
+              "title": "8. Zugriffskontrollmodelle",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "96ec5a23-70e9-46b1-b6ac-40c952adbcae",
+                  "title": "Strategien",
+                  "description": "DAC (besitzerbasiert) vs MAC (systembestimmt, regelbasiert)",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "6dc9fdcc-d1b9-4f65-a32d-7149990c5291",
+                  "title": "Konzepte",
+                  "description": "Zugriffsmatrix  ||   ACLs (Access Control Lists)   vs  Capabilities",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "a0ebaca4-ef04-43b0-a5cc-548455b86040",
+                  "title": "Modelle",
+                  "description": "",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": [
+                    {
+                      "id": "29463ad2-0c2d-4b14-8cfc-644a6c439619",
+                      "title": "RBAC",
+                      "description": "Rollenhierarchie, Vererbung, administrative Effizienz",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    },
+                    {
+                      "id": "fc6173a6-e82e-46d7-a057-9ed8f65acac8",
+                      "title": "Bell-LaPadula (BLP)",
+                      "description": "Vertraulichkeitsfokus  ||  Regeln: no-read-up (Simple Security), no-write-down (*-Property), Tranquility-Prinzip",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    },
+                    {
+                      "id": "ff6a7f0a-f712-41e2-9703-0f18860ad4e0",
+                      "title": "Chinese Wall",
+                      "description": "Vermeidung von Interessenkonflikten, dynamische Schranken basierend auf der Zugriffshistorie",
+                      "done": false,
+                      "until_deadline": false,
+                      "deadline": null,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "0b57fe44-9836-462b-8c99-ba96f7a1e107",
+                  "title": "Implementierung",
+                  "description": "PDP (Decision Point) und PEP (Enforcement Point) Pattern",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "290df8ea-a964-4398-a2cb-597f71f0b83e",
+              "title": "9. Hardware- und Netzwerksicherheit",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "267edecb-ca5d-41c7-99ed-a0bc0ad24764",
+                  "title": "Trusted Computing",
+                  "description": "TPM = Trusted Platform Module  ||  Binding, Sealing, Remote Attestation, PCR-Register",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "27fa6533-4b65-4644-99b0-0aca14cb880b",
+                  "title": "Netzwerksicherheit",
+                  "description": "Firewalls (Paketfilter, Appl. Layer)  ||  SSL/TLS (Handshake, Zertifikate, Schutz vor Man-in-the-Middle)",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "23e33ddc-e23f-470b-9ed0-5e433b9741dd",
+                  "title": "Security Engineering",
+                  "description": "SDLC (Security Lifecycle)    ||  STRIDE Modell zur Bedrohungsanalyse  ||  OpenSAMM Reifegradmodell",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "e2ef1b22-dbc9-4195-827e-9297d0b920d0",
+                  "title": "Evaluierung",
+                  "description": "Common Criteria (CC)   ||     Schutzprofile (PP)    ||     EAL-Stufen (1-7)",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "id": "0afa32ac-aa97-474b-ad69-37a3742d373a",
+              "title": "10. Moderne Datenökosysteme",
+              "description": "",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": [
+                {
+                  "id": "c25d40d9-5592-489a-b82d-7b49223463bd",
+                  "title": "Konzepte",
+                  "description": "Datensouveränität (Usage Control)  ||  Gaia-X  ||  IDSA",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                },
+                {
+                  "id": "12e1732b-2b51-480b-92fa-cfcb01fcf1b0",
+                  "title": "Anwendungsbeispiel Catena-X",
+                  "description": "Architektur, Use Cases (Traceabbility, Real Carbon Footprint)",
+                  "done": false,
+                  "until_deadline": false,
+                  "deadline": null,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-28T19:55:38.284796+00:00",
+      "updated_at": "2026-04-08T02:17:14.698037+00:00"
+    },
+    {
+      "id": "a41ddf173b7d43e783f64c34a5590b17",
+      "name": "Verteilte Systeme",
+      "deadline": "2026-04-29T11:30:00.000Z",
+      "description": "Klausur + Hausarbeit (Tor Netzwerk)",
+      "finished": false,
+      "icon": "https://c8.alamy.com/comp/P6YKY8/distribution-network-flat-icon-P6YKY8.jpg",
+      "links": [
+        {
+          "id": "4f0f397c-8765-4dd0-bed1-511c9cb94ade",
+          "title": "Moodle",
+          "url": "https://elearning.dhbw-stuttgart.de/moodle/course/view.php?id=24198",
+          "icon": "https://www.mildred-scheel-schule.info/wp-content/uploads/2023/10/2023-10-03-moodle-1.png"
+        },
+        {
+          "id": "84a9067a-baa2-42cc-9e66-15489066b1d0",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/a67bf747-e9dc-4845-b68d-4fb9a443d3b4",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
+      "steps": [
+        {
+          "id": "hsmk77jqmimnj1h1cl",
+          "title": "Klausur",
+          "description": "Lernen!!!",
+          "done": false,
+          "until_deadline": false,
+          "deadline": "2026-04-29T13:30:00.000Z",
+          "children": []
+        },
+        {
+          "id": "t2rq7tkqlrmnj1izkv",
+          "title": "Hausarbeit",
+          "description": "Thema: Tor-Netzwerk\nSeiten:  Ca. 3 pro Person\nTeam:    Ich + Kevin",
+          "done": false,
+          "until_deadline": false,
+          "deadline": "2026-05-01T21:59:00.000Z",
+          "children": []
+        }
+      ],
+      "created_at": "2026-03-28T19:57:27.824352+00:00",
+      "updated_at": "2026-04-08T02:17:31.251015+00:00"
+    },
+    {
+      "id": "4e997db96de74f0093839c592c4fdcec",
+      "name": "Interaktive Systeme",
+      "deadline": "2026-05-08T21:59:00.000Z",
+      "description": "Seminararbeit (einzeln)",
+      "finished": false,
+      "icon": "https://cdn-icons-png.flaticon.com/512/13320/13320606.png",
+      "links": [
+        {
+          "id": "031afb94-5212-4a96-a88e-b76c3ff530b3",
+          "title": "NotebookLM",
+          "url": "https://notebooklm.google.com/notebook/e40f698c-4c7a-4b95-98bb-62556a28991f",
+          "icon": "https://www.cnet.com/a/img/resize/d4f807906d34dcd25518b88d65c1537654b0061b/hub/2025/09/17/fade4539-606f-4ba0-a502-4cb0447ce68f/notebooklm-logo-custom.jpg?auto=webp&fit=crop&height=196&width=196"
+        }
+      ],
+      "steps": [
+        {
+          "id": "zbw30u77bamnj1kftr",
+          "title": "Seminararbeit (einzeln)",
+          "description": "",
+          "done": false,
+          "until_deadline": false,
+          "deadline": null,
+          "children": [
+            {
+              "id": "7hnh8nrij9rmnj1kn4x",
+              "title": "Thema + Scope herausfinden",
+              "description": "Selbst gewählte Website\n—> 4 Leitfragen beantworten\n—> heuristische Evaluierung\n\n- 5 Seiten",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "we7r5rlkpumnj1ksx3",
+              "title": "Deadline herausfinden",
+              "description": "08.05.2026, 23:59",
+              "done": true,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            },
+            {
+              "id": "nh69ju8t6jmnn8pw10",
+              "title": "Siehe",
+              "description": "https://notebooklm.google.com/notebook/e40f698c-4c7a-4b95-98bb-62556a28991f?pli=1&authuser=1&pageId=none",
+              "done": false,
+              "until_deadline": false,
+              "deadline": null,
+              "children": []
+            }
+          ]
+        }
+      ],
+      "created_at": "2026-03-28T19:59:12.073409+00:00",
+      "updated_at": "2026-04-09T18:11:25.625613+00:00"
+    },
+    {
+      "id": "12b45ba021c54ce7af3f302d9bef6023",
+      "name": "Südamerika",
+      "deadline": "2026-10-30T23:00:00.000Z",
+      "description": "",
+      "finished": false,
+      "icon": "https://www.landkarten-shop.de/images/product_images/original_images/mapwm048/suedamerika-physisch.jpg",
+      "links": [],
+      "steps": [],
+      "created_at": "2026-03-29T17:49:20.912450+00:00",
+      "updated_at": "2026-03-29T17:49:20.912450+00:00"
+    },
+    {
+      "id": "2166e06e136245889d11aec08cdd1aaf",
+      "name": "Privat",
+      "deadline": null,
+      "description": "",
+      "finished": false,
+      "icon": "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f680.png",
+      "links": [
+        {
+          "id": "f3metub0ze5mnp4id4b",
+          "title": "Südamerika",
+          "url": "PROJECTS/project?id=12b45ba021c54ce7af3f302d9bef6023",
+          "icon": "https://www.landkarten-shop.de/images/product_images/original_images/mapwm048/suedamerika-physisch.jpg"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-04-07T21:20:07.404788+00:00",
+      "updated_at": "2026-04-07T21:20:33.523669+00:00"
+    },
+    {
+      "id": "c6a47f9158db4c9f9a8fc6a5a1ebb1c8",
+      "name": "Studium",
+      "deadline": null,
+      "description": "",
+      "finished": false,
+      "icon": "https://lektorat-bauer.de/wp-content/uploads/2020/10/Design-ohne-Titel25.jpg",
+      "links": [
+        {
+          "id": "qooob6ddy3nmnp4ir4o",
+          "title": "Bachelorarbeit",
+          "url": "PROJECTS/project?id=11046e9681c14b93a4259e1d5697493a",
+          "icon": "https://lektorat-bauer.de/wp-content/uploads/2020/10/Design-ohne-Titel25.jpg"
+        },
+        {
+          "id": "wuhxtpdyiwbmnp4iv4t",
+          "title": "Studienarbeit",
+          "url": "PROJECTS/project?id=96b89c965c7149e3857dbdb4d3cdeca3",
+          "icon": "https://cdn-icons-png.flaticon.com/512/8920/8920811.png"
+        },
+        {
+          "id": "xef8a2wj0nmnp4ixzy",
+          "title": "T3000",
+          "url": "PROJECTS/project?id=1533328988ab4467a82b856e1bb1651b",
+          "icon": "https://img.icons8.com/fluent/1200/microsoft-powerpoint-2019.jpg"
+        },
+        {
+          "id": "6mgd0a0pdfsmnp4j2pf",
+          "title": "Semester 6",
+          "url": "PROJECTS/project?id=896c422ec6264ee9976cc5e06e770b6a",
+          "icon": "https://img.freepik.com/vektoren-premium/6-buchstaben-bildungslogo-vorlage-bildungslogo-konzept-mit-alphabet-6-vektorelement_752325-1144.jpg"
+        }
+      ],
+      "steps": [],
+      "created_at": "2026-04-07T21:20:20.892293+00:00",
+      "updated_at": "2026-04-07T21:21:06.674916+00:00"
+    }
+  ]
+}
