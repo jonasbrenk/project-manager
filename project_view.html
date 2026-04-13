@@ -5,6 +5,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Project View</title>
+  <script>
+    (() => {
+      const key = "pm_theme_mode";
+      const saved = localStorage.getItem(key);
+      const theme = saved === "light" ? "light" : "dark";
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    })();
+  </script>
 
   <style>
     :root {
@@ -18,7 +27,30 @@
       --accentSoft: rgba(79, 124, 255, .15);
       --danger: #ff6a6a;
       --shadow: 0 18px 50px rgba(0, 0, 0, .28);
-      --radius: 22px
+      --radius: 22px;
+      --bgTop: #172344;
+      --bgBottom: #0b1020;
+      --surfaceSoft: rgba(255, 255, 255, .05);
+      --panelBg: #0f172d;
+      --toggleOff: rgba(255, 255, 255, .16)
+    }
+
+    html[data-theme="light"] {
+      --bg: #edf3ff;
+      --card: rgba(255, 255, 255, .88);
+      --card2: rgba(242, 247, 255, .92);
+      --text: #17233c;
+      --muted: #5d6a84;
+      --line: rgba(23, 35, 60, .12);
+      --accent: #2f6df6;
+      --accentSoft: rgba(47, 109, 246, .12);
+      --danger: #d74d4d;
+      --shadow: 0 18px 45px rgba(63, 88, 138, .14);
+      --bgTop: #f9fbff;
+      --bgBottom: #dfe9ff;
+      --surfaceSoft: rgba(20, 34, 59, .04);
+      --panelBg: #ffffff;
+      --toggleOff: rgba(21, 34, 59, .16)
     }
 
     * {
@@ -29,7 +61,7 @@
     body {
       margin: 0;
       min-height: 100%;
-      background: radial-gradient(circle at top, #172344 0%, var(--bg) 58%);
+      background: radial-gradient(circle at top, var(--bgTop) 0%, var(--bgBottom) 58%);
       color: var(--text);
       font-family: Inter, system-ui, sans-serif
     }
@@ -58,7 +90,7 @@
     .back-link {
       text-decoration: none;
       color: var(--text);
-      background: rgba(255, 255, 255, .05);
+      background: var(--surfaceSoft);
       border: 1px solid var(--line);
       padding: 10px 14px;
       border-radius: 999px;
@@ -101,6 +133,13 @@
       min-width: 0
     }
 
+    .hero-copy {
+      min-width: 0;
+      flex: 1 1 auto;
+      display: grid;
+      gap: 8px
+    }
+
     .hero-icon {
       width: 64px;
       height: 64px;
@@ -133,6 +172,48 @@
       line-height: 1.5
     }
 
+    .formatted-text {
+      display: grid;
+      gap: 8px;
+      min-width: 0
+    }
+
+    .formatted-text.compact {
+      gap: 6px
+    }
+
+    .formatted-paragraph {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere
+    }
+
+    .formatted-list {
+      margin: 0;
+      padding-left: 1.2rem;
+      display: grid;
+      gap: 4px
+    }
+
+    .formatted-list li {
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere
+    }
+
+    .indent-1 {
+      margin-left: 1.4rem
+    }
+
+    .indent-2 {
+      margin-left: 2.8rem
+    }
+
+    .indent-3 {
+      margin-left: 4.2rem
+    }
+
     .meta-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -151,7 +232,7 @@
 
     .meta-label {
       color: var(--muted);
-      font-size: .75rem;
+      font-size: .65rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       margin-bottom: 4px
@@ -193,7 +274,7 @@
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, .05);
+      background: var(--surfaceSoft);
       color: var(--text);
       border: 1px solid var(--line)
     }
@@ -225,13 +306,14 @@
     /* Standard link card */
     .link-card {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr;
       gap: 14px;
       align-items: center;
-      padding: 14px;
+      padding: 14px 52px 14px 14px;
       border-radius: 18px;
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .03)
+      background: rgba(255, 255, 255, .03);
+      position: relative
     }
 
     .link-icon {
@@ -311,11 +393,7 @@
       color: var(--muted);
       font-size: .88rem;
       line-height: 1.4;
-      margin-bottom: 6px;
-      overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical
+      margin-bottom: 6px
     }
 
     .proj-link-meta {
@@ -330,7 +408,7 @@
       align-items: center;
       padding: 3px 9px;
       border-radius: 999px;
-      font-size: .76rem;
+      font-size: .65rem;
       font-weight: 600;
       letter-spacing: .01em
     }
@@ -421,12 +499,62 @@
       flex-shrink: 0
     }
 
-    .link-actions,
-    .step-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center
+    .card-menu-wrap {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 3
+    }
+
+    .card-menu-wrap.open {
+      z-index: 8
+    }
+
+    .card-menu-trigger {
+      width: 34px;
+      height: 34px;
+      position: relative;
+      z-index: 1
+    }
+
+    .card-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 160px;
+      padding: 8px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 45, .98);
+      box-shadow: var(--shadow);
+      display: none;
+      gap: 6px;
+      z-index: 9
+    }
+
+    .card-menu.show {
+      display: grid
+    }
+
+    .card-menu-item {
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .04);
+      color: var(--text);
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer
+    }
+
+    .card-menu-item:hover {
+      border-color: rgba(79, 124, 255, .4);
+      background: rgba(79, 124, 255, .1)
+    }
+
+    .card-menu-item.danger {
+      color: #ffd9d9;
+      background: rgba(255, 106, 106, .12)
     }
 
     .icon-btn {
@@ -455,12 +583,13 @@
       border: 1px solid var(--line);
       background: rgba(255, 255, 255, .03);
       border-radius: 18px;
-      padding: 14px
+      padding: 14px 52px 14px 14px;
+      position: relative
     }
 
     .step-head {
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto 1fr;
       gap: 12px;
       align-items: flex-start
     }
@@ -483,6 +612,11 @@
       color: var(--muted)
     }
 
+    .step-main {
+      min-width: 0;
+      width: 100%
+    }
+
     .step-sub {
       display: inline-flex;
       gap: 8px;
@@ -503,12 +637,18 @@
     }
 
     .children {
-      margin-top: 12px;
+      margin-top: 8px;
       margin-left: 18px;
       display: grid;
       gap: 10px;
       border-left: 2px solid rgba(255, 255, 255, .07);
-      padding-left: 12px
+      padding-left: 12px;
+      width: calc(100% + 30px)
+    }
+
+    .children>.step-item {
+      width: 100%;
+      max-width: 100%
     }
 
     .empty {
@@ -538,7 +678,7 @@
       width: min(720px, 100%);
       max-height: calc(100vh - 32px);
       overflow: hidden;
-      background: #0f172d;
+      background: var(--panelBg);
       border: 1px solid var(--line);
       border-radius: 24px;
       box-shadow: var(--shadow);
@@ -608,6 +748,77 @@
       background: rgba(255, 106, 106, .06)
     }
 
+    .settings-modal {
+      width: min(420px, 100%);
+      background: var(--panelBg);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      display: grid;
+      gap: 18px
+    }
+
+    .settings-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surfaceSoft)
+    }
+
+    .settings-copy {
+      display: grid;
+      gap: 4px
+    }
+
+    .settings-copy strong {
+      font-size: .98rem
+    }
+
+    .theme-switch {
+      position: relative;
+      width: 52px;
+      height: 32px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--toggleOff);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .18s ease
+    }
+
+    .theme-switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+      transition: transform .18s ease
+    }
+
+    .theme-switch.active {
+      background: var(--accent)
+    }
+
+    .theme-switch.active::after {
+      transform: translateX(20px)
+    }
+
     #loadingState {
       padding: 28px;
       text-align: center;
@@ -633,15 +844,30 @@
       min-width: 0
     }
 
-    .standard-icons-field {
-      min-height: 0
+    .icon-preview {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .04);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      font-size: 1.35rem
     }
 
-    .standard-icons-field .icon-picker-grid {
+    .icon-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block
+    }
+
+    .icon-picker-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
       gap: 12px;
-      margin-top: 14px;
       max-height: 240px;
       overflow-y: auto;
       overflow-x: hidden;
@@ -697,10 +923,21 @@
     }
 
     input[type="datetime-local"] {
+      display: block;
       width: 100%;
       max-width: 100%;
       min-width: 0;
+      inline-size: 100%;
+      max-inline-size: 100%;
+      min-inline-size: 0;
       box-sizing: border-box;
+    }
+
+    @supports (-webkit-touch-callout: none) {
+      input[type="datetime-local"] {
+        width: -webkit-fill-available;
+        max-width: -webkit-fill-available;
+      }
     }
 
     @media (max-width:620px) {
@@ -728,11 +965,6 @@
         grid-template-columns: auto 1fr
       }
 
-      .step-actions,
-      .link-actions {
-        grid-column: 1/-1
-      }
-
       .children {
         margin-left: 8px;
         padding-left: 8px
@@ -745,9 +977,9 @@
       }
 
       .link-card {
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: auto 1fr;
         gap: 8px;
-        padding: 8px 10px
+        padding: 10px 44px 8px 10px
       }
 
       .link-icon {
@@ -777,19 +1009,8 @@
         text-overflow: ellipsis
       }
 
-      .link-actions {
-        grid-column: auto;
-        align-self: center;
-        gap: 6px
-      }
-
-      .link-actions .icon-btn {
-        width: 34px;
-        height: 34px;
-      }
-
       .step-item {
-        padding: 8px 10px;
+        padding: 10px 44px 8px 10px;
         border-radius: 16px
       }
 
@@ -824,37 +1045,24 @@
 
       .pill {
         padding: 4px 7px;
-        font-size: .76rem
-      }
-
-      .step-actions {
-        gap: 6px
-      }
-
-      .step-actions .icon-btn {
-        width: 34px;
-        height: 34px
+        font-size: .68rem
       }
 
       .children {
         margin-left: 10px;
-        padding-left: 10px
+        padding-left: 10px;
+        width: calc(100% + 20px)
+      }
+
+      .substep-count-pill {
+        display: none
       }
 
       /* Project link card on mobile */
       /* Project link card on mobile */
       .link-card-project {
-        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-columns: auto minmax(0, 1fr);
         align-items: start;
-      }
-
-      .link-card-project .link-actions {
-        grid-column: auto;
-        justify-self: end;
-        align-self: start;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
       }
 
       .proj-link-icon {
@@ -869,7 +1077,7 @@
 
 <body>
   <main class="page">
-    <div class="topbar"><a class="back-link" href="/">← Back to projects</a></div>
+    <div class="topbar"><a class="back-link" href="/">← Back to projects</a><button class="btn btn-secondary" type="button" onclick="openSettingsModal()">Settings</button></div>
     <div id="loadingState" class="card">Loading project...</div>
     <div id="app" class="layout" hidden></div>
   </main>
@@ -881,6 +1089,35 @@
         <button class="icon-btn" id="closeModalBtn" type="button">×</button>
       </div>
       <form id="modalForm" style="overflow-y: auto; max-height: 70vh; padding: 4px;"></form>
+    </div>
+  </div>
+
+  <div id="iconPickerBackdrop" class="modal-backdrop">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h3>Choose Icon Template</h3>
+        <button class="icon-btn" id="closeIconPickerBtn" type="button">×</button>
+      </div>
+      <div id="iconPickerBody" style="overflow-y:auto;max-height:70vh;padding:4px;"></div>
+    </div>
+  </div>
+
+  <div id="settingsBackdrop" class="modal-backdrop">
+    <div class="settings-modal" onclick="event.stopPropagation()">
+      <div class="settings-head">
+        <div>
+          <h3 style="margin:0;">Settings</h3>
+          <div class="muted">Saved automatically on this device.</div>
+        </div>
+        <button class="btn btn-secondary" type="button" onclick="closeSettingsModal()">Close</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-copy">
+          <strong>Light mode</strong>
+          <div class="muted">Switch instantly between the current dark theme and a light theme.</div>
+        </div>
+        <button id="themeSwitch" class="theme-switch" type="button" role="switch" aria-checked="false" onclick="toggleTheme()"></button>
+      </div>
     </div>
   </div>
 
@@ -898,6 +1135,7 @@
       { label: "Target", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f3af.png", removable: false }
     ];
     const STANDARD_ICONS_STORAGE_KEY = "project_manager_standard_icons";
+    const THEME_STORAGE_KEY = "pm_theme_mode";
     let STANDARD_ICONS = loadStandardIcons();
     const projectId = new URLSearchParams(location.search).get("id");
     const app = document.getElementById("app");
@@ -906,7 +1144,13 @@
     const modalTitle = document.getElementById("modalTitle");
     const modalForm = document.getElementById("modalForm");
     const closeModalBtn = document.getElementById("closeModalBtn");
+    const iconPickerBackdrop = document.getElementById("iconPickerBackdrop");
+    const iconPickerBody = document.getElementById("iconPickerBody");
+    const closeIconPickerBtn = document.getElementById("closeIconPickerBtn");
+    const settingsBackdrop = document.getElementById("settingsBackdrop");
+    const themeSwitch = document.getElementById("themeSwitch");
     let project = null;
+    let openContextMenuId = null;
 
     // Cache for linked project data: id -> project object (or null on error)
     const projectCache = {};
@@ -922,13 +1166,85 @@
     function saveStandardIcons() { localStorage.setItem(STANDARD_ICONS_STORAGE_KEY, JSON.stringify(STANDARD_ICONS)); }
     function addToStandardIcons(iconValue, label = "Custom") { const value = String(iconValue || "").trim(); if (!value) return; if (STANDARD_ICONS.some(icon => String(icon.value).trim() === value)) return; STANDARD_ICONS.unshift({ label: String(label || "Custom").trim() || "Custom", value, removable: true }); saveStandardIcons(); }
     function escapeHtml(value = "") { return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
+    function normalizeDisplayText(value = "") { return String(value).replaceAll("-->", "→"); }
     function isImageUrl(value = "") { const v = String(value).trim(); return /^https?:\/\//i.test(v) && /\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(v); }
     function renderIcon(icon, fallback = "📌", alt = "icon") { const value = String(icon || "").trim(); return isImageUrl(value) ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(alt)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;" />` : escapeHtml(value || fallback); }
+    function applyTheme(theme) {
+      const resolved = theme === "light" ? "light" : "dark";
+      document.documentElement.dataset.theme = resolved;
+      document.documentElement.style.colorScheme = resolved;
+      localStorage.setItem(THEME_STORAGE_KEY, resolved);
+      if (themeSwitch) {
+        const isLight = resolved === "light";
+        themeSwitch.classList.toggle("active", isLight);
+        themeSwitch.setAttribute("aria-checked", String(isLight));
+      }
+    }
+    function toggleTheme() { applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light"); }
+    function openSettingsModal() { settingsBackdrop.classList.add("show"); }
+    function closeSettingsModal() { settingsBackdrop.classList.remove("show"); }
+    function clampIndent(level) { return Math.max(0, Math.min(3, Number(level) || 0)); }
+    function renderFormattedText(value, fallback = "No description", compact = false) {
+      const source = String(value || "").replace(/\r\n?/g, "\n");
+      if (!source.trim()) return `<div class="formatted-text${compact ? " compact" : ""}"><p class="formatted-paragraph">${escapeHtml(normalizeDisplayText(fallback))}</p></div>`;
+
+      const lines = source.split("\n");
+      const parts = [];
+      let paragraphLines = [];
+      let paragraphIndent = 0;
+      let listItems = [];
+      let listIndent = 0;
+
+      function flushParagraph() {
+        if (!paragraphLines.length) return;
+        parts.push(`<p class="formatted-paragraph indent-${clampIndent(paragraphIndent)}">${escapeHtml(normalizeDisplayText(paragraphLines.join("\n")))}</p>`);
+        paragraphLines = [];
+        paragraphIndent = 0;
+      }
+
+      function flushList() {
+        if (!listItems.length) return;
+        parts.push(`<ul class="formatted-list indent-${clampIndent(listIndent)}">${listItems.join("")}</ul>`);
+        listItems = [];
+        listIndent = 0;
+      }
+
+      for (const rawLine of lines) {
+        if (!rawLine.trim()) {
+          flushParagraph();
+          flushList();
+          continue;
+        }
+
+        const indentMatch = rawLine.match(/^(\t*)/);
+        const indent = indentMatch ? indentMatch[1].length : 0;
+        const trimmedLine = rawLine.slice(indent);
+
+        if (/^- /.test(trimmedLine)) {
+          flushParagraph();
+          if (listItems.length && indent !== listIndent) flushList();
+          if (!listItems.length) listIndent = indent;
+          listItems.push(`<li>${escapeHtml(normalizeDisplayText(trimmedLine.slice(2)))}</li>`);
+          continue;
+        }
+
+        flushList();
+        if (!paragraphLines.length) paragraphIndent = indent;
+        paragraphLines.push(rawLine);
+      }
+
+      flushParagraph();
+      flushList();
+      return `<div class="formatted-text${compact ? " compact" : ""}">${parts.join("")}</div>`;
+    }
     function formatDeadline(deadline) { if (!deadline) return "No deadline"; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return "Invalid deadline"; return dt.toLocaleString([], { year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }); }
-    function formatTimeLeft(seconds) { if (seconds == null) return "No deadline"; if (seconds <= 0) return "Deadline passed"; const days = Math.floor(seconds / 86400); const hours = Math.floor((seconds % 86400) / 3600); const minutes = Math.floor((seconds % 3600) / 60); if (days > 0) return `${days}d, ${hours}h left`; if (hours > 0) return `${hours}h, ${minutes}m left`; return `${minutes} min left`; }
+    function formatTimeLeft(seconds) { if (seconds == null) return "No deadline"; if (seconds <= 0) return "Passed"; const days = Math.floor(seconds / 86400); const hours = Math.floor((seconds % 86400) / 3600); const minutes = Math.floor((seconds % 3600) / 60); if (days > 0) return `${days}d, ${hours}h left`; if (hours > 0) return `${hours}h, ${minutes}m left`; return `${minutes} min left`; }
     function stepTimeLeft(deadline) { if (!deadline) return null; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return null; return Math.floor((dt.getTime() - Date.now()) / 1000); }
     function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
     function parseDateSafe(val) { const str = String(val || "").trim(); if (!str) return null; const dt = new Date(str); return Number.isNaN(dt.getTime()) ? null : dt.toISOString(); }
+    function buildCardMenu(menuId, actions) {
+      return `<div class="card-menu-wrap${openContextMenuId === menuId ? " open" : ""}"><button class="icon-btn card-menu-trigger" type="button" onclick='toggleContextMenu(${JSON.stringify(menuId)}, event)' aria-label="Open menu">⋯</button><div class="card-menu${openContextMenuId === menuId ? " show" : ""}" id="${escapeHtml(menuId)}">${actions.map(action => `<button class="card-menu-item${action.danger ? " danger" : ""}" type="button" onclick="${action.onclick}">${escapeHtml(action.label)}</button>`).join("")}</div></div>`;
+    }
 
     async function api(url, options = {}) {
       const res = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options });
@@ -981,10 +1297,14 @@
       const error = proj === null;
       const projectUrl = proj ? `${window.location.origin}/project?id=${proj.id}` : "#";
       const icon = renderIcon(proj?.icon || link.icon || "📌", "📌", proj?.name || link.title);
-      const name = escapeHtml(proj?.name || link.title || "Project link");
-      const stepsCount = proj ? (proj.steps || []).length : null;
+      const name = escapeHtml(normalizeDisplayText(proj?.name || link.title || "Project link"));
+      const menu = buildCardMenu(`project-link-menu-${index}`, [
+        { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal(${index});` },
+        { label: "Delete", onclick: `event.stopPropagation(); deleteLink(${index});`, danger: true }
+      ]);
 
       return `<div class="link-card link-card-project${loading ? " proj-link-loading" : ""}" onclick="window.open('${escapeHtml(projectUrl)}')">
+        ${menu}
         <div class="proj-link-icon">${loading ? "⏳" : icon}</div>
         <div class="proj-link-body">
           <div class="proj-link-header">
@@ -992,15 +1312,11 @@
             ${proj?.finished ? `<span class="proj-status-badge finished">✓ Finished</span>` : proj && !loading ? `<span class="proj-status-badge open">Open</span>` : ""}
           </div>
           ${error ? `<div class="proj-link-desc" style="color:var(--danger)">Could not load project.</div>` : ""}
-          ${proj?.description ? `<div class="proj-link-desc">${escapeHtml(proj.description)}</div>` : ""}
+          ${proj?.description ? `<div class="proj-link-desc">${renderFormattedText(proj.description, "", true)}</div>` : ""}
           <div class="proj-link-meta">
             ${proj?.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(proj.deadline))}</span>` : !loading && !error ? `<span class="pill" style="color:var(--muted)">No deadline</span>` : ""}
             ${proj?.seconds_left != null ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(proj.seconds_left))}</span>` : ""}
           </div>
-        </div>
-        <div class="link-actions">
-          <button class="icon-btn" type="button" onclick="event.stopPropagation(); openEditLinkModal(${index});" title="Edit">✎</button>
-          <button class="icon-btn danger" type="button" onclick="event.stopPropagation(); deleteLink(${index});" title="Delete">×</button>
         </div>
       </div>`;
     }
@@ -1011,6 +1327,7 @@
       modalTitle.textContent = title;
       modalForm.innerHTML = contentHtml;
       modalBackdrop.classList.add("show");
+      initializeIconInputPreviews();
       modalForm.onsubmit = async (event) => {
         event.preventDefault();
         const btn = modalForm.querySelector('button[type="submit"]');
@@ -1024,20 +1341,66 @@
       };
     }
 
-    function closeModal() { modalBackdrop.classList.remove("show"); modalForm.innerHTML = ""; modalForm.onsubmit = null; }
+    function closeModal() { modalBackdrop.classList.remove("show"); modalForm.innerHTML = ""; modalForm.onsubmit = null; closeIconPickerModal(); }
     function findStepAndParent(steps, targetId, parent = null) { for (let i = 0; i < (steps || []).length; i++) { const step = steps[i]; if (step.id === targetId) return { step, parent, index: i, collection: steps }; const nested = findStepAndParent(step.children || [], targetId, step); if (nested) return nested; } return null; }
     function updateStepRecursive(steps, targetId, updater) { return (steps || []).map(step => step.id === targetId ? updater(step) : ({ ...step, children: updateStepRecursive(step.children || [], targetId, updater) })); }
     function removeStepRecursive(steps, targetId) { return (steps || []).filter(step => step.id !== targetId).map(step => ({ ...step, children: removeStepRecursive(step.children || [], targetId) })); }
 
-    function buildStandardIconPicker(targetInputId, fallback = "📌") {
-      return `<div class="field full standard-icons-field"><label>Standard icons</label><div class="icon-picker-grid">${STANDARD_ICONS.map(icon => `
+    function buildIconInputField(targetInputId, fallback = "📌", value = "", placeholder = "📌 or image URL") {
+      return `<div class="field"><label>Icon</label><div class="icon-input-row"><input id="${escapeHtml(targetInputId)}" name="icon" data-icon-fallback="${escapeHtml(fallback)}" data-icon-preview="${escapeHtml(`${targetInputId}Preview`)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" /><button class="btn btn-secondary" type="button" onclick='openIconPickerModal(${JSON.stringify(targetInputId)})'>Template</button><div class="icon-preview" id="${escapeHtml(`${targetInputId}Preview`)}">${renderIcon(value, fallback, "icon preview")}</div></div></div>`;
+    }
+
+    function updateIconPreview(targetInputId) {
+      const input = document.getElementById(targetInputId);
+      if (!input) return;
+      const previewId = input.dataset.iconPreview;
+      const preview = previewId ? document.getElementById(previewId) : null;
+      if (!preview) return;
+      preview.innerHTML = renderIcon(input.value, input.dataset.iconFallback || "📌", "icon preview");
+    }
+
+    function initializeIconInputPreviews() {
+      modalForm.querySelectorAll("input[data-icon-preview]").forEach(input => {
+        updateIconPreview(input.id);
+        input.addEventListener("input", () => updateIconPreview(input.id));
+      });
+    }
+
+    function openIconPickerModal(targetInputId) {
+      const input = document.getElementById(targetInputId);
+      const fallback = input?.dataset.iconFallback || "📌";
+      iconPickerBody.innerHTML = `<div class="icon-picker-grid">${STANDARD_ICONS.map(icon => `
         <button class="icon-choice" type="button" onclick='selectStandardIcon(${JSON.stringify(targetInputId)}, ${JSON.stringify(icon.value)})'>
           <div class="icon-choice-visual">${renderIcon(icon.value, fallback, icon.label)}</div>
           <div class="icon-choice-label">${escapeHtml(icon.label)}</div>
-        </button>`).join("")}</div></div>`;
+        </button>`).join("")}</div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:8px;"><button class="btn btn-secondary" type="button" onclick="closeIconPickerModal()">Close</button></div>`;
+      iconPickerBackdrop.classList.add("show");
     }
 
-    function selectStandardIcon(targetInputId, value) { const input = document.getElementById(targetInputId); if (input) input.value = value; }
+    function closeIconPickerModal() {
+      iconPickerBackdrop.classList.remove("show");
+      iconPickerBody.innerHTML = "";
+    }
+
+    function selectStandardIcon(targetInputId, value) {
+      const input = document.getElementById(targetInputId);
+      if (!input) return;
+      input.value = value;
+      updateIconPreview(targetInputId);
+      closeIconPickerModal();
+    }
+
+    function toggleContextMenu(menuId, event) {
+      event.stopPropagation();
+      openContextMenuId = openContextMenuId === menuId ? null : menuId;
+      render();
+    }
+
+    function closeContextMenu() {
+      if (!openContextMenuId) return;
+      openContextMenuId = null;
+      render();
+    }
 
     async function saveProject(updatedProject) {
       project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updatedProject) });
@@ -1048,11 +1411,15 @@
     // --- Render ---
 
     function renderStep(step) {
-      return `<div class="step-item"><div class="step-head">
+      const menu = buildCardMenu(`step-menu-${step.id}`, [
+        { label: "Edit", onclick: `event.stopPropagation(); openStepEditor('${step.id}');` },
+        { label: "Add sub-step", onclick: `event.stopPropagation(); openAddSubStepModal('${step.id}');` },
+        { label: "Delete", onclick: `event.stopPropagation(); deleteStep('${step.id}');`, danger: true }
+      ]);
+      return `<div class="step-item">${menu}<div class="step-head">
         <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onchange="toggleStepDone('${step.id}', this.checked)" />
-        <div><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(step.title || "Untitled step")}</div><p class="muted">${escapeHtml(step.description || "No description")}</p>
-        <div class="step-sub" style="margin-top:10px;">${step.until_deadline ? `<span class="pill">⏳ until deadline</span>` : ""}${step.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(step.deadline))}</span>` : ""}${step.deadline ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(stepTimeLeft(step.deadline)))}</span>` : ""}${(step.children || []).length ? `<span class="pill">↳ ${(step.children || []).length} sub-step(s)</span>` : ""}</div></div>
-        <div class="step-actions"><button class="icon-btn" type="button" onclick="openStepEditor('${step.id}')">✎</button><button class="icon-btn" type="button" onclick="openAddSubStepModal('${step.id}')">＋</button><button class="icon-btn danger" type="button" onclick="deleteStep('${step.id}')">×</button></div>
+        <div class="step-main"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div><div class="muted">${renderFormattedText(step.description, "No description", true)}</div>
+        <div class="step-sub" style="margin-top:10px;">${step.until_deadline ? `<span class="pill">⏳ until deadline</span>` : ""}${step.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(step.deadline))}</span>` : ""}${step.deadline ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(stepTimeLeft(step.deadline)))}</span>` : ""}${(step.children || []).length ? `<span class="pill substep-count-pill">↳ ${(step.children || []).length} sub-step(s)</span>` : ""}</div></div>
       </div>${(step.children || []).length ? `<div class="children">${(step.children || []).map(child => renderStep(child)).join("")}</div>` : ""}</div>`;
     }
 
@@ -1079,14 +1446,14 @@
           : rawUrl;
 
         return `<div class="link-card" onclick="window.open('${escapeHtml(processedUrl)}')">
+          ${buildCardMenu(`link-menu-${index}`, [
+            { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal(${index});` },
+            { label: "Delete", onclick: `event.stopPropagation(); deleteLink(${index});`, danger: true }
+          ])}
           <div class="link-icon">${renderIcon(link.icon, "🔗", link.title || "link icon")}</div>
           <div class="link-main">
-            <div class="link-title">${escapeHtml(link.title || "Untitled link")}</div>
+            <div class="link-title">${escapeHtml(normalizeDisplayText(link.title || "Untitled link"))}</div>
             <a class="link-url" href="${escapeHtml(processedUrl)}" target="_blank" rel="noreferrer">${escapeHtml(processedUrl)}</a>
-          </div>
-          <div class="link-actions">
-            <button class="icon-btn" type="button" onclick="event.stopPropagation(); openEditLinkModal(${index});">✎</button>
-            <button class="icon-btn danger" type="button" onclick="event.stopPropagation(); deleteLink(${index});">×</button>
           </div>
         </div>`;
       }).join("")}</div>`;
@@ -1096,9 +1463,9 @@
       if (!project) return;
       document.title = project.name ? `${project.name} · Project View` : "Project View";
       app.hidden = false; loadingState.hidden = true;
-      app.innerHTML = `<section class="card hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div><h1 class="project-title">${escapeHtml(project.name || "Untitled Project")}</h1><p class="muted">${escapeHtml(project.description || "No description")}</p></div></div><div class="inline-actions"><button class="btn btn-secondary" type="button" onclick="openProjectEditor()">Edit project</button><button class="btn ${project.finished ? "btn-ok" : "btn-secondary"}" type="button" onclick="toggleFinished()">${project.finished ? "✓ Finished" : "Mark finished"}</button></div></div><div class="meta-grid"><div class="meta-box"><div class="meta-label">Name</div><div class="meta-value">${escapeHtml(project.name || "Untitled Project")}</div></div><div class="meta-box"><div class="meta-label">Deadline</div><div class="meta-value">${escapeHtml(formatDeadline(project.deadline))}</div></div><div class="meta-box"><div class="meta-label">Time left</div><div class="meta-value">${escapeHtml(formatTimeLeft(project.seconds_left))}</div></div><div class="meta-box"><div class="meta-label">Status</div><div class="meta-value">${project.finished ? "Finished" : "Open"}</div></div></div></section>
-      <section class="card"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Manage your bookmarks and project links.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button><button class="btn btn-secondary" type="button" onclick="openAddProjectLinkModal()">🔗 Link project</button></div></section>
-      <section class="card"><div class="section-head"><div><h2 class="section-title">Steps + sub-steps</h2><div class="muted">Project tasks and hierarchy.</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddStepModal()">Add step</button></div></section>
+      app.innerHTML = `<section class="card hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div class="hero-copy"><h1 class="project-title">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</h1><div class="muted">${renderFormattedText(project.description, "No description")}</div></div></div><div class="inline-actions"><button class="btn btn-secondary" type="button" onclick="openProjectEditor()">Edit project</button><button class="btn ${project.finished ? "btn-ok" : "btn-secondary"}" type="button" onclick="toggleFinished()">${project.finished ? "✓ Finished" : "Mark finished"}</button></div></div><div class="meta-grid"><div class="meta-box"><div class="meta-label">Name</div><div class="meta-value">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</div></div><div class="meta-box"><div class="meta-label">Deadline</div><div class="meta-value">${escapeHtml(formatDeadline(project.deadline))}</div></div><div class="meta-box"><div class="meta-label">Time left</div><div class="meta-value">${escapeHtml(formatTimeLeft(project.seconds_left))}</div></div><div class="meta-box"><div class="meta-label">Status</div><div class="meta-value">${project.finished ? "Finished" : "Open"}</div></div></div></section>
+      <section class="card"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Websites, files and project links.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button><button class="btn btn-secondary" type="button" onclick="openAddProjectLinkModal()">🔗 Link project</button></div></section>
+      <section class="card"><div class="section-head"><div><h2 class="section-title">WILL-DO List</h2><div class="muted">Project tasks and hierarchy.</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddStepModal()">Add step</button></div></section>
       <section class="card danger-zone"><div class="section-head"><div><h2 class="section-title">Delete project</h2><div class="muted">Irreversible action.</div></div><button class="btn btn-danger" type="button" onclick="deleteProject()">Delete project</button></div></section>`;
 
       // Fetch any uncached linked project data and re-render when ready
@@ -1108,14 +1475,14 @@
     // --- Link modals ---
 
     function openProjectEditor() {
-      openModal("Edit project", `<div class="form-grid"><div class="field"><label>Name</label><input name="name" value="${escapeHtml(project.name || "")}" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="projectIconInput" name="icon" value="${escapeHtml(project.icon || "📌")}" placeholder="📌 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('projectIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("projectIconInput", "📌")}<div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0, 16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
+      openModal("Edit project", `<div class="form-grid"><div class="field"><label>Name</label><input name="name" value="${escapeHtml(project.name || "")}" required /></div>${buildIconInputField("projectIconInput", "📌", project.icon || "📌", "📌 or image URL")}<div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0, 16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
         const updated = deepClone(project); updated.name = String(formData.get("name") || "").trim(); updated.icon = String(formData.get("icon") || "").trim() || "📌"; updated.description = String(formData.get("description") || "").trim();
         updated.deadline = parseDateSafe(formData.get("deadline")); addToStandardIcons(updated.icon, updated.name || "Project"); await saveProject(updated);
       });
     }
 
     function openAddLinkModal() {
-      openModal("Add link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" placeholder="Link title" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="newLinkIconInput" name="icon" placeholder="🔗 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('newLinkIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("newLinkIconInput", "🔗")}<div class="field full"><label>URL</label><input name="url" placeholder="https://example.com" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Add link</button></div>`, async (formData) => {
+      openModal("Add link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" placeholder="Link title" required /></div>${buildIconInputField("newLinkIconInput", "🔗", "", "🔗 or image URL")}<div class="field full"><label>URL</label><input name="url" placeholder="https://example.com" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Add link</button></div>`, async (formData) => {
         const updated = deepClone(project); const newLink = { id: generateId(), title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" };
         updated.links = updated.links || []; updated.links.push(newLink); addToStandardIcons(newLink.icon, newLink.title || "Link"); await saveProject(updated);
       });
@@ -1123,7 +1490,7 @@
 
     function openEditLinkModal(index) {
       const link = (project.links || [])[index]; if (!link) return;
-      openModal("Edit link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" value="${escapeHtml(link.title || "")}" required /></div><div class="field"><label>Icon</label><div class="icon-input-row"><input id="editLinkIconInput" name="icon" value="${escapeHtml(link.icon || "🔗")}" placeholder="🔗 or image URL" /><button class="btn btn-secondary" type="button" onclick="document.getElementById('editLinkIconInput').focus()">Custom</button></div></div>${buildStandardIconPicker("editLinkIconInput", "🔗")}<div class="field full"><label>URL</label><input name="url" value="${escapeHtml(link.url || "")}" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
+      openModal("Edit link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" value="${escapeHtml(link.title || "")}" required /></div>${buildIconInputField("editLinkIconInput", "🔗", link.icon || "🔗", "🔗 or image URL")}<div class="field full"><label>URL</label><input name="url" value="${escapeHtml(link.url || "")}" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
         const updated = deepClone(project); updated.links[index] = { ...updated.links[index], title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" }; await saveProject(updated);
       });
     }
@@ -1191,12 +1558,12 @@
     // --- Step modals ---
 
     function stepFormHtml(step = null, submitLabel = "Save") {
-      return `<div class="form-grid"><div class="field full"><label>Title</label><input name="title" value="${escapeHtml(step?.title || "")}" required /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(step?.description || "")}</textarea></div><div class="field full"><label>Step deadline</label><input name="deadline" type="datetime-local" value="${step?.deadline ? new Date(step.deadline).toISOString().slice(0, 16) : ""}" /></div><div class="field full"><label class="check-row"><input name="done" type="checkbox" ${step?.done ? "checked" : ""} />Mark as done</label></div><div class="field full"><label class="check-row"><input name="until_deadline" type="checkbox" ${step?.until_deadline ? "checked" : ""} />Show "until deadline"</label></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">${submitLabel}</button></div>`;
+      return `<div class="form-grid"><div class="field full"><label>Title</label><input name="title" value="${escapeHtml(step?.title || "")}" required /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(step?.description || "")}</textarea></div><div class="field full"><label>Step deadline</label><input name="deadline" type="datetime-local" value="${step?.deadline ? new Date(step.deadline).toISOString().slice(0, 16) : ""}" /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">${submitLabel}</button></div>`;
     }
 
-    function openAddStepModal() { openModal("Add step", stepFormHtml(null, "Add step"), async (formData) => { const updated = deepClone(project); updated.steps = updated.steps || []; updated.steps.push({ id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: parseDateSafe(formData.get("deadline")), children: [] }); await saveProject(updated); }); }
-    function openAddSubStepModal(parentId) { openModal("Add sub-step", stepFormHtml(null, "Add sub-step"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], parentId, step => ({ ...step, children: [...(step.children || []), { id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: parseDateSafe(formData.get("deadline")), children: [] }] })); await saveProject(updated); }); }
-    function openStepEditor(stepId) { const found = findStepAndParent(project.steps || [], stepId); if (!found) return; openModal("Edit step", stepFormHtml(found.step, "Save"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: formData.get("done") === "on", until_deadline: formData.get("until_deadline") === "on", deadline: parseDateSafe(formData.get("deadline")) })); await saveProject(updated); }); }
+    function openAddStepModal() { openModal("Add step", stepFormHtml(null, "Add step"), async (formData) => { const updated = deepClone(project); updated.steps = updated.steps || []; updated.steps.push({ id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: false, until_deadline: false, deadline: parseDateSafe(formData.get("deadline")), children: [] }); await saveProject(updated); }); }
+    function openAddSubStepModal(parentId) { openModal("Add sub-step", stepFormHtml(null, "Add sub-step"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], parentId, step => ({ ...step, children: [...(step.children || []), { id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: false, until_deadline: false, deadline: parseDateSafe(formData.get("deadline")), children: [] }] })); await saveProject(updated); }); }
+    function openStepEditor(stepId) { const found = findStepAndParent(project.steps || [], stepId); if (!found) return; openModal("Edit step", stepFormHtml(found.step, "Save"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), deadline: parseDateSafe(formData.get("deadline")) })); await saveProject(updated); }); }
 
     async function toggleStepDone(stepId, done) { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, done })); await saveProject(updated); }
     async function deleteStep(stepId) { if (!confirm("Delete this?")) return; const updated = deepClone(project); updated.steps = removeStepRecursive(updated.steps || [], stepId); await saveProject(updated); }
@@ -1204,11 +1571,29 @@
     async function deleteProject() { if (!confirm("Permanent delete?")) return; await api(`/api/projects/${projectId}`, { method: "DELETE" }); location.href = "/"; }
     async function loadProject() { try { project = await api(`/api/projects/${projectId}`); render(); } catch (e) { loadingState.textContent = "Error loading project."; } }
 
+    applyTheme(document.documentElement.dataset.theme || "dark");
     closeModalBtn.addEventListener("click", closeModal);
+    closeIconPickerBtn.addEventListener("click", closeIconPickerModal);
     modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+    iconPickerBackdrop.addEventListener("click", (e) => { if (e.target === iconPickerBackdrop) closeIconPickerModal(); });
+    settingsBackdrop.addEventListener("click", (e) => { if (e.target === settingsBackdrop) closeSettingsModal(); });
+    document.addEventListener("click", () => {
+      if (openContextMenuId) closeContextMenu();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (settingsBackdrop.classList.contains("show")) closeSettingsModal();
+      else if (iconPickerBackdrop.classList.contains("show")) closeIconPickerModal();
+      else closeModal();
+    });
 
+    window.openSettingsModal = openSettingsModal;
+    window.closeSettingsModal = closeSettingsModal;
+    window.toggleTheme = toggleTheme;
+    window.openIconPickerModal = openIconPickerModal;
+    window.closeIconPickerModal = closeIconPickerModal;
     window.selectStandardIcon = selectStandardIcon;
+    window.toggleContextMenu = toggleContextMenu;
     window.openProjectEditor = openProjectEditor;
     window.openAddLinkModal = openAddLinkModal;
     window.openEditLinkModal = openEditLinkModal;
