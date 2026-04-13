@@ -769,24 +769,36 @@
     .move-toolbar {
       position: fixed;
       right: 18px;
-      bottom: 18px;
+      left: 18px;
+      bottom: calc(18px + env(safe-area-inset-bottom, 0px));
       z-index: 130;
+
       display: flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
+      flex-wrap: nowrap;
+
       padding: 10px;
       border-radius: 16px;
       border: 1px solid var(--line);
       background: var(--panelBg);
       box-shadow: var(--shadow);
       box-sizing: border-box;
+
+      max-width: calc(100vw - 36px);
+      overflow: hidden;
     }
 
     .move-toolbar .btn {
       min-height: 34px;
-      padding: 7px 12px;
+      padding: 7px 10px;
       border-radius: 12px;
       box-sizing: border-box;
+
+      flex: 1 1 0;
+      min-width: 0;
+      white-space: nowrap;
+      font-size: 14px;
     }
 
     .link-card.selected-for-delete,
@@ -1948,7 +1960,7 @@
       <section class="card${linksMenuOpen ? " has-open-menu" : ""}"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Websites, files and project links.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button><button class="btn btn-secondary" type="button" onclick="openAddProjectLinkModal()">🔗 Link project</button></div></section>
       <section class="card steps-section${stepsMenuOpen ? " has-open-menu" : ""}${moveState && moveState.targetParentId == null ? " move-target" : ""}" ${moveState ? `onclick="selectMoveTarget(null, event)"` : ""}><div class="section-head"><div><h2 class="section-title">WILL-DO List</h2><div class="muted">${moveState ? "Select a destination step or this box, then choose insert position below." : "Project tasks and hierarchy."}</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="event.stopPropagation(); openAddStepModal()">Add step</button></div></section>
       <section class="card danger-zone"><div class="section-head"><div><h2 class="section-title">Delete project</h2><div class="muted">Irreversible action.</div></div><button class="btn btn-danger" type="button" onclick="deleteProject()">Delete project</button></div></section>`;
-      if (moveState) app.innerHTML += `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('top')">Insert at top</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('bottom')">Insert at bottom</button></div>`;
+      if (moveState) app.innerHTML += `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('top')">Insert at start</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('bottom')">Insert at end</button></div>`;
 
       // Fetch any uncached linked project data and re-render when ready
       if (hasUncachedProjectLinks()) hydrateProjectLinks();
