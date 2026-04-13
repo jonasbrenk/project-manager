@@ -691,6 +691,10 @@
       opacity: var(--doneFade)
     }
 
+    .step-item:has(.step-check:checked) .card-menu-trigger {
+      opacity: var(--doneFade)
+    }
+
     .step-main {
       min-width: 0;
       width: 100%
@@ -742,6 +746,151 @@
       border-radius: 18px;
       text-align: center;
       color: var(--muted)
+    }
+
+    .step-item.move-target {
+      border-color: color-mix(in srgb, var(--successText) 42%, var(--line));
+      background: color-mix(in srgb, var(--successSoft) 62%, var(--card));
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--successText) 20%, transparent)
+    }
+
+    .step-item.move-source {
+      border-color: color-mix(in srgb, var(--accent) 52%, var(--line));
+      background: color-mix(in srgb, var(--accentSoft) 48%, var(--card));
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 26%, transparent)
+    }
+
+    .steps-section.move-target {
+      border-color: color-mix(in srgb, var(--successText) 42%, var(--line));
+      background: color-mix(in srgb, var(--successSoft) 35%, var(--card));
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--successText) 20%, transparent)
+    }
+
+    .move-toolbar {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 130;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: var(--panelBg);
+      box-shadow: var(--shadow)
+    }
+
+    .move-toolbar .btn {
+      min-height: 34px;
+      padding: 7px 12px;
+      border-radius: 12px
+    }
+
+    .link-card.selected-for-delete,
+    .step-item.selected-for-delete {
+      border-color: var(--dangerBorder);
+      background: color-mix(in srgb, var(--dangerSoft) 70%, var(--card));
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 24%, transparent)
+    }
+
+    .delete-mode .step-check {
+      pointer-events: none
+    }
+
+    .floating-actions {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 110
+    }
+
+    .floating-actions.hidden {
+      opacity: 0;
+      pointer-events: none
+    }
+
+    .floating-actions-menu {
+      position: absolute;
+      right: 0;
+      bottom: calc(100% + 10px);
+      min-width: 196px;
+      padding: 10px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: var(--panelBg);
+      box-shadow: var(--shadow);
+      display: none;
+      gap: 8px
+    }
+
+    .floating-actions-menu.show {
+      display: grid
+    }
+
+    .menu-item {
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background: var(--surfaceSoft);
+      color: var(--text);
+      padding: 12px 14px;
+      text-align: left;
+      cursor: pointer;
+      font-family: "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase
+    }
+
+    .menu-item:hover {
+      border-color: rgba(79, 124, 255, .4);
+      background: rgba(79, 124, 255, .1)
+    }
+
+    .menu-item.danger {
+      color: var(--danger)
+    }
+
+    .floating-trigger {
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+      background: var(--panelBg);
+      color: var(--text);
+      border: 1px solid var(--line);
+      font-family: "SF Pro Display", "Segoe UI", Inter, system-ui, sans-serif;
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      line-height: 1
+    }
+
+    .delete-toolbar {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 111;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      border: 1px solid var(--dangerBorder);
+      background: var(--panelBg);
+      color: var(--dangerText);
+      box-shadow: var(--shadow)
+    }
+
+    .delete-toolbar.show {
+      display: flex
+    }
+
+    .delete-toolbar-copy {
+      display: grid;
+      gap: 2px
     }
 
     .modal-backdrop {
@@ -1061,7 +1210,8 @@
 
       .page {
         width: min(100% - 16px, 1120px);
-        padding-top: 16px
+        padding-top: 16px;
+        padding-bottom: 168px;
       }
 
       .card,
@@ -1100,7 +1250,10 @@
 
       .link-main {
         min-width: 0;
-        overflow: hidden
+        overflow: hidden;
+        min-height: 40px;
+        display: flex;
+        align-items: center
       }
 
       .link-title {
@@ -1114,9 +1267,7 @@
       }
 
       .link-url {
-        font-size: 8px;
-        text-wrap: nowrap;
-        text-overflow: ellipsis
+        display: none
       }
 
       .step-item {
@@ -1130,12 +1281,35 @@
       }
 
       .step-check {
-        width: 17px;
-        height: 17px;
-        margin-top: 2px;
-        border-radius: 999px;
+        display: block;
+        flex: 0 0 19px;
+        inline-size: 19px;
+        block-size: 19px;
+        min-inline-size: 19px;
+        max-inline-size: 19px;
+        min-block-size: 19px;
+        max-block-size: 19px;
+        margin: 2px 0 0;
+        padding: 0;
+        border-radius: 50%;
+        -webkit-appearance: none;
+        appearance: none;
+        box-sizing: border-box;
+        border: 1.5px solid color-mix(in srgb, var(--muted) 42%, var(--line));
+        background: var(--panelBg);
+        box-shadow: inset 0 0 0 2px var(--panelBg);
         overflow: hidden;
         background-clip: padding-box
+      }
+
+      .step-check:checked {
+        border-color: var(--accent);
+        background-color: var(--accent);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.2 6.6 11 12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 11px 11px;
+        box-shadow: none
       }
 
       .step-title {
@@ -1205,7 +1379,31 @@
         border-radius: 13px
       }
 
-      
+      .move-toolbar {
+        left: 12px;
+        right: 12px;
+        bottom: 12px
+      }
+
+      .move-toolbar .btn {
+        min-height: 34px
+      }
+
+      .floating-actions,
+      .delete-toolbar {
+        right: 12px;
+        bottom: 12px
+      }
+
+      .floating-actions-menu {
+        min-width: 188px
+      }
+
+      .delete-toolbar {
+        left: 12px;
+        align-items: stretch;
+        flex-direction: column
+      }
     }
   </style>
 
@@ -1217,6 +1415,24 @@
     <div id="loadingState" class="card">Loading project...</div>
     <div id="app" class="layout" hidden></div>
   </main>
+  <div class="floating-actions" id="floatingActions">
+    <div id="floatingActionsMenu" class="floating-actions-menu">
+      <button class="menu-item" type="button" onclick="openAddLinkFromMenu()">Add link</button>
+      <button class="menu-item" type="button" onclick="openAddStepFromMenu()">Add step</button>
+      <button class="menu-item danger" type="button" onclick="enterDeleteMode()">Delete</button>
+    </div>
+    <button class="btn btn-primary floating-trigger" type="button" onclick="toggleFloatingActions(event)">⋯</button>
+  </div>
+  <div id="deleteToolbar" class="delete-toolbar">
+    <div class="delete-toolbar-copy">
+      <strong id="deleteCount">0 selected</strong>
+      <div class="muted">Selected items will be deleted permanently.</div>
+    </div>
+    <div class="inline-actions" style="margin-top:0;">
+      <button class="btn btn-secondary" type="button" onclick="cancelDeleteMode()">Cancel</button>
+      <button class="btn btn-danger" type="button" onclick="confirmDeleteSelected()">Delete</button>
+    </div>
+  </div>
 
   <div id="modalBackdrop" class="modal-backdrop">
     <div class="modal" onclick="event.stopPropagation()">
@@ -1285,8 +1501,15 @@
     const closeIconPickerBtn = document.getElementById("closeIconPickerBtn");
     const settingsBackdrop = document.getElementById("settingsBackdrop");
     const themeSwitch = document.getElementById("themeSwitch");
+    const floatingActions = document.getElementById("floatingActions");
+    const floatingActionsMenu = document.getElementById("floatingActionsMenu");
+    const deleteToolbar = document.getElementById("deleteToolbar");
+    const deleteCount = document.getElementById("deleteCount");
     let project = null;
     let openContextMenuId = null;
+    let moveState = null;
+    let deleteMode = false;
+    let selectedDeleteIds = new Set();
 
     // Cache for linked project data: id -> project object (or null on error)
     const projectCache = {};
@@ -1441,7 +1664,7 @@
         { label: "Delete", onclick: `event.stopPropagation(); deleteLink(${index});`, danger: true }
       ]);
 
-      return `<div class="link-card link-card-project${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}" onclick="window.open('${escapeHtml(projectUrl)}')">
+      return `<div class="link-card link-card-project${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(projectUrl)}')`}">
         ${menu}
         <div class="proj-link-icon">${loading ? "⏳" : icon}</div>
         <div class="proj-link-body">
@@ -1482,6 +1705,99 @@
     function findStepAndParent(steps, targetId, parent = null) { for (let i = 0; i < (steps || []).length; i++) { const step = steps[i]; if (step.id === targetId) return { step, parent, index: i, collection: steps }; const nested = findStepAndParent(step.children || [], targetId, step); if (nested) return nested; } return null; }
     function updateStepRecursive(steps, targetId, updater) { return (steps || []).map(step => step.id === targetId ? updater(step) : ({ ...step, children: updateStepRecursive(step.children || [], targetId, updater) })); }
     function removeStepRecursive(steps, targetId) { return (steps || []).filter(step => step.id !== targetId).map(step => ({ ...step, children: removeStepRecursive(step.children || [], targetId) })); }
+    function containsStepId(steps, targetId) { return !!findStepAndParent(steps || [], targetId); }
+    function removeStepAndCapture(steps, targetId) {
+      let captured = null;
+      const next = (steps || []).flatMap(step => {
+        if (step.id === targetId) {
+          captured = step;
+          return [];
+        }
+        const nested = removeStepAndCapture(step.children || [], targetId);
+        if (nested.captured) captured = nested.captured;
+        return [{ ...step, children: nested.steps }];
+      });
+      return { steps: next, captured };
+    }
+    function insertStepAtTarget(steps, targetParentId, stepToInsert, position) {
+      if (targetParentId == null) {
+        const root = [...(steps || [])];
+        if (position === "top") root.unshift(stepToInsert);
+        else root.push(stepToInsert);
+        return root;
+      }
+      return updateStepRecursive(steps || [], targetParentId, step => ({
+        ...step,
+        children: position === "top" ? [stepToInsert, ...(step.children || [])] : [...(step.children || []), stepToInsert]
+      }));
+    }
+    function beginMoveStep(stepId) { moveState = { stepId, targetParentId: null }; openContextMenuId = null; render(); }
+    function cancelMoveStep() { if (!moveState) return; moveState = null; render(); }
+    function selectMoveTarget(targetParentId, event) {
+      if (!moveState) return;
+      event?.stopPropagation();
+      if (targetParentId === moveState.stepId) return;
+      const source = findStepAndParent(project.steps || [], moveState.stepId)?.step;
+      if (!source) return;
+      if (targetParentId && containsStepId(source.children || [], targetParentId)) return;
+      moveState = { ...moveState, targetParentId };
+      render();
+    }
+    async function confirmMoveStep(position) {
+      if (!moveState) return;
+      const updated = deepClone(project);
+      const removed = removeStepAndCapture(updated.steps || [], moveState.stepId);
+      if (!removed.captured) return cancelMoveStep();
+      updated.steps = insertStepAtTarget(removed.steps, moveState.targetParentId, removed.captured, position);
+      moveState = null;
+      await saveProject(updated);
+    }
+    function toggleFloatingActions(event) { event.stopPropagation(); floatingActionsMenu.classList.toggle("show"); }
+    function closeFloatingActions() { floatingActionsMenu.classList.remove("show"); }
+    function openAddLinkFromMenu() { closeFloatingActions(); openAddLinkModal(); }
+    function openAddStepFromMenu() { closeFloatingActions(); openAddStepModal(); }
+    function updateDeleteToolbar() {
+      deleteCount.textContent = `${selectedDeleteIds.size} selected`;
+      deleteToolbar.classList.toggle("show", deleteMode);
+      floatingActions.classList.toggle("hidden", deleteMode);
+    }
+    function enterDeleteMode() {
+      closeFloatingActions();
+      moveState = null;
+      deleteMode = true;
+      selectedDeleteIds.clear();
+      openContextMenuId = null;
+      updateDeleteToolbar();
+      render();
+    }
+    function cancelDeleteMode() {
+      deleteMode = false;
+      selectedDeleteIds.clear();
+      updateDeleteToolbar();
+      render();
+    }
+    function toggleDeleteSelection(event, key) {
+      if (!deleteMode) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (selectedDeleteIds.has(key)) selectedDeleteIds.delete(key);
+      else selectedDeleteIds.add(key);
+      updateDeleteToolbar();
+      render();
+    }
+    async function confirmDeleteSelected() {
+      if (!selectedDeleteIds.size) return;
+      if (!confirm(`Delete ${selectedDeleteIds.size} selected item(s)? This cannot be undone.`)) return;
+      const updated = deepClone(project);
+      const linkIds = [...selectedDeleteIds].filter(key => key.startsWith("link:")).map(key => key.slice(5));
+      const stepIds = [...selectedDeleteIds].filter(key => key.startsWith("step:")).map(key => key.slice(5));
+      if (linkIds.length) updated.links = (updated.links || []).filter(link => !linkIds.includes(link.id));
+      for (const stepId of stepIds) updated.steps = removeStepRecursive(updated.steps || [], stepId);
+      deleteMode = false;
+      selectedDeleteIds.clear();
+      updateDeleteToolbar();
+      await saveProject(updated);
+    }
 
     function buildIconInputField(targetInputId, fallback = "📌", value = "", placeholder = "Icon or image URL") {
       return `<div class="field"><label>Icon</label><div class="icon-input-row"><input id="${escapeHtml(targetInputId)}" name="icon" data-icon-fallback="${escapeHtml(fallback)}" data-icon-preview="${escapeHtml(`${targetInputId}Preview`)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" /><div class="icon-preview" id="${escapeHtml(`${targetInputId}Preview`)}">${renderIcon(value, fallback, "icon preview")}</div><button class="btn btn-secondary template-icon-btn" type="button" onclick='openIconPickerModal(${JSON.stringify(targetInputId)})' aria-label="Choose template icon" title="Choose template icon"><span>🗂️</span></button></div></div>`;
@@ -1550,17 +1866,25 @@
     function renderStep(step) {
       const menu = buildCardMenu(`step-menu-${step.id}`, [
         { label: "Edit", onclick: `event.stopPropagation(); openStepEditor('${step.id}');` },
+        { label: "Move", onclick: `event.stopPropagation(); beginMoveStep('${step.id}');` },
         { label: "Add sub-step", onclick: `event.stopPropagation(); openAddSubStepModal('${step.id}');` },
         { label: "Delete", onclick: `event.stopPropagation(); deleteStep('${step.id}');`, danger: true }
       ]);
-      return `<div class="step-item">${menu}<div class="step-head">
+      const moveClass = moveState?.stepId === step.id ? " move-source" : moveState?.targetParentId === step.id ? " move-target" : "";
+      const deleteClass = deleteMode && selectedDeleteIds.has(`step:${step.id}`) ? " selected-for-delete" : "";
+      const clickHandler = deleteMode ? `toggleDeleteSelection(event, 'step:${step.id}')` : moveState ? `selectMoveTarget('${step.id}', event)` : "";
+      return `<div class="step-item${moveClass}${deleteClass}" ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
         <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onchange="toggleStepDone('${step.id}', this.checked)" />
         <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div><div class="muted">${renderFormattedText(step.description, "No description", true)}</div>
         </div>
       </div><div class="step-sub ${step.done ? "done-state" : ""}">${step.until_deadline ? `<span class="pill">⏳ until deadline</span>` : ""}${step.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(step.deadline))}</span>` : ""}${step.deadline ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(stepTimeLeft(step.deadline)))}</span>` : ""}${(step.children || []).length ? `<span class="pill substep-count-pill">↳ ${(step.children || []).length} sub-step(s)</span>` : ""}</div>${(step.children || []).length ? `<div class="children">${(step.children || []).map(child => renderStep(child)).join("")}</div>` : ""}</div>`;
     }
 
-    function renderStepTree(steps) { const s = steps || []; return !s.length ? `<div class="empty">No steps yet.</div>` : `<div class="step-tree">${s.map(step => renderStep(step)).join("")}</div>`; }
+    function renderStepTree(steps) {
+      const s = steps || [];
+      if (!s.length && !moveState) return `<div class="empty">No steps yet.</div>`;
+      return `<div class="step-tree">${s.map(step => renderStep(step)).join("")}</div>`;
+    }
 
     function renderLinks() {
       const l = [...(project.links || [])].sort((a, b) => {
@@ -1596,7 +1920,7 @@
           ? rawUrl.replace("PROJECTS/", currentOrigin + "/")
           : rawUrl;
 
-        return `<div class="link-card" onclick="window.open('${escapeHtml(processedUrl)}')">
+        return `<div class="link-card${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(processedUrl)}')`}">
           ${buildCardMenu(`link-menu-${index}`, [
             { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal(${index});` },
             { label: "Delete", onclick: `event.stopPropagation(); deleteLink(${index});`, danger: true }
@@ -1614,13 +1938,15 @@
       if (!project) return;
       const projectMetaState = getProjectMetaState();
       const linksMenuOpen = !!openContextMenuId && (openContextMenuId.startsWith("link-menu-") || openContextMenuId.startsWith("project-link-menu-"));
-      const stepsMenuOpen = !!openContextMenuId && openContextMenuId.startsWith("step-menu-");
+      const stepsMenuOpen = (!!openContextMenuId && openContextMenuId.startsWith("step-menu-")) || !!moveState;
       document.title = project.name ? `${project.name} · Project View` : "Project View";
       app.hidden = false; loadingState.hidden = true;
+      app.className = `layout${deleteMode ? " delete-mode" : ""}`;
       app.innerHTML = `<section class="card hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div class="hero-copy"><h1 class="project-title">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</h1><div class="muted">${renderFormattedText(project.description, "No description")}</div></div></div><div class="inline-actions"><button class="btn btn-secondary" type="button" onclick="openProjectEditor()">Edit project</button><button class="btn ${project.finished ? "btn-ok" : "btn-secondary"}" type="button" onclick="toggleFinished()">${project.finished ? "✓ Finished" : "Mark finished"}</button></div></div><div class="meta-grid"><div class="meta-box ${isDueSoon(project.seconds_left) ? "warning" : ""}"><div class="meta-label">Deadline</div><div class="meta-value">${escapeHtml(formatDeadline(project.deadline))}</div></div><div class="meta-box ${isDueSoon(project.seconds_left) && !project.finished && !(project.seconds_left != null && project.seconds_left <= 0) ? "warning" : ""}"><div class="meta-label">${escapeHtml(projectMetaState.label)}</div><div class="meta-value ${projectMetaState.extraClass}">${escapeHtml(projectMetaState.value)}</div></div></div></section>
       <section class="card${linksMenuOpen ? " has-open-menu" : ""}"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Websites, files and project links.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button><button class="btn btn-secondary" type="button" onclick="openAddProjectLinkModal()">🔗 Link project</button></div></section>
-      <section class="card${stepsMenuOpen ? " has-open-menu" : ""}"><div class="section-head"><div><h2 class="section-title">WILL-DO List</h2><div class="muted">Project tasks and hierarchy.</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddStepModal()">Add step</button></div></section>
+      <section class="card steps-section${stepsMenuOpen ? " has-open-menu" : ""}${moveState && moveState.targetParentId == null ? " move-target" : ""}" ${moveState ? `onclick="selectMoveTarget(null, event)"` : ""}><div class="section-head"><div><h2 class="section-title">WILL-DO List</h2><div class="muted">${moveState ? "Select a destination step or this box, then choose insert position below." : "Project tasks and hierarchy."}</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="event.stopPropagation(); openAddStepModal()">Add step</button></div></section>
       <section class="card danger-zone"><div class="section-head"><div><h2 class="section-title">Delete project</h2><div class="muted">Irreversible action.</div></div><button class="btn btn-danger" type="button" onclick="deleteProject()">Delete project</button></div></section>`;
+      if (moveState) app.innerHTML += `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('top')">Insert at top</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('bottom')">Insert at bottom</button></div>`;
 
       // Fetch any uncached linked project data and re-render when ready
       if (hasUncachedProjectLinks()) hydrateProjectLinks();
@@ -1731,8 +2057,9 @@
     modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
     iconPickerBackdrop.addEventListener("click", (e) => { if (e.target === iconPickerBackdrop) closeIconPickerModal(); });
     settingsBackdrop.addEventListener("click", (e) => { if (e.target === settingsBackdrop) closeSettingsModal(); });
-    document.addEventListener("click", () => {
-      if (openContextMenuId) closeContextMenu();
+    document.addEventListener("click", (e) => {
+      if (openContextMenuId && !e.target.closest(".card-menu-wrap")) closeContextMenu();
+      if (!e.target.closest(".floating-actions")) closeFloatingActions();
     });
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
@@ -1759,6 +2086,17 @@
     window.openStepEditor = openStepEditor;
     window.toggleStepDone = toggleStepDone;
     window.deleteStep = deleteStep;
+    window.beginMoveStep = beginMoveStep;
+    window.selectMoveTarget = selectMoveTarget;
+    window.cancelMoveStep = cancelMoveStep;
+    window.confirmMoveStep = confirmMoveStep;
+    window.toggleFloatingActions = toggleFloatingActions;
+    window.openAddLinkFromMenu = openAddLinkFromMenu;
+    window.openAddStepFromMenu = openAddStepFromMenu;
+    window.enterDeleteMode = enterDeleteMode;
+    window.cancelDeleteMode = cancelDeleteMode;
+    window.confirmDeleteSelected = confirmDeleteSelected;
+    window.toggleDeleteSelection = toggleDeleteSelection;
     window.toggleFinished = toggleFinished;
     window.deleteProject = deleteProject;
     window.closeModal = closeModal;
