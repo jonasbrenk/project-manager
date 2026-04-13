@@ -130,7 +130,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 
 /* Project List Items */
 .project-card {
-  display: flex; align-items: flex-start; gap: 16px; position: relative;
+  display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: flex-start; gap: 16px; position: relative;
   padding: 16px; border-radius: 18px; border: 1px solid rgba(79,124,255,.18); text-decoration: none; color: inherit;
   background: rgba(79,124,255,.05);
   transition: border-color .15s, background .15s, transform .15s;
@@ -140,7 +140,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   width: 56px; height: 56px; display: grid; place-items: center; border-radius: 16px;
   background: var(--accentSoft); font-size: 1.5rem; border: 1px solid rgba(79,124,255,.3); overflow: hidden; flex-shrink: 0;
 }
-.project-card-body { flex: 1; display: flex; flex-direction: column; min-width: 0; gap: 12px; }
+.project-card-body { min-width: 0; display: grid; gap: 12px; }
 .project-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .project-copy { min-width: 0; }
 .project-name { margin: 0 0 4px; font-size: 1rem; font-weight: 700; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -157,10 +157,11 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 .indent-1 { margin-left: 1.4rem; }
 .indent-2 { margin-left: 2.8rem; }
 .indent-3 { margin-left: 4.2rem; }
-.project-meta { display: flex; gap: 8px; flex-wrap: wrap; text-align: left; }
+.project-meta { grid-column: 1 / -1; display: grid; gap: 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); text-align: left; }
 .badge { 
   display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; 
-  padding: 9px 12px; background: var(--surfaceSoft); border: 1px solid var(--line); font-size: .65rem;
+  width: 100%; min-width: 0; padding: 9px 12px; background: var(--surfaceSoft); border: 1px solid var(--line); font-size: .65rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .done { color: #58c48f; }
 .empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 18px; }
@@ -262,19 +263,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   .project-icon { width: 50px; height: 50px; }
   .actions .btn { flex: 1; }
   .hide-toggle { top: 8px; right: 8px; padding: 8px 10px; }
-  .project-meta {
-    margin-top: 8px;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 100%;
-  }
-  .badge {
-    width: 100%;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .project-meta { margin-top: 8px; grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr); width: 100%; }
 } 
 
 
@@ -691,11 +680,10 @@ async function loadProjects() {
               ${isHidden ? "Show" : "Hide"}
             </button>
           </div>
-
-          <div class="project-meta">
-            <div class="badge">${escapeHtml("📅 " + formatDeadline(p.deadline))}</div>
-            <div class="badge ${p.finished ? "done" : ""}">${p.finished ? "✓ Finished" : escapeHtml("⏱ " + formatTimeLeft(p.seconds_left))}</div>
-          </div>
+        </div>
+        <div class="project-meta">
+          <div class="badge">${escapeHtml("📅 " + formatDeadline(p.deadline))}</div>
+          <div class="badge ${p.finished ? "done" : ""}">${p.finished ? "✓ Finished" : escapeHtml("⏱ " + formatTimeLeft(p.seconds_left))}</div>
         </div>
       </a>`;
   };
