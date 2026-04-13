@@ -26,6 +26,13 @@
       --accent: #4f7cff;
       --accentSoft: rgba(79, 124, 255, .15);
       --danger: #ff6a6a;
+      --dangerSoft: rgba(255, 106, 106, .12);
+      --dangerSoftAlt: rgba(255, 106, 106, .06);
+      --dangerBorder: rgba(255, 106, 106, .28);
+      --dangerText: #ffd9d9;
+      --successSoft: rgba(88, 196, 143, .12);
+      --successBorder: rgba(88, 196, 143, .28);
+      --successText: #d9ffea;
       --shadow: 0 18px 50px rgba(0, 0, 0, .28);
       --radius: 22px;
       --bgTop: #172344;
@@ -45,6 +52,13 @@
       --accent: #2f6df6;
       --accentSoft: rgba(47, 109, 246, .12);
       --danger: #d74d4d;
+      --dangerSoft: rgba(215, 77, 77, .12);
+      --dangerSoftAlt: rgba(215, 77, 77, .08);
+      --dangerBorder: rgba(215, 77, 77, .28);
+      --dangerText: #b43333;
+      --successSoft: rgba(88, 196, 143, .14);
+      --successBorder: rgba(88, 196, 143, .32);
+      --successText: #217a52;
       --shadow: 0 18px 45px rgba(63, 88, 138, .14);
       --bgTop: #f9fbff;
       --bgBottom: #dfe9ff;
@@ -280,15 +294,15 @@
     }
 
     .btn-danger {
-      background: rgba(255, 106, 106, .12);
-      color: #ffd9d9;
-      border: 1px solid rgba(255, 106, 106, .28)
+      background: var(--dangerSoft);
+      color: var(--dangerText);
+      border: 1px solid var(--dangerBorder)
     }
 
     .btn-ok {
-      background: rgba(88, 196, 143, .12);
-      color: #d9ffea;
-      border: 1px solid rgba(88, 196, 143, .28)
+      background: var(--successSoft);
+      color: var(--successText);
+      border: 1px solid var(--successBorder)
     }
 
     .inline-actions {
@@ -525,7 +539,7 @@
       padding: 8px;
       border-radius: 16px;
       border: 1px solid var(--line);
-      background: rgba(15, 23, 45, .98);
+      background: var(--panelBg);
       box-shadow: var(--shadow);
       display: none;
       gap: 6px;
@@ -540,7 +554,7 @@
       width: 100%;
       border: 1px solid transparent;
       border-radius: 12px;
-      background: rgba(255, 255, 255, .04);
+      background: var(--surfaceSoft);
       color: var(--text);
       padding: 10px 12px;
       text-align: left;
@@ -553,8 +567,9 @@
     }
 
     .card-menu-item.danger {
-      color: #ffd9d9;
-      background: rgba(255, 106, 106, .12)
+      color: var(--dangerText);
+      background: var(--dangerSoft);
+      border-color: var(--dangerBorder)
     }
 
     .icon-btn {
@@ -574,9 +589,9 @@
     }
 
     .icon-btn.danger {
-      color: #ffd9d9;
-      border-color: rgba(255, 106, 106, .28);
-      background: rgba(255, 106, 106, .12)
+      color: var(--dangerText);
+      border-color: var(--dangerBorder);
+      background: var(--dangerSoft)
     }
 
     .step-item {
@@ -633,7 +648,7 @@
       border-radius: 999px;
       padding: 7px 10px;
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .05)
+      background: var(--surfaceSoft)
     }
 
     .children {
@@ -723,12 +738,13 @@
     textarea {
       width: 100%;
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .04);
+      background: var(--surfaceSoft);
       color: var(--text);
       border-radius: 14px;
       padding: 12px 14px;
       outline: none;
-      min-width: 0
+      min-width: 0;
+      color-scheme: inherit
     }
 
     textarea {
@@ -744,8 +760,8 @@
     }
 
     .danger-zone {
-      border: 1px solid rgba(255, 106, 106, .2);
-      background: rgba(255, 106, 106, .06)
+      border: 1px solid var(--dangerBorder);
+      background: var(--dangerSoftAlt)
     }
 
     .settings-modal {
@@ -1040,12 +1056,27 @@
 
       .step-sub {
         margin-top: 6px !important;
-        gap: 5px
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+        width: 100%
       }
 
       .pill {
         padding: 4px 7px;
-        font-size: .68rem
+        font-size: .68rem;
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis
+      }
+
+      .proj-link-meta {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        width: 100%
       }
 
       .children {
@@ -1070,6 +1101,8 @@
         height: 44px;
         border-radius: 13px
       }
+
+      
     }
   </style>
 

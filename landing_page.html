@@ -83,15 +83,16 @@ html, body {
 
 .icon-preview {
   width: 48px; height: 48px; border-radius: 14px; border: 1px solid var(--line);
-  background: rgba(255,255,255,.04); display: grid; place-items: center; overflow: hidden;
+  background: var(--surfaceSoft); display: grid; place-items: center; overflow: hidden;
   flex-shrink: 0; font-size: 1.35rem;
 }
 
 .icon-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 input, textarea { 
-  width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--line); 
+  width: 100%; background: var(--surfaceSoft); border: 1px solid var(--line); 
   color: var(--text); border-radius: 14px; padding: 12px 14px; outline: none; font: inherit;
+  color-scheme: inherit;
 }
 
 input[type="datetime-local"] {
@@ -159,7 +160,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 .project-meta { display: flex; gap: 8px; flex-wrap: wrap; text-align: left; }
 .badge { 
   display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; 
-  padding: 9px 12px; background: rgba(255,255,255,.05); border: 1px solid var(--line); font-size: .65rem;
+  padding: 9px 12px; background: var(--surfaceSoft); border: 1px solid var(--line); font-size: .65rem;
 }
 .done { color: #58c48f; }
 .empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 18px; }
@@ -206,7 +207,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 .icon-picker.show { display: flex; }
 .icon-picker-panel { 
-  width: min(760px, 100%); max-height: calc(100vh - 32px); background: #0f172d; 
+  width: min(760px, 100%); max-height: calc(100vh - 32px); background: var(--panelBg); 
   border: 1px solid var(--line); border-radius: 24px; padding: 18px; display: flex; flex-direction: column; 
 }
 .icon-picker-grid { 
@@ -214,7 +215,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   margin-top: 14px; overflow-y: auto; padding-right: 4px; 
 }
 .icon-choice { 
-  background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 18px; 
+  background: var(--surfaceSoft); border: 1px solid var(--line); border-radius: 18px; 
   padding: 12px; cursor: pointer; color: var(--text); display: grid; gap: 10px; justify-items: center; font: inherit;
 }
 .icon-choice:hover { border-color: rgba(79,124,255,.55); background: rgba(79,124,255,.08); }
@@ -261,13 +262,25 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   .project-icon { width: 50px; height: 50px; }
   .actions .btn { flex: 1; }
   .hide-toggle { top: 8px; right: 8px; padding: 8px 10px; }
-  .project-meta { margin-top: 8px; } /* Space for the button */
+  .project-meta {
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+  .badge {
+    width: 100%;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 } 
 
 
 .icon-choice {
   position: relative;
-  background: rgba(255,255,255,.04);
+  background: var(--surfaceSoft);
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 12px;
