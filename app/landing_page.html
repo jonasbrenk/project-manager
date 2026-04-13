@@ -22,6 +22,7 @@
   --shadow: 0 18px 50px rgba(0,0,0,.28); --radius: 22px;
   --bgTop: #172344; --bgBottom: #0b1020; --surfaceSoft: rgba(255,255,255,.04);
   --panelBg: #0f172d; --toggleOff: rgba(255,255,255,.16);
+  --dangerSoft: rgba(255, 106, 106, .12); --dangerBorder: rgba(255, 106, 106, .28); --dangerText: #ffd9d9;
 }
 
 html[data-theme="light"] {
@@ -30,6 +31,7 @@ html[data-theme="light"] {
   --accent: #2f6df6; --accentSoft: rgba(47, 109, 246, .12); --danger: #d74d4d;
   --shadow: 0 18px 45px rgba(63, 88, 138, .14); --bgTop: #f9fbff; --bgBottom: #dfe9ff;
   --surfaceSoft: rgba(20, 34, 59, .04); --panelBg: #ffffff; --toggleOff: rgba(21, 34, 59, .16);
+  --dangerSoft: rgba(215, 77, 77, .12); --dangerBorder: rgba(215, 77, 77, .28); --dangerText: #b43333;
 }
 
 * { box-sizing: border-box; }
@@ -40,7 +42,7 @@ html, body {
 }
 
 /* Layout Containers */
-.page { width: min(1120px, calc(100% - 24px)); margin: 0 auto; padding: 24px 0 80px; display: grid; gap: 18px; }
+.page { width: min(1120px, calc(100% - 24px)); margin: 0 auto; padding: 24px 0 148px; display: grid; gap: 18px; }
 .hero, .project-list { display: grid; gap: 18px; }
 
 /* Components: Cards & Panels */
@@ -51,13 +53,6 @@ html, body {
 .hero-card { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: flex-start; position: relative; }
 .hero-copy-wrap { display: grid; gap: 10px; }
 .panel-head { display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
-.create-project-card { overflow: hidden; transform-origin: top center; }
-.create-project-card.closing { pointer-events: none; animation: create-project-close .18s ease forwards; }
-
-@keyframes create-project-close {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(-8px) scale(.985); }
-}
 
 /* Typography */
 .title { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 6px; }
@@ -78,16 +73,40 @@ html, body {
 .field { display: grid; gap: 8px; min-width: 0; }
 .span-2 { grid-column: span 2; }
 .span-4 { grid-column: 1 / -1; }
-.icon-input-row { display: flex; gap: 10px; align-items: center; }
-.icon-input-row input { flex: 1 1 auto; min-width: 0; }
+.icon-input-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.icon-input-row input { min-width: 0; }
 
 .icon-preview {
-  width: 48px; height: 48px; border-radius: 14px; border: 1px solid var(--line);
+  width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--line);
   background: var(--surfaceSoft); display: grid; place-items: center; overflow: hidden;
   flex-shrink: 0; font-size: 1.35rem;
 }
 
 .icon-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.template-icon-btn {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.template-icon-btn span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  line-height: 1;
+  transform: translateX(-1px);
+}
 
 input, textarea { 
   width: 100%; background: var(--surfaceSoft); border: 1px solid var(--line); 
@@ -136,6 +155,10 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   transition: border-color .15s, background .15s, transform .15s;
 }
 .project-card:hover { border-color: rgba(79,124,255,.4); background: rgba(79,124,255,.08); }
+.project-card.is-finished {
+  opacity: .68;
+  background: color-mix(in srgb, var(--card) 70%, var(--surfaceSoft));
+}
 .project-icon {
   width: 56px; height: 56px; display: grid; place-items: center; border-radius: 16px;
   background: var(--accentSoft); font-size: 1.5rem; border: 1px solid rgba(79,124,255,.3); overflow: hidden; flex-shrink: 0;
@@ -164,6 +187,17 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .done { color: #58c48f; }
+.project-card.selected-for-delete {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accentSoft) 70%, var(--card));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.project-card.visibility-selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accentSoft) 82%, var(--card));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 34%, transparent);
+}
 .empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 18px; }
 
 .settings-backdrop {
@@ -177,6 +211,97 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   width: min(420px, 100%); background: var(--panelBg); border: 1px solid var(--line);
   border-radius: 24px; box-shadow: var(--shadow); padding: 18px; display: grid; gap: 18px;
 }
+
+.modal-backdrop {
+  position: fixed; inset: 0; background: rgba(7,10,18,.68);
+  display: none; align-items: center; justify-content: center; padding: 16px; z-index: 90;
+}
+
+.modal-backdrop.show { display: flex; }
+
+.modal-panel {
+  width: min(720px, 100%); max-height: calc(100vh - 32px); overflow: auto;
+  background: var(--panelBg); border: 1px solid var(--line); border-radius: 24px;
+  box-shadow: var(--shadow); padding: 18px;
+}
+
+.floating-actions {
+  position: fixed; right: 18px; bottom: 18px; z-index: 110;
+}
+
+.floating-actions.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.floating-actions-menu {
+  position: absolute; right: 0; bottom: calc(100% + 10px);
+  min-width: 180px; padding: 8px; border-radius: 16px;
+  border: 1px solid var(--line); background: var(--panelBg); box-shadow: var(--shadow);
+  display: none; gap: 6px;
+}
+
+.floating-actions-menu.show { display: grid; }
+
+.menu-item {
+  width: 100%; border: 1px solid transparent; border-radius: 12px;
+  background: var(--surfaceSoft); color: var(--text); padding: 10px 12px; text-align: left; cursor: pointer;
+}
+
+.menu-item:hover { border-color: rgba(79,124,255,.4); background: rgba(79,124,255,.1); }
+.menu-item.danger { color: var(--danger); }
+
+.floating-trigger {
+  width: 56px; height: 56px; border-radius: 999px; font-size: 1.4rem;
+  box-shadow: var(--shadow);
+  background: var(--panelBg);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.delete-toolbar .btn-primary {
+  background: var(--dangerSoft);
+  color: var(--dangerText);
+  border: 1px solid var(--dangerBorder);
+}
+
+.delete-toolbar.visibility-mode .btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: 0;
+}
+
+#hiddenSection {
+  position: relative;
+  z-index: 1;
+}
+
+.project-card.visibility-pending {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 24%, transparent);
+}
+
+.visibility-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 8px 12px;
+  font-size: .72rem;
+  border-radius: 999px;
+  z-index: 12;
+}
+
+.delete-toolbar {
+  position: fixed; right: 18px; bottom: 18px; left: auto;
+  width: min(520px, calc(100vw - 36px));
+  display: none; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 16px; border-radius: 18px; border: 1px solid var(--line);
+  background: var(--panelBg); box-shadow: var(--shadow); z-index: 111;
+}
+
+.delete-toolbar.show { display: flex; }
+
+.toolbar-copy { display: grid; gap: 4px; min-width: 0; }
 
 .settings-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .settings-row {
@@ -204,7 +329,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 /* Icon Picker */
 .icon-picker { 
   position: fixed; inset: 0; background: rgba(7,10,18,.68); 
-  display: none; align-items: center; justify-content: center; padding: 16px; z-index: 60; 
+  display: none; align-items: center; justify-content: center; padding: 16px; z-index: 110; 
 }
 .icon-picker.show { display: flex; }
 .icon-picker-panel { 
@@ -251,7 +376,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 
 @media (max-width: 560px) {
-  .page { width: calc(100% - 16px); padding-top: 16px; }
+  .page { width: calc(100% - 16px); padding-top: 16px; padding-bottom: 168px; }
   .card { padding: 16px; border-radius: 18px; }
   .hero-card { display: block; }
   .hero-copy-wrap { width: 100%; padding-right: 108px; }
@@ -264,6 +389,16 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   .actions .btn { flex: 1; }
   .hide-toggle { top: 8px; right: 8px; padding: 8px 10px; }
   .project-meta { margin-top: 8px; grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr); width: 100%; }
+  .icon-input-row { grid-template-columns: 44px minmax(0, 1fr) 40px; gap: 8px; }
+  .icon-preview { width: 44px; height: 44px; }
+  .template-icon-btn { width: 40px; height: 40px; }
+  .delete-toolbar {
+    right: 12px;
+    bottom: 12px;
+    width: calc(100vw - 24px);
+    flex-direction: column;
+    align-items: stretch;
+  }
 } 
 
 
@@ -335,25 +470,6 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
         </div>
       </div>
 
-      <details class="card create-project-card" closed>
-        <summary class="panel-head create-project-toggle">
-          <div>
-            <h2 class="panel-title">Create project</h2>
-            <div class="muted">Add project icon, deadline, and description.</div>
-          </div>
-        </summary>
-
-        <form id="projectForm">
-          <div class="form-grid">
-            <div class="field"><label for="name">Name</label><input id="name" name="name" placeholder="Project name" required /></div>
-            <div class="field"><label for="icon">Icon</label><div class="icon-input-row"><input id="icon" name="icon" data-icon-fallback="📌" data-icon-preview="iconPreview" placeholder="📌 or image URL" /><button class="btn btn-secondary" type="button" onclick="openIconPicker('icon','📌')">Template</button><div class="icon-preview" id="iconPreview">📌</div></div></div>
-            <div class="field span-2"><label for="deadline">Deadline</label><input id="deadline" name="deadline" type="datetime-local" /></div>
-            <div class="field span-4"><label for="description">Description</label><textarea id="description" name="description" placeholder="Short project description"></textarea></div>
-          </div>
-          <div class="actions"><button class="btn btn-secondary" type="button" onclick="cancelCreateProject()">Cancel</button><button class="btn btn-primary" type="submit">Create project</button></div>
-        </form>
-    </details>
-
     <section class="card">
       <div class="panel-head"><div><h2 class="panel-title">All projects</h2><div class="muted">Sorted by nearest deadline.</div></div></div>
       <div id="projectList" class="project-list"></div>
@@ -385,6 +501,46 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     </div>
   </div>
 
+  <div id="createProjectBackdrop" class="modal-backdrop">
+    <div class="modal-panel" onclick="event.stopPropagation()">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">Create project</h2>
+          <div class="muted">Add project icon, deadline, and description.</div>
+        </div>
+      </div>
+      <form id="projectForm">
+        <div class="form-grid">
+          <div class="field"><label for="name">Name</label><input id="name" name="name" placeholder="Project name" required /></div>
+          <div class="field"><label for="icon">Icon</label><div class="icon-input-row"><div class="icon-preview" id="iconPreview">📌</div><input id="icon" name="icon" data-icon-fallback="📌" data-icon-preview="iconPreview" placeholder="Icon or image URL" /><button class="btn btn-secondary template-icon-btn" type="button" onclick="openIconPicker('icon','📌')" aria-label="Choose template icon" title="Choose template icon"><span>🗂️</span></button></div></div>
+          <div class="field span-2"><label for="deadline">Deadline</label><input id="deadline" name="deadline" type="datetime-local" /></div>
+          <div class="field span-4"><label for="description">Description</label><textarea id="description" name="description" placeholder="Short project description"></textarea></div>
+        </div>
+        <div class="actions"><button class="btn btn-secondary" type="button" onclick="closeCreateProjectModal()">Cancel</button><button class="btn btn-primary" type="submit">Create project</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="floating-actions" id="floatingActions">
+    <div id="floatingActionsMenu" class="floating-actions-menu">
+      <button class="menu-item" type="button" onclick="openCreateProjectModal()">Add</button>
+      <button class="menu-item" type="button" onclick="enterVisibilityMode()">Visibility</button>
+      <button class="menu-item danger" type="button" onclick="enterDeleteMode()">Delete</button>
+    </div>
+    <button class="btn btn-primary floating-trigger" type="button" onclick="toggleFloatingActions(event)">⋯</button>
+  </div>
+
+  <div id="deleteToolbar" class="delete-toolbar">
+    <div class="toolbar-copy">
+      <strong id="deleteCount">0 selected</strong>
+      <div id="toolbarHint" class="muted">Selected projects will be deleted permanently.</div>
+    </div>
+    <div class="actions" style="margin-top:0;">
+      <button class="btn btn-secondary" type="button" onclick="cancelActionMode()">Cancel</button>
+      <button id="toolbarConfirmBtn" class="btn btn-primary" type="button" onclick="confirmDeleteSelected()">Delete</button>
+    </div>
+  </div>
+
   <script>
     const DEFAULT_STANDARD_ICONS = [
       { label: "Folder", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png", removable: false },
@@ -403,12 +559,23 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     let STANDARD_ICONS = loadStandardIcons();
     const projectList = document.getElementById("projectList");
     const projectForm = document.getElementById("projectForm");
-    const createProjectCard = document.querySelector(".create-project-card");
     const allCount = document.getElementById("allCount");
     const openCount = document.getElementById("openCount");
     const doneCount = document.getElementById("doneCount");
     const settingsBackdrop = document.getElementById("settingsBackdrop");
     const themeSwitch = document.getElementById("themeSwitch");
+    const createProjectBackdrop = document.getElementById("createProjectBackdrop");
+    const floatingActions = document.getElementById("floatingActions");
+    const floatingActionsMenu = document.getElementById("floatingActionsMenu");
+    const deleteToolbar = document.getElementById("deleteToolbar");
+    const deleteCount = document.getElementById("deleteCount");
+    const toolbarHint = document.getElementById("toolbarHint");
+    const toolbarConfirmBtn = document.getElementById("toolbarConfirmBtn");
+    let currentProjects = [];
+    let deleteMode = false;
+    let visibilityMode = false;
+    let selectedProjectIds = new Set();
+    let pendingHiddenIds = new Set();
 
 
 
@@ -632,38 +799,119 @@ document.getElementById("icon")?.addEventListener("input", () => updateIconPrevi
 updateIconPreview("icon");
 applyTheme(document.documentElement.dataset.theme || "dark");
 
-function cancelCreateProject() {
+function closeCreateProjectModal() {
   projectForm.reset();
   updateIconPreview("icon");
-
-  if (!createProjectCard?.open) return;
-
-  createProjectCard.classList.add("closing");
-  window.setTimeout(() => {
-    createProjectCard.open = false;
-    createProjectCard.classList.remove("closing");
-  }, 180);
+  createProjectBackdrop.classList.remove("show");
 }
 
-function toggleHide(e, id) {
-  e.preventDefault(); e.stopPropagation();
-  hiddenIds.has(id) ? hiddenIds.delete(id) : hiddenIds.add(id);
-  localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hiddenIds]));
+function openCreateProjectModal() {
+  closeFloatingActions();
+  createProjectBackdrop.classList.add("show");
+}
+
+function toggleFloatingActions(event) {
+  event.stopPropagation();
+  floatingActionsMenu.classList.toggle("show");
+}
+
+function closeFloatingActions() {
+  floatingActionsMenu.classList.remove("show");
+}
+
+function updateDeleteToolbar() {
+  if (deleteMode) {
+    deleteCount.textContent = `${selectedProjectIds.size} selected`;
+    toolbarHint.textContent = "Selected projects will be deleted permanently.";
+    toolbarConfirmBtn.textContent = "Delete";
+    toolbarConfirmBtn.onclick = confirmDeleteSelected;
+  } else if (visibilityMode) {
+    deleteCount.textContent = `${selectedProjectIds.size} visible`;
+    toolbarHint.textContent = "Highlighted projects will stay visible after confirm.";
+    toolbarConfirmBtn.textContent = "Confirm";
+    toolbarConfirmBtn.onclick = confirmVisibilityChanges;
+  }
+  deleteToolbar.classList.toggle("show", deleteMode || visibilityMode);
+  deleteToolbar.classList.toggle("visibility-mode", visibilityMode);
+  floatingActions.classList.toggle("hidden", deleteMode || visibilityMode);
+}
+
+function enterDeleteMode() {
+  closeFloatingActions();
+  visibilityMode = false;
+  deleteMode = true;
+  selectedProjectIds.clear();
+  updateDeleteToolbar();
   loadProjects();
+}
+
+function enterVisibilityMode() {
+  closeFloatingActions();
+  deleteMode = false;
+  visibilityMode = true;
+  selectedProjectIds = new Set();
+  document.querySelectorAll("#projectList .project-card, #hiddenList .project-card");
+  updateDeleteToolbar();
+  loadProjects();
+}
+
+function cancelActionMode() {
+  deleteMode = false;
+  visibilityMode = false;
+  selectedProjectIds.clear();
+  updateDeleteToolbar();
+  loadProjects();
+}
+
+function toggleProjectSelection(event, id) {
+  if (!deleteMode) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (selectedProjectIds.has(id)) selectedProjectIds.delete(id);
+  else selectedProjectIds.add(id);
+  updateDeleteToolbar();
+  loadProjects();
+}
+
+async function confirmDeleteSelected() {
+  if (!selectedProjectIds.size) return;
+  if (!confirm(`Delete ${selectedProjectIds.size} selected project(s)? This cannot be undone.`)) return;
+  await Promise.all([...selectedProjectIds].map(id => fetch(`/api/projects/${id}`, { method: "DELETE" })));
+  cancelActionMode();
+}
+
+function togglePendingVisibility(event, id) {
+  if (!visibilityMode) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (selectedProjectIds.has(id)) selectedProjectIds.delete(id);
+  else selectedProjectIds.add(id);
+  updateDeleteToolbar();
+  loadProjects();
+}
+
+function confirmVisibilityChanges() {
+  hiddenIds = new Set();
+  for (const { id } of currentProjects) {
+    if (!selectedProjectIds.has(id)) hiddenIds.add(id);
+  }
+  localStorage.setItem(HIDDEN_KEY, JSON.stringify([...hiddenIds]));
+  cancelActionMode();
 }
 
 async function loadProjects() {
   const res = await fetch("/api/projects");
   const projects = await res.json();
+  currentProjects = projects;
   
   allCount.textContent = projects.length;
   doneCount.textContent = projects.filter(p => p.finished).length;
   openCount.textContent = projects.filter(p => !p.finished).length;
 
   const renderCard = (p) => {
-    const isHidden = hiddenIds.has(p.id);
+    const isVisible = visibilityMode ? selectedProjectIds.has(p.id) : !hiddenIds.has(p.id);
     return `
-      <a class="project-card" href="/project?id=${encodeURIComponent(p.id)}">
+      <a class="project-card${p.finished ? " is-finished" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" href="/project?id=${encodeURIComponent(p.id)}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : visibilityMode ? `togglePendingVisibility(event, '${p.id}')` : ""}">
         <div class="project-icon">
           ${renderIcon(p.icon, "📌", p.name)}
         </div>
@@ -674,13 +922,9 @@ async function loadProjects() {
               <h3 class="project-name">${escapeHtml(normalizeDisplayText(p.name))}</h3>
               <div class="project-desc">${renderFormattedText(p.description || "", "", true)}</div>
             </div>
-            <button class="btn btn-secondary hide-toggle"
-                    type="button"
-                    onclick="toggleHide(event, '${p.id}')">
-              ${isHidden ? "Show" : "Hide"}
-            </button>
           </div>
         </div>
+        ${visibilityMode ? `<button class="btn btn-secondary visibility-toggle" type="button" onclick="togglePendingVisibility(event, '${p.id}')">${isVisible ? "Visible" : "Hidden"}</button>` : ""}
         <div class="project-meta">
           <div class="badge">${escapeHtml("📅 " + formatDeadline(p.deadline))}</div>
           <div class="badge ${p.finished ? "done" : ""}">${p.finished ? "✓ Finished" : escapeHtml("⏱ " + formatTimeLeft(p.seconds_left))}</div>
@@ -688,8 +932,12 @@ async function loadProjects() {
       </a>`;
   };
 
-  const visible = projects.filter(p => !hiddenIds.has(p.id));
-  const hidden = projects.filter(p => hiddenIds.has(p.id));
+    if (visibilityMode && !selectedProjectIds.size) {
+      selectedProjectIds = new Set(projects.filter(p => !hiddenIds.has(p.id)).map(p => p.id));
+    }
+
+    const visible = projects.filter(p => !hiddenIds.has(p.id));
+    const hidden = projects.filter(p => hiddenIds.has(p.id));
 
   projectList.innerHTML = visible.length ? visible.map(renderCard).join("") : `<div class="empty">No active projects.</div>`;
   
@@ -717,20 +965,36 @@ async function loadProjects() {
       };
       const res = await fetch("/api/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       if (!res.ok) { alert("Could not create project."); return; }
-      projectForm.reset();
-      updateIconPreview("icon");
+      closeCreateProjectModal();
       await loadProjects();
     });
 
     window.openIconPicker = openIconPicker;
     window.closeIconPicker = closeIconPicker;
     window.selectStandardIcon = selectStandardIcon;
-    window.cancelCreateProject = cancelCreateProject;
+    window.openCreateProjectModal = openCreateProjectModal;
+    window.closeCreateProjectModal = closeCreateProjectModal;
+    window.toggleFloatingActions = toggleFloatingActions;
+    window.enterDeleteMode = enterDeleteMode;
+    window.enterVisibilityMode = enterVisibilityMode;
+    window.cancelActionMode = cancelActionMode;
+    window.confirmDeleteSelected = confirmDeleteSelected;
+    window.toggleProjectSelection = toggleProjectSelection;
+    window.togglePendingVisibility = togglePendingVisibility;
+    window.confirmVisibilityChanges = confirmVisibilityChanges;
     window.openSettingsModal = openSettingsModal;
     window.closeSettingsModal = closeSettingsModal;
     window.toggleTheme = toggleTheme;
     settingsBackdrop?.addEventListener("click", (event) => { if (event.target === settingsBackdrop) closeSettingsModal(); });
-    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeSettingsModal(); });
+    createProjectBackdrop?.addEventListener("click", (event) => { if (event.target === createProjectBackdrop) closeCreateProjectModal(); });
+    document.addEventListener("click", () => closeFloatingActions());
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      closeSettingsModal();
+      closeCreateProjectModal();
+      closeFloatingActions();
+    });
+    updateDeleteToolbar();
     loadProjects().catch(() => { projectList.innerHTML = `<div class="empty">Could not load projects.</div>`; });
   </script>
 </body>

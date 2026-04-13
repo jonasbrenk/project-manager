@@ -428,30 +428,22 @@
       justify-self: stretch
     }
 
-    .proj-status-badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: .65rem;
-      font-weight: 600;
-      letter-spacing: .01em
-    }
-
-    .proj-status-badge.finished {
-      background: rgba(88, 196, 143, .15);
-      color: #58c48f;
-      border: 1px solid rgba(88, 196, 143, .3)
-    }
-
-    .proj-status-badge.open {
-      background: rgba(79, 124, 255, .12);
-      color: #8faeff;
-      border: 1px solid rgba(79, 124, 255, .25)
-    }
-
     .proj-link-loading {
       opacity: .6
+    }
+
+    .link-card-project.is-finished {
+      opacity: .68
+    }
+
+    .link-card-project.is-finished .card-menu-trigger {
+      opacity: .58
+    }
+
+    .pill.done {
+      color: #58c48f;
+      border-color: rgba(88, 196, 143, .3);
+      background: rgba(88, 196, 143, .12)
     }
 
     /* Project link picker modal */
@@ -1370,20 +1362,19 @@
         { label: "Delete", onclick: `event.stopPropagation(); deleteLink(${index});`, danger: true }
       ]);
 
-      return `<div class="link-card link-card-project${loading ? " proj-link-loading" : ""}" onclick="window.open('${escapeHtml(projectUrl)}')">
+      return `<div class="link-card link-card-project${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}" onclick="window.open('${escapeHtml(projectUrl)}')">
         ${menu}
         <div class="proj-link-icon">${loading ? "⏳" : icon}</div>
         <div class="proj-link-body">
           <div class="proj-link-header">
             <div class="proj-link-name">${loading ? "Loading…" : name}</div>
-            ${proj?.finished ? `<span class="proj-status-badge finished">✓ Finished</span>` : proj && !loading ? `<span class="proj-status-badge open">Open</span>` : ""}
           </div>
           ${error ? `<div class="proj-link-desc" style="color:var(--danger)">Could not load project.</div>` : ""}
           ${proj?.description ? `<div class="proj-link-desc">${renderFormattedText(proj.description, "", true)}</div>` : ""}
         </div>
         <div class="proj-link-meta">
           ${proj?.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(proj.deadline))}</span>` : !loading && !error ? `<span class="pill" style="color:var(--muted)">No deadline</span>` : ""}
-          ${proj?.seconds_left != null ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(proj.seconds_left))}</span>` : ""}
+          ${proj?.finished ? `<span class="pill done">✓ Finished</span>` : proj?.seconds_left != null ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(proj.seconds_left))}</span>` : !loading && !error ? `<span class="pill">Open</span>` : ""}
         </div>
       </div>`;
     }
@@ -1493,7 +1484,21 @@
     function renderStepTree(steps) { const s = steps || []; return !s.length ? `<div class="empty">No steps yet.</div>` : `<div class="step-tree">${s.map(step => renderStep(step)).join("")}</div>`; }
 
     function renderLinks() {
-      const l = project.links || [];
+      const l = [...(project.links || [])].sort((a, b) => {
+        const aId = getProjectIdFromLink(a);
+        const bId = getProjectIdFromLink(b);
+        if (!!aId !== !!bId) return aId ? -1 : 1;
+        if (!aId && !bId) return 0;
+        const aProj = projectCache[aId];
+        const bProj = projectCache[bId];
+        const aFinished = !!aProj?.finished;
+        const bFinished = !!bProj?.finished;
+        if (aFinished !== bFinished) return aFinished ? 1 : -1;
+        const aTs = aProj?.deadline ? new Date(aProj.deadline).getTime() : Number.POSITIVE_INFINITY;
+        const bTs = bProj?.deadline ? new Date(bProj.deadline).getTime() : Number.POSITIVE_INFINITY;
+        if (aTs !== bTs) return aTs - bTs;
+        return String(aProj?.name || a.title || "").localeCompare(String(bProj?.name || b.title || ""));
+      });
       if (!l.length) return `<div class="empty">No links yet.</div>`;
       const currentOrigin = window.location.origin;
 
