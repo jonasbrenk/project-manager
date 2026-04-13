@@ -53,6 +53,21 @@ html, body {
 .hero-card { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: flex-start; position: relative; }
 .hero-copy-wrap { display: grid; gap: 10px; }
 .panel-head { display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.panel-x {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surfaceSoft);
+  color: var(--text);
+  display: grid;
+  place-items: center;
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+}
 
 /* Typography */
 .title { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 6px; }
@@ -73,7 +88,7 @@ html, body {
 .field { display: grid; gap: 8px; min-width: 0; }
 .span-2 { grid-column: span 2; }
 .span-4 { grid-column: 1 / -1; }
-.icon-input-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.icon-input-row { display: grid; grid-template-columns: minmax(0, 1fr) 48px auto; gap: 10px; align-items: center; }
 .icon-input-row input { min-width: 0; }
 
 .icon-preview {
@@ -389,9 +404,12 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   .actions .btn { flex: 1; }
   .hide-toggle { top: 8px; right: 8px; padding: 8px 10px; }
   .project-meta { margin-top: 8px; grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr); width: 100%; }
-  .icon-input-row { grid-template-columns: 44px minmax(0, 1fr) 40px; gap: 8px; }
+  .icon-input-row { grid-template-columns: minmax(0, 1fr) 44px 40px; gap: 8px; }
   .icon-preview { width: 44px; height: 44px; }
   .template-icon-btn { width: 40px; height: 40px; }
+  .floating-trigger { width: 64px; height: 64px; font-size: 1.65rem; }
+  .floating-actions-menu { min-width: 208px; gap: 10px; }
+  .menu-item { min-height: 52px; font-size: 1rem; }
   .delete-toolbar {
     right: 12px;
     bottom: 12px;
@@ -508,11 +526,12 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
           <h2 class="panel-title">Create project</h2>
           <div class="muted">Add project icon, deadline, and description.</div>
         </div>
+        <button class="panel-x" type="button" onclick="closeCreateProjectModal()" aria-label="Close">×</button>
       </div>
       <form id="projectForm">
         <div class="form-grid">
-          <div class="field"><label for="name">Name</label><input id="name" name="name" placeholder="Project name" required /></div>
-          <div class="field"><label for="icon">Icon</label><div class="icon-input-row"><div class="icon-preview" id="iconPreview">📌</div><input id="icon" name="icon" data-icon-fallback="📌" data-icon-preview="iconPreview" placeholder="Icon or image URL" /><button class="btn btn-secondary template-icon-btn" type="button" onclick="openIconPicker('icon','📌')" aria-label="Choose template icon" title="Choose template icon"><span>🗂️</span></button></div></div>
+          <div class="field span-2"><label for="name">Name</label><input id="name" name="name" placeholder="Project name" required /></div>
+          <div class="field span-2"><label for="icon">Icon</label><div class="icon-input-row"><input id="icon" name="icon" data-icon-fallback="📌" data-icon-preview="iconPreview" placeholder="Icon or image URL" /><div class="icon-preview" id="iconPreview">📌</div><button class="btn btn-secondary template-icon-btn" type="button" onclick="openIconPicker('icon','📌')" aria-label="Choose template icon" title="Choose template icon"><span>🗂️</span></button></div></div>
           <div class="field span-2"><label for="deadline">Deadline</label><input id="deadline" name="deadline" type="datetime-local" /></div>
           <div class="field span-4"><label for="description">Description</label><textarea id="description" name="description" placeholder="Short project description"></textarea></div>
         </div>

@@ -719,6 +719,10 @@
       flex-direction: column
     }
 
+    .icon-picker-modal {
+      width: min(760px, 100%)
+    }
+
     .modal-head {
       display: flex;
       justify-content: space-between;
@@ -866,14 +870,13 @@
     }
 
     .icon-input-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 48px auto;
       gap: 10px;
-      align-items: center;
-      min-width: 0
+      align-items: center
     }
 
     .icon-input-row input {
-      flex: 1 1 auto;
       min-width: 0
     }
 
@@ -882,12 +885,34 @@
       height: 48px;
       border-radius: 14px;
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .04);
+      background: var(--surfaceSoft);
       display: grid;
       place-items: center;
       overflow: hidden;
       flex-shrink: 0;
       font-size: 1.35rem
+    }
+
+    .template-icon-btn {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      padding: 0;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .template-icon-btn span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      font-size: 1.05rem;
+      line-height: 1;
+      transform: translateX(-1px)
     }
 
     .icon-preview img {
@@ -901,7 +926,6 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
       gap: 12px;
-      max-height: 240px;
       overflow-y: auto;
       overflow-x: hidden;
       padding-right: 4px;
@@ -911,7 +935,7 @@
     .icon-choice {
       position: relative;
       border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .04);
+      background: var(--surfaceSoft);
       border-radius: 18px;
       padding: 12px;
       cursor: pointer;
@@ -1151,13 +1175,13 @@
     </div>
   </div>
 
-  <div id="iconPickerBackdrop" class="modal-backdrop">
-    <div class="modal" onclick="event.stopPropagation()">
+    <div id="iconPickerBackdrop" class="modal-backdrop">
+    <div class="modal icon-picker-modal" onclick="event.stopPropagation()">
       <div class="modal-head">
         <h3>Choose Icon Template</h3>
         <button class="icon-btn" id="closeIconPickerBtn" type="button">×</button>
       </div>
-      <div id="iconPickerBody" style="overflow-y:auto;max-height:70vh;padding:4px;"></div>
+      <div id="iconPickerBody" style="overflow-y:auto;padding:4px;"></div>
     </div>
   </div>
 
@@ -1404,8 +1428,8 @@
     function updateStepRecursive(steps, targetId, updater) { return (steps || []).map(step => step.id === targetId ? updater(step) : ({ ...step, children: updateStepRecursive(step.children || [], targetId, updater) })); }
     function removeStepRecursive(steps, targetId) { return (steps || []).filter(step => step.id !== targetId).map(step => ({ ...step, children: removeStepRecursive(step.children || [], targetId) })); }
 
-    function buildIconInputField(targetInputId, fallback = "📌", value = "", placeholder = "📌 or image URL") {
-      return `<div class="field"><label>Icon</label><div class="icon-input-row"><input id="${escapeHtml(targetInputId)}" name="icon" data-icon-fallback="${escapeHtml(fallback)}" data-icon-preview="${escapeHtml(`${targetInputId}Preview`)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" /><button class="btn btn-secondary" type="button" onclick='openIconPickerModal(${JSON.stringify(targetInputId)})'>Template</button><div class="icon-preview" id="${escapeHtml(`${targetInputId}Preview`)}">${renderIcon(value, fallback, "icon preview")}</div></div></div>`;
+    function buildIconInputField(targetInputId, fallback = "📌", value = "", placeholder = "Icon or image URL") {
+      return `<div class="field"><label>Icon</label><div class="icon-input-row"><input id="${escapeHtml(targetInputId)}" name="icon" data-icon-fallback="${escapeHtml(fallback)}" data-icon-preview="${escapeHtml(`${targetInputId}Preview`)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" /><div class="icon-preview" id="${escapeHtml(`${targetInputId}Preview`)}">${renderIcon(value, fallback, "icon preview")}</div><button class="btn btn-secondary template-icon-btn" type="button" onclick='openIconPickerModal(${JSON.stringify(targetInputId)})' aria-label="Choose template icon" title="Choose template icon"><span>🗂️</span></button></div></div>`;
     }
 
     function updateIconPreview(targetInputId) {
@@ -1427,11 +1451,11 @@
     function openIconPickerModal(targetInputId) {
       const input = document.getElementById(targetInputId);
       const fallback = input?.dataset.iconFallback || "📌";
-      iconPickerBody.innerHTML = `<div class="icon-picker-grid">${STANDARD_ICONS.map(icon => `
+      iconPickerBody.innerHTML = `<div class="muted" style="margin:0 0 14px;">Click an icon to fill the input field.</div><div class="icon-picker-grid" style="margin-top:0;">${STANDARD_ICONS.map(icon => `
         <button class="icon-choice" type="button" onclick='selectStandardIcon(${JSON.stringify(targetInputId)}, ${JSON.stringify(icon.value)})'>
           <div class="icon-choice-visual">${renderIcon(icon.value, fallback, icon.label)}</div>
           <div class="icon-choice-label">${escapeHtml(icon.label)}</div>
-        </button>`).join("")}</div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:8px;"><button class="btn btn-secondary" type="button" onclick="closeIconPickerModal()">Close</button></div>`;
+        </button>`).join("")}</div>`;
       iconPickerBackdrop.classList.add("show");
     }
 
@@ -1549,14 +1573,14 @@
     // --- Link modals ---
 
     function openProjectEditor() {
-      openModal("Edit project", `<div class="form-grid"><div class="field"><label>Name</label><input name="name" value="${escapeHtml(project.name || "")}" required /></div>${buildIconInputField("projectIconInput", "📌", project.icon || "📌", "📌 or image URL")}<div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0, 16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
+      openModal("Edit project", `<div class="form-grid"><div class="field"><label>Name</label><input name="name" value="${escapeHtml(project.name || "")}" required /></div>${buildIconInputField("projectIconInput", "📌", project.icon || "📌", "Icon or image URL")}<div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0, 16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
         const updated = deepClone(project); updated.name = String(formData.get("name") || "").trim(); updated.icon = String(formData.get("icon") || "").trim() || "📌"; updated.description = String(formData.get("description") || "").trim();
         updated.deadline = parseDateSafe(formData.get("deadline")); addToStandardIcons(updated.icon, updated.name || "Project"); await saveProject(updated);
       });
     }
 
     function openAddLinkModal() {
-      openModal("Add link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" placeholder="Link title" required /></div>${buildIconInputField("newLinkIconInput", "🔗", "", "🔗 or image URL")}<div class="field full"><label>URL</label><input name="url" placeholder="https://example.com" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Add link</button></div>`, async (formData) => {
+      openModal("Add link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" placeholder="Link title" required /></div>${buildIconInputField("newLinkIconInput", "🔗", "", "Icon or image URL")}<div class="field full"><label>URL</label><input name="url" placeholder="https://example.com" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Add link</button></div>`, async (formData) => {
         const updated = deepClone(project); const newLink = { id: generateId(), title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" };
         updated.links = updated.links || []; updated.links.push(newLink); addToStandardIcons(newLink.icon, newLink.title || "Link"); await saveProject(updated);
       });
@@ -1564,7 +1588,7 @@
 
     function openEditLinkModal(index) {
       const link = (project.links || [])[index]; if (!link) return;
-      openModal("Edit link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" value="${escapeHtml(link.title || "")}" required /></div>${buildIconInputField("editLinkIconInput", "🔗", link.icon || "🔗", "🔗 or image URL")}<div class="field full"><label>URL</label><input name="url" value="${escapeHtml(link.url || "")}" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
+      openModal("Edit link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" value="${escapeHtml(link.title || "")}" required /></div>${buildIconInputField("editLinkIconInput", "🔗", link.icon || "🔗", "Icon or image URL")}<div class="field full"><label>URL</label><input name="url" value="${escapeHtml(link.url || "")}" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
         const updated = deepClone(project); updated.links[index] = { ...updated.links[index], title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" }; await saveProject(updated);
       });
     }
