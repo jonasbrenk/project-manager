@@ -5,19 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/jpeg" href="/static/icon.jpg?v=2">
   <title>Project Manager</title>
+  <script>
+    (() => {
+      const key = "pm_theme_mode";
+      const saved = localStorage.getItem(key);
+      const theme = saved === "light" ? "light" : "dark";
+      document.documentElement.dataset.theme = theme;
+      document.documentElement.style.colorScheme = theme;
+    })();
+  </script>
   <style>
 :root {
   --bg: #0b1020; --card: rgba(19, 26, 47, .92); --card2: rgba(28, 38, 70, .8);
   --text: #eef2ff; --muted: #a8b3cf; --line: rgba(255, 255, 255, .08);
   --accent: #4f7cff; --accentSoft: rgba(79, 124, 255, .16); --danger: #ff6a6a;
   --shadow: 0 18px 50px rgba(0,0,0,.28); --radius: 22px;
+  --bgTop: #172344; --bgBottom: #0b1020; --surfaceSoft: rgba(255,255,255,.04);
+  --panelBg: #0f172d; --toggleOff: rgba(255,255,255,.16);
+}
+
+html[data-theme="light"] {
+  --bg: #edf3ff; --card: rgba(255, 255, 255, .88); --card2: rgba(242, 247, 255, .92);
+  --text: #17233c; --muted: #5d6a84; --line: rgba(23, 35, 60, .12);
+  --accent: #2f6df6; --accentSoft: rgba(47, 109, 246, .12); --danger: #d74d4d;
+  --shadow: 0 18px 45px rgba(63, 88, 138, .14); --bgTop: #f9fbff; --bgBottom: #dfe9ff;
+  --surfaceSoft: rgba(20, 34, 59, .04); --panelBg: #ffffff; --toggleOff: rgba(21, 34, 59, .16);
 }
 
 * { box-sizing: border-box; }
 html, body { 
   margin: 0; min-height: 100%; color: var(--text); 
   font-family: Inter, system-ui, sans-serif;
-  background: radial-gradient(circle at top, #172344 0%, var(--bg) 58%);
+  background: radial-gradient(circle at top, var(--bgTop) 0%, var(--bgBottom) 58%);
 }
 
 /* Layout Containers */
@@ -29,8 +48,16 @@ html, body {
   background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); 
   box-shadow: var(--shadow); backdrop-filter: blur(12px); padding: 18px; 
 }
-.hero-card { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: flex-start; }
+.hero-card { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; align-items: flex-start; position: relative; }
+.hero-copy-wrap { display: grid; gap: 10px; }
 .panel-head { display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap; margin-bottom: 16px; }
+.create-project-card { overflow: hidden; transform-origin: top center; }
+.create-project-card.closing { pointer-events: none; animation: create-project-close .18s ease forwards; }
+
+@keyframes create-project-close {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-8px) scale(.985); }
+}
 
 /* Typography */
 .title { font-size: clamp(1.8rem, 4vw, 2.8rem); margin: 0 0 6px; }
@@ -52,11 +79,39 @@ html, body {
 .span-2 { grid-column: span 2; }
 .span-4 { grid-column: 1 / -1; }
 .icon-input-row { display: flex; gap: 10px; align-items: center; }
+.icon-input-row input { flex: 1 1 auto; min-width: 0; }
+
+.icon-preview {
+  width: 48px; height: 48px; border-radius: 14px; border: 1px solid var(--line);
+  background: rgba(255,255,255,.04); display: grid; place-items: center; overflow: hidden;
+  flex-shrink: 0; font-size: 1.35rem;
+}
+
+.icon-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 input, textarea { 
   width: 100%; background: rgba(255,255,255,.04); border: 1px solid var(--line); 
   color: var(--text); border-radius: 14px; padding: 12px 14px; outline: none; font: inherit;
 }
+
+input[type="datetime-local"] {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  box-sizing: border-box;
+}
+
+@supports (-webkit-touch-callout: none) {
+  input[type="datetime-local"] {
+    width: -webkit-fill-available;
+    max-width: -webkit-fill-available;
+  }
+}
+
 textarea { min-height: 100px; resize: vertical; }
 input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0 0 3px rgba(79,124,255,.15); }
 
@@ -64,7 +119,13 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
 .btn { border: 0; border-radius: 999px; padding: 12px 16px; cursor: pointer; font-weight: 600; font: inherit; }
 .btn-primary { background: var(--accent); color: #fff; }
-.btn-secondary { background: rgba(255, 255, 255, .06); color: var(--text); border: 1px solid var(--line); }
+.btn-secondary { background: var(--surfaceSoft); color: var(--text); border: 1px solid var(--line); }
+.settings-btn {
+  padding-inline: 14px;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+}
 
 /* Project List Items */
 .project-card {
@@ -84,15 +145,59 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 .project-name { margin: 0 0 4px; font-size: 1rem; font-weight: 700; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .project-desc {
   margin: 0; color: var(--muted); line-height: 1.45; font-size: .88rem;
-  white-space: pre-line; word-break: break-word; overflow-wrap: anywhere;
 }
+.formatted-text { display: grid; gap: 8px; min-width: 0; }
+.formatted-text.compact { gap: 6px; }
+.formatted-paragraph {
+  margin: 0; white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;
+}
+.formatted-list { margin: 0; padding-left: 1.2rem; display: grid; gap: 4px; }
+.formatted-list li { white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere; }
+.indent-1 { margin-left: 1.4rem; }
+.indent-2 { margin-left: 2.8rem; }
+.indent-3 { margin-left: 4.2rem; }
 .project-meta { display: flex; gap: 8px; flex-wrap: wrap; text-align: left; }
 .badge { 
   display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; 
-  padding: 9px 12px; background: rgba(255,255,255,.05); border: 1px solid var(--line); font-size: .75rem;
+  padding: 9px 12px; background: rgba(255,255,255,.05); border: 1px solid var(--line); font-size: .65rem;
 }
 .done { color: #58c48f; }
 .empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 18px; }
+
+.settings-backdrop {
+  position: fixed; inset: 0; background: rgba(7,10,18,.68);
+  display: none; align-items: center; justify-content: center; padding: 16px; z-index: 80;
+}
+
+.settings-backdrop.show { display: flex; }
+
+.settings-modal {
+  width: min(420px, 100%); background: var(--panelBg); border: 1px solid var(--line);
+  border-radius: 24px; box-shadow: var(--shadow); padding: 18px; display: grid; gap: 18px;
+}
+
+.settings-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px 16px; border: 1px solid var(--line); border-radius: 18px; background: var(--surfaceSoft);
+}
+
+.settings-copy { display: grid; gap: 4px; }
+.settings-copy strong { font-size: .98rem; }
+
+.theme-switch {
+  position: relative; width: 52px; height: 32px; border: 0; border-radius: 999px;
+  background: var(--toggleOff); cursor: pointer; flex-shrink: 0; transition: background .18s ease;
+}
+
+.theme-switch::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px;
+  border-radius: 999px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.18);
+  transition: transform .18s ease;
+}
+
+.theme-switch.active { background: var(--accent); }
+.theme-switch.active::after { transform: translateX(20px); }
 
 /* Icon Picker */
 .icon-picker { 
@@ -144,6 +249,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   .stats { flex-wrap: nowrap; flex-grow: 2; }
   .stat { padding: 10px 12px; }
   .stat-value { font-size: 1.05rem; }
+  .settings-btn { top: 16px; right: 16px; }
   .project-card { padding: 14px; gap: 12px; }
   .project-icon { width: 50px; height: 50px; }
   .actions .btn { flex: 1; }
@@ -206,14 +312,17 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   <main class="page">
     <section class="hero">
       <div class="card hero-card">
-        <div>
+        <div class="hero-copy-wrap">
           <h1 class="title">Projects</h1>
-          <p class="subtitle">Two-page Flask project manager with JSON API, custom icons, and deadline sorting.</p>
+          <p class="subtitle">Handle your longterm and everyday tasks seamlessly.</p>
         </div>
-        <div class="stats">
-          <div class="stat"><div class="stat-label">All projects</div><div class="stat-value" id="allCount">0</div></div>
-          <div class="stat"><div class="stat-label">Open</div><div class="stat-value" id="openCount">0</div></div>
-          <div class="stat"><div class="stat-label">Finished</div><div class="stat-value" id="doneCount">0</div></div>
+        <div style="display:grid;gap:12px;justify-items:end;">
+          <button class="btn btn-secondary settings-btn" type="button" onclick="openSettingsModal()">Settings</button>
+          <div class="stats">
+            <div class="stat"><div class="stat-label">All projects</div><div class="stat-value" id="allCount">0</div></div>
+            <div class="stat"><div class="stat-label">Open</div><div class="stat-value" id="openCount">0</div></div>
+            <div class="stat"><div class="stat-label">Finished</div><div class="stat-value" id="doneCount">0</div></div>
+          </div>
         </div>
       </div>
 
@@ -228,11 +337,11 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
         <form id="projectForm">
           <div class="form-grid">
             <div class="field"><label for="name">Name</label><input id="name" name="name" placeholder="Project name" required /></div>
-            <div class="field"><label for="icon">Icon</label><div class="icon-input-row"><input id="icon" name="icon" placeholder="📌 or image URL" /><button class="btn btn-secondary" type="button" onclick="openIconPicker('icon','📌')">Choose</button></div></div>
+            <div class="field"><label for="icon">Icon</label><div class="icon-input-row"><input id="icon" name="icon" data-icon-fallback="📌" data-icon-preview="iconPreview" placeholder="📌 or image URL" /><button class="btn btn-secondary" type="button" onclick="openIconPicker('icon','📌')">Template</button><div class="icon-preview" id="iconPreview">📌</div></div></div>
             <div class="field span-2"><label for="deadline">Deadline</label><input id="deadline" name="deadline" type="datetime-local" /></div>
             <div class="field span-4"><label for="description">Description</label><textarea id="description" name="description" placeholder="Short project description"></textarea></div>
           </div>
-          <div class="actions"><button class="btn btn-secondary" type="reset">Clear</button><button class="btn btn-primary" type="submit">Create project</button></div>
+          <div class="actions"><button class="btn btn-secondary" type="button" onclick="cancelCreateProject()">Cancel</button><button class="btn btn-primary" type="submit">Create project</button></div>
         </form>
     </details>
 
@@ -248,6 +357,25 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     </details>
   </main>
 
+  <div id="settingsBackdrop" class="settings-backdrop">
+    <div class="settings-modal" onclick="event.stopPropagation()">
+      <div class="settings-head">
+        <div>
+          <h2 class="panel-title">Settings</h2>
+          <div class="muted">Saved automatically on this device.</div>
+        </div>
+        <button class="btn btn-secondary" type="button" onclick="closeSettingsModal()">Close</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-copy">
+          <strong>Light mode</strong>
+          <div class="muted">Switch instantly between the current dark theme and a light theme.</div>
+        </div>
+        <button id="themeSwitch" class="theme-switch" type="button" role="switch" aria-checked="false" onclick="toggleTheme()"></button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const DEFAULT_STANDARD_ICONS = [
       { label: "Folder", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png", removable: false },
@@ -262,12 +390,16 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
       { label: "Target", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f3af.png", removable: false }
     ];
     const STANDARD_ICONS_STORAGE_KEY = "project_manager_standard_icons";
+    const THEME_STORAGE_KEY = "pm_theme_mode";
     let STANDARD_ICONS = loadStandardIcons();
     const projectList = document.getElementById("projectList");
     const projectForm = document.getElementById("projectForm");
+    const createProjectCard = document.querySelector(".create-project-card");
     const allCount = document.getElementById("allCount");
     const openCount = document.getElementById("openCount");
     const doneCount = document.getElementById("doneCount");
+    const settingsBackdrop = document.getElementById("settingsBackdrop");
+    const themeSwitch = document.getElementById("themeSwitch");
 
 
 
@@ -303,8 +435,85 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
       saveStandardIcons();
     }
     function escapeHtml(value = "") { return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+    function normalizeDisplayText(value = "") { return String(value).replaceAll("-->", "→"); }
     function isImageUrl(value = "") { const v = String(value).trim(); return /^https?:\/\//i.test(v) && /\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(v); }
     function renderIcon(icon, fallback = "📌", alt = "icon") { const value = String(icon || "").trim(); return isImageUrl(value) ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(alt)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;" />` : escapeHtml(value || fallback); }
+    function clampIndent(level) { return Math.max(0, Math.min(3, Number(level) || 0)); }
+    function renderFormattedText(value, fallback = "", compact = false) {
+      const source = String(value || "").replace(/\r\n?/g, "\n");
+      if (!source.trim()) return fallback ? `<div class="formatted-text${compact ? " compact" : ""}"><p class="formatted-paragraph">${escapeHtml(normalizeDisplayText(fallback))}</p></div>` : "";
+
+      const lines = source.split("\n");
+      const parts = [];
+      let paragraphLines = [];
+      let paragraphIndent = 0;
+      let listItems = [];
+      let listIndent = 0;
+
+      function flushParagraph() {
+        if (!paragraphLines.length) return;
+        parts.push(`<p class="formatted-paragraph indent-${clampIndent(paragraphIndent)}">${escapeHtml(normalizeDisplayText(paragraphLines.join("\n")))}</p>`);
+        paragraphLines = [];
+        paragraphIndent = 0;
+      }
+
+      function flushList() {
+        if (!listItems.length) return;
+        parts.push(`<ul class="formatted-list indent-${clampIndent(listIndent)}">${listItems.join("")}</ul>`);
+        listItems = [];
+        listIndent = 0;
+      }
+
+      for (const rawLine of lines) {
+        if (!rawLine.trim()) {
+          flushParagraph();
+          flushList();
+          continue;
+        }
+
+        const indentMatch = rawLine.match(/^(\t*)/);
+        const indent = indentMatch ? indentMatch[1].length : 0;
+        const trimmedLine = rawLine.slice(indent);
+
+        if (/^- /.test(trimmedLine)) {
+          flushParagraph();
+          if (listItems.length && indent !== listIndent) flushList();
+          if (!listItems.length) listIndent = indent;
+          listItems.push(`<li>${escapeHtml(normalizeDisplayText(trimmedLine.slice(2)))}</li>`);
+          continue;
+        }
+
+        flushList();
+        if (!paragraphLines.length) paragraphIndent = indent;
+        paragraphLines.push(rawLine);
+      }
+
+      flushParagraph();
+      flushList();
+      return `<div class="formatted-text${compact ? " compact" : ""}">${parts.join("")}</div>`;
+    }
+    function updateIconPreview(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const previewId = input.dataset.iconPreview;
+      const preview = previewId ? document.getElementById(previewId) : null;
+      if (!preview) return;
+      preview.innerHTML = renderIcon(input.value, input.dataset.iconFallback || "📌", "icon preview");
+    }
+    function applyTheme(theme) {
+      const resolved = theme === "light" ? "light" : "dark";
+      document.documentElement.dataset.theme = resolved;
+      document.documentElement.style.colorScheme = resolved;
+      localStorage.setItem(THEME_STORAGE_KEY, resolved);
+      if (themeSwitch) {
+        const isLight = resolved === "light";
+        themeSwitch.classList.toggle("active", isLight);
+        themeSwitch.setAttribute("aria-checked", String(isLight));
+      }
+    }
+    function toggleTheme() { applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light"); }
+    function openSettingsModal() { settingsBackdrop.classList.add("show"); }
+    function closeSettingsModal() { settingsBackdrop.classList.remove("show"); }
     function formatDeadline(deadline) { if (!deadline) return "No deadline"; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return "Invalid deadline"; return dt.toLocaleString([], {year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit"}); }
     function formatTimeLeft(seconds) { if (seconds == null) return "No deadline"; if (seconds <= 0) return "Deadline passed"; const days = Math.floor(seconds / 86400); const hours = Math.floor((seconds % 86400) / 3600); const minutes = Math.floor((seconds % 3600) / 60); if (days > 0) return `${days}d ${hours}h left`; if (hours > 0) return `${hours}h ${minutes}m left`; return `${minutes}m left`; }
     function buildIconPickerHtml(targetInputId, fallback) {
@@ -382,6 +591,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     function selectStandardIcon(targetInputId, value) {
       const input = document.getElementById(targetInputId);
       if (input) input.value = value;
+      if (input) updateIconPreview(targetInputId);
       closeIconPicker();
     }
 
@@ -409,6 +619,23 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 const HIDDEN_KEY = "pm_hidden_ids";
 let hiddenIds = new Set(JSON.parse(localStorage.getItem(HIDDEN_KEY) || "[]"));
 
+document.getElementById("icon")?.addEventListener("input", () => updateIconPreview("icon"));
+updateIconPreview("icon");
+applyTheme(document.documentElement.dataset.theme || "dark");
+
+function cancelCreateProject() {
+  projectForm.reset();
+  updateIconPreview("icon");
+
+  if (!createProjectCard?.open) return;
+
+  createProjectCard.classList.add("closing");
+  window.setTimeout(() => {
+    createProjectCard.open = false;
+    createProjectCard.classList.remove("closing");
+  }, 180);
+}
+
 function toggleHide(e, id) {
   e.preventDefault(); e.stopPropagation();
   hiddenIds.has(id) ? hiddenIds.delete(id) : hiddenIds.add(id);
@@ -435,8 +662,8 @@ async function loadProjects() {
         <div class="project-card-body">
           <div class="project-card-top">
             <div class="project-copy">
-              <h3 class="project-name">${escapeHtml(p.name)}</h3>
-              <p class="project-desc">${escapeHtml(p.description || "")}</p>
+              <h3 class="project-name">${escapeHtml(normalizeDisplayText(p.name))}</h3>
+              <div class="project-desc">${renderFormattedText(p.description || "", "", true)}</div>
             </div>
             <button class="btn btn-secondary hide-toggle"
                     type="button"
@@ -483,12 +710,19 @@ async function loadProjects() {
       const res = await fetch("/api/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       if (!res.ok) { alert("Could not create project."); return; }
       projectForm.reset();
+      updateIconPreview("icon");
       await loadProjects();
     });
 
     window.openIconPicker = openIconPicker;
     window.closeIconPicker = closeIconPicker;
     window.selectStandardIcon = selectStandardIcon;
+    window.cancelCreateProject = cancelCreateProject;
+    window.openSettingsModal = openSettingsModal;
+    window.closeSettingsModal = closeSettingsModal;
+    window.toggleTheme = toggleTheme;
+    settingsBackdrop?.addEventListener("click", (event) => { if (event.target === settingsBackdrop) closeSettingsModal(); });
+    document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeSettingsModal(); });
     loadProjects().catch(() => { projectList.innerHTML = `<div class="empty">Could not load projects.</div>`; });
   </script>
 </body>
