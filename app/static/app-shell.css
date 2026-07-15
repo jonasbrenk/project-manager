@@ -548,28 +548,36 @@ input:focus, textarea:focus {
   bottom: 0;
   display: flex;
   z-index: 0;
-  /* Only present while a swipe is engaged — the card above is translucent */
   visibility: hidden;
+  background: var(--panelBg);
 }
 
 .swipe-row.dragging .swipe-actions,
 .swipe-row.swipe-open .swipe-actions { visibility: visible; }
 
 .swipe-btn {
-  width: 76px;
+  width: 68px;
+  min-height: 100%;
+  padding: 7px 4px;
   border: 0;
   color: #fff;
   font: inherit;
-  font-size: .66rem;
-  font-weight: 570;
-  letter-spacing: .01em;
+  font-size: .64rem;
+  font-weight: 620;
+  letter-spacing: 0;
   display: grid;
-  gap: 3px;
+  gap: 5px;
   place-content: center;
   justify-items: center;
+  border-radius: 0;
+  box-shadow: none;
 }
 
-.swipe-btn svg { width: 15px; height: 15px; display: block; }
+.swipe-btn:active { transform: none; filter: brightness(.9); }
+.swipe-btn svg { width: 18px; height: 18px; display: block; }
+.swipe-btn.swipe-edit { background: #007aff; }
+.swipe-btn.swipe-add { background: #30a46c; }
+.swipe-btn.swipe-move { background: #5856d6; }
 .swipe-btn.swipe-hide { background: #8e8e93; }
 .swipe-btn.swipe-delete { background: var(--danger); }
 
@@ -597,10 +605,12 @@ input:focus, textarea:focus {
   background: color-mix(in srgb, var(--card2) 60%, var(--panelBg));
 }
 
-/* Three-dot triggers: never visible on touch (swipe + long-press instead),
-   hover-revealed with a pointer — Apple shows no row chrome */
-@media (hover: none) {
-  .card-menu-trigger { display: none; }
+/* Swipe owns the complete action set on touch. Three-dot menus exist only for
+   pointer devices where swipe is not the primary interaction. */
+.swipe-enabled .card-menu-wrap { display: none; }
+
+@media (hover: none), (pointer: coarse) {
+  .card-menu-wrap { display: none; }
   .step-head { padding-right: 12px; }
   .links-grid .link-card { padding-right: 10px; }
   .proj-link-body { padding-right: 0; }
@@ -768,6 +778,22 @@ input:focus, textarea:focus {
   font-weight: 540;
   letter-spacing: -.004em;
   text-transform: none;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+}
+
+.card-menu-item svg {
+  flex: 0 0 17px;
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .card-menu-item:hover { background: var(--surfaceSoft); }
@@ -1048,6 +1074,8 @@ input:focus, textarea:focus {
 }
 
 .nav-actions .floating-trigger[aria-expanded="true"] svg { transform: rotate(45deg); }
+.nav-actions .management-actions .floating-trigger svg { fill: currentColor; stroke: none; }
+.nav-actions .management-actions .floating-trigger[aria-expanded="true"] svg { transform: none; }
 
 .nav-actions .floating-actions-menu {
   top: calc(100% + 6px);
@@ -1073,6 +1101,27 @@ input:focus, textarea:focus {
   text-transform: none;
 }
 
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.menu-item svg {
+  flex: 0 0 19px;
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.menu-item.danger svg { color: var(--danger); }
+.menu-separator { height: 1px; margin: 4px 8px; background: var(--line); }
+
 .menu-item:hover { border-color: transparent; background: var(--surfaceSoft); }
 .menu-item + .menu-item { margin-top: 1px; }
 
@@ -1091,6 +1140,67 @@ input:focus, textarea:focus {
   border-radius: 14px;
   background: var(--surfaceSoft);
 }
+
+.empty-state {
+  min-height: 132px;
+  padding: 22px 16px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
+  border-radius: 16px;
+  color: var(--muted);
+  background: var(--surfaceSoft);
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 34px;
+  height: 34px;
+  color: color-mix(in srgb, var(--muted) 72%, transparent);
+}
+
+.empty-state-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.empty-state strong { color: var(--text); font-size: .9rem; font-weight: 650; }
+.empty-state .empty-action { min-height: 36px; margin-top: 3px; padding: 7px 13px; color: var(--accent); }
+
+.project-card[type="button"] {
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.linked-project-skeleton {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--surfaceSoft), color-mix(in srgb, var(--muted) 18%, transparent), var(--surfaceSoft));
+  background-size: 220% 100%;
+  animation: linked-project-shimmer 1.15s ease-in-out infinite;
+}
+
+.proj-link-loading .proj-link-name,
+.proj-link-loading .link-subtitle {
+  color: transparent;
+  border-radius: 999px;
+  background: var(--surfaceSoft);
+}
+
+.proj-link-loading .proj-link-name { width: 58%; }
+.proj-link-loading .link-subtitle { width: 34%; }
+.proj-link-loading { opacity: 1; }
+@keyframes linked-project-shimmer { to { background-position: -220% 0; } }
 
 .modal-backdrop, .settings-backdrop, .icon-picker {
   z-index: 140;

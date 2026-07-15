@@ -1423,15 +1423,15 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="/static/app-shell.css?v=32">
-  <script src="/static/app-shell.js?v=9"></script>
+  <link rel="stylesheet" href="/static/app-shell.css?v=33">
+  <script src="/static/app-shell.js?v=10"></script>
 
 </head>
 
 <body>
   <div class="app-scroll" id="appScroll">
   <main class="page">
-    <div class="topbar"><a class="back-link" href="/" onclick="goBack(event)">‹ Projects</a><div class="nav-actions"><button id="themeToggleBtn" class="settings-trigger" type="button" onclick="toggleTheme()" aria-label="Toggle light or dark appearance"></button></div></div>
+    <div class="topbar"><a class="back-link" href="/" onclick="goBack(event)">‹ Projects</a><div class="nav-actions"><button id="themeToggleBtn" class="settings-trigger" type="button" onclick="toggleTheme()" aria-label="Toggle light or dark appearance"></button><div class="floating-actions management-actions" id="managementActions"><div id="managementActionsMenu" class="floating-actions-menu"><button class="menu-item danger" type="button" onclick="enterDeleteMode()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg><span>Select items to delete</span></button></div><button class="floating-trigger" type="button" onclick="toggleManagementActions(event)" aria-label="Manage project items" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button></div></div></div>
     <div id="loadingState" class="card loading-skeleton">Loading project…</div>
     <div id="app" class="layout" hidden></div>
   </main>
@@ -1439,10 +1439,9 @@
 
   <div class="floating-actions" id="floatingActions">
     <div id="floatingActionsMenu" class="floating-actions-menu">
-      <button class="menu-item" type="button" onclick="openAddStepFromMenu()">New task</button>
-      <button class="menu-item" type="button" onclick="openAddLinkFromMenu()">New link</button>
-      <button class="menu-item" type="button" onclick="openAddProjectLinkFromMenu()">Link project</button>
-      <button class="menu-item danger" type="button" onclick="enterDeleteMode()">Delete</button>
+      <button class="menu-item" type="button" onclick="openAddStepFromMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.2 12 2.4 2.5 5.3-5.2"/></svg><span>New task</span></button>
+      <button class="menu-item" type="button" onclick="openAddLinkFromMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 14.5 5-5M7.2 16.8l-1.1 1.1a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.8 7.2l1.1-1.1a3 3 0 0 1 4.2 4.2l-4 4a3 3 0 0 1-4.2 0"/></svg><span>New link</span></button>
+      <button class="menu-item" type="button" onclick="openAddProjectLinkFromMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h6l1.8 2H20v11H4Z"/><path d="M12 13h5M14.5 10.5v5"/></svg><span>Link project</span></button>
     </div>
     <button class="floating-trigger" type="button" onclick="toggleFloatingActions(event)" aria-label="Project actions" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
@@ -1507,6 +1506,8 @@
     const themeSwitch = document.getElementById("themeSwitch");
     const floatingActions = document.getElementById("floatingActions");
     const floatingActionsMenu = document.getElementById("floatingActionsMenu");
+    const managementActions = document.getElementById("managementActions");
+    const managementActionsMenu = document.getElementById("managementActionsMenu");
     const deleteToolbar = document.getElementById("deleteToolbar");
     const deleteCount = document.getElementById("deleteCount");
     let project = null;
@@ -1521,11 +1522,20 @@
     let toastTimer = null;
 
     const SWIPE_ICON_EDIT = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>`;
+    const SWIPE_ICON_ADD = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
+    const SWIPE_ICON_MOVE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M12 3 9 6M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>`;
     const SWIPE_ICON_DELETE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`;
     window.pmSwipeDisabled = () => deleteMode || !!moveState;
 
-    function swipeActionsHtml(editCall, deleteCall) {
-      return `<div class="swipe-actions"><button class="swipe-btn swipe-hide" type="button" onclick="event.stopPropagation(); window.pmSwipeClose?.(); ${editCall}">${SWIPE_ICON_EDIT}<span>Edit</span></button><button class="swipe-btn swipe-delete" type="button" onclick="event.stopPropagation(); window.pmSwipeClose?.(); ${deleteCall}">${SWIPE_ICON_DELETE}<span>Delete</span></button></div>`;
+    function swipeActionsHtml(actions) {
+      return `<div class="swipe-actions">${actions.map(action => `<button class="swipe-btn ${action.className}" type="button" onclick="event.stopPropagation(); window.pmSwipeClose?.(); ${action.onclick}">${action.icon}<span>${escapeHtml(action.label)}</span></button>`).join("")}</div>`;
+    }
+
+    function editDeleteSwipeActions(editCall, deleteCall) {
+      return swipeActionsHtml([
+        { label: "Edit", className: "swipe-edit", icon: SWIPE_ICON_EDIT, onclick: editCall },
+        { label: "Delete", className: "swipe-delete", icon: SWIPE_ICON_DELETE, onclick: deleteCall }
+      ]);
     }
 
     // Cache for linked project data: id -> project object (or null on error)
@@ -1688,7 +1698,7 @@
     function parseDateSafe(val) { const str = String(val || "").trim(); if (!str) return null; const dt = new Date(str); return Number.isNaN(dt.getTime()) ? null : dt.toISOString(); }
     function buildCardMenu(menuId, actions) {
       const isOpen = openContextMenuId === menuId;
-      return `<div class="card-menu-wrap${isOpen ? " open" : ""}"><button class="card-menu-trigger" type="button" onclick='toggleContextMenu(${JSON.stringify(menuId)}, event)' aria-label="More actions" aria-expanded="${isOpen}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.65"/><circle cx="12" cy="12" r="1.65"/><circle cx="19" cy="12" r="1.65"/></svg></button><div class="card-menu${isOpen ? " show" : ""}" id="${escapeHtml(menuId)}">${actions.map(action => `<button class="card-menu-item${action.danger ? " danger" : ""}" type="button" onclick="event.stopPropagation(); closeContextMenu(); ${action.onclick}">${escapeHtml(action.label)}</button>`).join("")}</div></div>`;
+      return `<div class="card-menu-wrap${isOpen ? " open" : ""}"><button class="card-menu-trigger" type="button" onclick='toggleContextMenu(${JSON.stringify(menuId)}, event)' aria-label="More actions" aria-expanded="${isOpen}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.65"/><circle cx="12" cy="12" r="1.65"/><circle cx="19" cy="12" r="1.65"/></svg></button><div class="card-menu${isOpen ? " show" : ""}" id="${escapeHtml(menuId)}">${actions.map(action => `<button class="card-menu-item${action.danger ? " danger" : ""}" type="button" onclick="event.stopPropagation(); closeContextMenu(); ${action.onclick}">${action.icon || ""}<span>${escapeHtml(action.label)}</span></button>`).join("")}</div></div>`;
     }
 
     async function api(url, options = {}) {
@@ -1745,13 +1755,13 @@
       const name = escapeHtml(normalizeDisplayText(proj?.name || link.title || "Project link"));
       const subtitle = loading ? "Project" : error ? "Unavailable" : proj?.finished ? "Finished" : proj?.seconds_left != null ? formatTimeLeft(proj.seconds_left) : "Project";
       const menu = buildCardMenu(`project-link-menu-${index}`, [
-        { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal('${link.id}');` },
-        { label: "Delete", onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
+        { label: "Edit", icon: SWIPE_ICON_EDIT, onclick: `event.stopPropagation(); openEditLinkModal('${link.id}');` },
+        { label: "Delete", icon: SWIPE_ICON_DELETE, onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
       ]);
 
-      return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card link-card-project swipe-target${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `location.href='${escapeHtml(projectUrl)}'`}">
+      return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${editDeleteSwipeActions(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card link-card-project swipe-target${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `location.href='${escapeHtml(projectUrl)}'`}">
         ${menu}
-        <div class="proj-link-icon">${loading ? "⏳" : icon}</div>
+        <div class="proj-link-icon">${loading ? '<span class="linked-project-skeleton" aria-hidden="true"></span>' : icon}</div>
         <div class="proj-link-body">
           <div class="proj-link-name">${loading ? "Loading…" : name}</div>
           <div class="link-subtitle${error ? " danger" : proj?.finished ? " done" : ""}">${escapeHtml(subtitle)}</div>
@@ -1766,6 +1776,7 @@
       modalForm.innerHTML = contentHtml;
       modalBackdrop.classList.add("show");
       initializeIconInputPreviews();
+      window.pmSheetOpened?.(modalBackdrop, 'input:not([type="hidden"]), textarea');
       modalForm.onsubmit = async (event) => {
         event.preventDefault();
         const btn = modalForm.querySelector('button[type="submit"]');
@@ -1779,7 +1790,7 @@
       };
     }
 
-    function closeModal() { modalBackdrop.classList.remove("show"); modalForm.innerHTML = ""; modalForm.onsubmit = null; closeIconPickerModal(); }
+    function closeModal() { const wasOpen = modalBackdrop.classList.contains("show"); modalBackdrop.classList.remove("show"); modalForm.innerHTML = ""; modalForm.onsubmit = null; closeIconPickerModal(); if (wasOpen) window.pmSheetClosed?.(modalBackdrop); }
     function findStepAndParent(steps, targetId, parent = null) { for (let i = 0; i < (steps || []).length; i++) { const step = steps[i]; if (step.id === targetId) return { step, parent, index: i, collection: steps }; const nested = findStepAndParent(step.children || [], targetId, step); if (nested) return nested; } return null; }
     function getStepDepth(steps, targetId, depth = 0) { for (const step of (steps || [])) { if (step.id === targetId) return depth; const nestedDepth = getStepDepth(step.children || [], targetId, depth + 1); if (nestedDepth != null) return nestedDepth; } return null; }
     function getSubtreeDepth(step) { const children = step?.children || []; return children.length ? 1 + Math.max(...children.map(getSubtreeDepth)) : 0; }
@@ -1840,8 +1851,10 @@
       moveState = null;
       await saveProject(updated);
     }
-    function toggleFloatingActions(event) { event.stopPropagation(); const isOpen = floatingActionsMenu.classList.toggle("show"); event.currentTarget?.setAttribute("aria-expanded", String(isOpen)); }
+    function toggleFloatingActions(event) { event.stopPropagation(); closeManagementActions(); const isOpen = floatingActionsMenu.classList.toggle("show"); event.currentTarget?.setAttribute("aria-expanded", String(isOpen)); }
     function closeFloatingActions() { floatingActionsMenu.classList.remove("show"); floatingActions.querySelector(".floating-trigger")?.setAttribute("aria-expanded", "false"); }
+    function toggleManagementActions(event) { event.stopPropagation(); closeFloatingActions(); const isOpen = managementActionsMenu.classList.toggle("show"); event.currentTarget?.setAttribute("aria-expanded", String(isOpen)); }
+    function closeManagementActions() { managementActionsMenu?.classList.remove("show"); managementActions?.querySelector(".floating-trigger")?.setAttribute("aria-expanded", "false"); }
     function openAddLinkFromMenu() { closeFloatingActions(); openAddLinkModal(); }
     function openAddProjectLinkFromMenu() { closeFloatingActions(); openAddProjectLinkModal(); }
     function openAddStepFromMenu() { closeFloatingActions(); openAddStepModal(); }
@@ -1852,6 +1865,7 @@
     }
     function enterDeleteMode() {
       closeFloatingActions();
+      closeManagementActions();
       moveState = null;
       deleteMode = true;
       selectedDeleteIds.clear();
@@ -1926,14 +1940,17 @@
       const currentValue = String(input?.value || "").trim();
       iconPickerBody.innerHTML = `<div class="icon-search-row"><input id="iconSearchInput" type="search" inputmode="search" autocomplete="off" placeholder="Search open-source icons" aria-label="Search open-source icons"></div><div id="iconSearchStatus" class="icon-search-status">Suggestions</div><div id="iconPickerGrid" class="icon-picker-grid">${standardIconChoicesHtml(targetInputId, fallback, currentValue)}</div><details class="icon-custom-details"><summary>Use emoji or image URL</summary><div class="icon-custom-row"><input id="iconPickerCustomInput" value="${escapeHtml(currentValue)}" placeholder="Emoji or image URL" aria-label="Custom icon value"><button class="btn btn-primary" type="button" onclick='applyCustomIcon(${JSON.stringify(targetInputId)})'>Use</button></div></details><a class="icon-source-note" href="https://iconify.design" target="_blank" rel="noreferrer">Open-source icons via Iconify</a>`;
       iconPickerBackdrop.classList.add("show");
+      window.pmSheetOpened?.(iconPickerBackdrop, "#iconSearchInput");
       document.getElementById("iconSearchInput")?.addEventListener("input", event => scheduleIconSearch(targetInputId, fallback, event.target.value));
       const customInput = document.getElementById("iconPickerCustomInput");
       customInput?.addEventListener("keydown", event => { if (event.key === "Enter") { event.preventDefault(); applyCustomIcon(targetInputId); } });
     }
 
     function closeIconPickerModal() {
+      const wasOpen = iconPickerBackdrop.classList.contains("show");
       iconPickerBackdrop.classList.remove("show");
       iconPickerBody.innerHTML = "";
+      if (wasOpen) window.pmSheetClosed?.(iconPickerBackdrop);
     }
 
     function selectStandardIcon(targetInputId, value) {
@@ -2002,14 +2019,31 @@
 
     // --- Render ---
 
+    function emptyStateHtml(kind, title, actionLabel, onclick) {
+      const icon = kind === "tasks"
+        ? `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.2 12 2.4 2.5 5.3-5.2"/></svg>`
+        : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 14.5 5-5M7.2 16.8l-1.1 1.1a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.8 7.2l1.1-1.1a3 3 0 0 1 4.2 4.2l-4 4a3 3 0 0 1-4.2 0"/></svg>`;
+      return `<div class="empty-state"><div class="empty-state-icon">${icon}</div><strong>${escapeHtml(title)}</strong><button class="btn empty-action" type="button" onclick="${onclick}">${escapeHtml(actionLabel)}</button></div>`;
+    }
+
     function renderStep(step, depth = 0) {
       const actions = [
-        { label: "Edit", onclick: `event.stopPropagation(); openStepEditor('${step.id}');` },
-        { label: "Move", onclick: `event.stopPropagation(); beginMoveStep('${step.id}');` },
-        { label: "Delete", onclick: `event.stopPropagation(); deleteStep('${step.id}');`, danger: true }
+        { label: "Edit", icon: SWIPE_ICON_EDIT, onclick: `event.stopPropagation(); openStepEditor('${step.id}');` }
       ];
-      if (depth < MAX_STEP_DEPTH) actions.splice(2, 0, { label: "Add sub-task", onclick: `event.stopPropagation(); openAddSubStepModal('${step.id}');` });
+      if (depth < MAX_STEP_DEPTH) actions.push({ label: "Add sub-task", icon: SWIPE_ICON_ADD, onclick: `event.stopPropagation(); openAddSubStepModal('${step.id}');` });
+      actions.push(
+        { label: "Move", icon: SWIPE_ICON_MOVE, onclick: `event.stopPropagation(); beginMoveStep('${step.id}');` },
+        { label: "Delete", icon: SWIPE_ICON_DELETE, onclick: `event.stopPropagation(); deleteStep('${step.id}');`, danger: true }
+      );
       const menu = buildCardMenu(`step-menu-${step.id}`, actions);
+      const swipeActions = [
+        { label: "Edit", className: "swipe-edit", icon: SWIPE_ICON_EDIT, onclick: `openStepEditor('${step.id}');` }
+      ];
+      if (depth < MAX_STEP_DEPTH) swipeActions.push({ label: "Subtask", className: "swipe-add", icon: SWIPE_ICON_ADD, onclick: `openAddSubStepModal('${step.id}');` });
+      swipeActions.push(
+        { label: "Move", className: "swipe-move", icon: SWIPE_ICON_MOVE, onclick: `beginMoveStep('${step.id}');` },
+        { label: "Delete", className: "swipe-delete", icon: SWIPE_ICON_DELETE, onclick: `deleteStep('${step.id}');` }
+      );
       const moveClass = moveState?.stepId === step.id ? " move-source" : moveState?.targetParentId === step.id ? " move-target" : "";
       const deleteClass = deleteMode && selectedDeleteIds.has(`step:${step.id}`) ? " selected-for-delete" : "";
       const childCount = (step.children || []).length;
@@ -2020,7 +2054,7 @@
         : step.until_deadline
           ? `<div class="project-meta-line"><span class="meta-date">Until project deadline</span></div>`
           : "";
-      return `<div class="swipe-row" style="view-transition-name: s-${String(step.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(`openStepEditor('${step.id}');`, `deleteStep('${step.id}');`)}<div class="step-item swipe-target${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
+      return `<div class="swipe-row" style="view-transition-name: s-${String(step.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(swipeActions)}<div class="step-item swipe-target${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
         <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onclick="event.stopPropagation()" onchange="toggleStepDone('${step.id}', this.checked)" />
         <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title-row"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div></div>${String(step.description || "").trim() ? `<div class="muted">${renderFormattedText(step.description, "", true)}</div>` : ""}
         </div>
@@ -2059,7 +2093,7 @@
 
     function renderStepTree(steps) {
       const s = steps || [];
-      if (!s.length && !moveState) return `<div class="empty">No steps yet.</div>`;
+      if (!s.length && !moveState) return emptyStateHtml("tasks", "No tasks yet", "Add task", "openAddStepModal()");
       const rows = compactCompletedRows(flattenVisibleSteps(s));
       return `<div class="step-tree">${rows.map(row => row.type === "completed" ? renderCompletedSequence(row.rows) : renderStep(row.step, row.depth)).join("")}</div>`;
     }
@@ -2080,7 +2114,7 @@
         if (aTs !== bTs) return aTs - bTs;
         return String(aProj?.name || a.title || "").localeCompare(String(bProj?.name || b.title || ""));
       });
-      if (!l.length) return `<div class="empty">No links yet.</div>`;
+      if (!l.length) return emptyStateHtml("links", "No links yet", "Add link", "openAddLinkModal()");
       const currentOrigin = window.location.origin;
 
       return `<div class="links-grid">${l.map((link, index) => {
@@ -2098,10 +2132,10 @@
           ? rawUrl.replace("PROJECTS/", currentOrigin + "/")
           : rawUrl;
 
-        return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card swipe-target${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(processedUrl)}')`}">
+        return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${editDeleteSwipeActions(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card swipe-target${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(processedUrl)}')`}">
           ${buildCardMenu(`link-menu-${index}`, [
-            { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal('${link.id}');` },
-            { label: "Delete", onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
+            { label: "Edit", icon: SWIPE_ICON_EDIT, onclick: `event.stopPropagation(); openEditLinkModal('${link.id}');` },
+            { label: "Delete", icon: SWIPE_ICON_DELETE, onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
           ])}
           <div class="link-icon">${renderIcon(link.icon, "🔗", link.title || "link icon")}</div>
           <div class="link-main">
@@ -2265,6 +2299,7 @@
     document.addEventListener("click", (e) => {
       if (openContextMenuId && !e.target.closest(".card-menu-wrap")) closeContextMenu();
       if (!e.target.closest(".floating-actions")) closeFloatingActions();
+      if (!e.target.closest(".management-actions")) closeManagementActions();
     });
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
@@ -2301,6 +2336,7 @@
     window.cancelMoveStep = cancelMoveStep;
     window.confirmMoveStep = confirmMoveStep;
     window.toggleFloatingActions = toggleFloatingActions;
+    window.toggleManagementActions = toggleManagementActions;
     window.openAddLinkFromMenu = openAddLinkFromMenu;
     window.openAddProjectLinkFromMenu = openAddProjectLinkFromMenu;
     window.openAddStepFromMenu = openAddStepFromMenu;

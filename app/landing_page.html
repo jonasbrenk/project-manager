@@ -513,8 +513,8 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 
  </style>
-  <link rel="stylesheet" href="/static/app-shell.css?v=32">
-  <script src="/static/app-shell.js?v=9"></script>
+  <link rel="stylesheet" href="/static/app-shell.css?v=33">
+  <script src="/static/app-shell.js?v=10"></script>
 </head>
 <body>
   <div class="app-scroll" id="appScroll">
@@ -523,6 +523,14 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
       <h1 class="title">Projects</h1>
       <div class="nav-actions">
         <button id="themeToggleBtn" class="landing-settings settings-trigger" type="button" onclick="toggleTheme()" aria-label="Toggle light or dark appearance"></button>
+        <div class="floating-actions management-actions" id="managementActions">
+          <div id="managementActionsMenu" class="floating-actions-menu">
+            <button class="menu-item" type="button" onclick="enterVisibilityMode()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/></svg><span>Edit visibility</span></button>
+            <div class="menu-separator"></div>
+            <button class="menu-item danger" type="button" onclick="enterDeleteMode()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg><span>Select to delete</span></button>
+          </div>
+          <button class="floating-trigger" type="button" onclick="toggleManagementActions(event)" aria-label="Manage projects" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
+        </div>
       </div>
     </header>
 
@@ -533,9 +541,9 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
         <button id="searchClear" class="search-clear" type="button" onclick="clearProjectSearch()" aria-label="Clear search" hidden>×</button>
       </div>
       <div class="segmented-control" role="group" aria-label="Filter projects">
-        <button class="segment is-active" type="button" data-filter="all" onclick="setProjectFilter('all')">All <span id="allCount">0</span></button>
-        <button class="segment" type="button" data-filter="open" onclick="setProjectFilter('open')">Open <span id="openCount">0</span></button>
-        <button class="segment" type="button" data-filter="finished" onclick="setProjectFilter('finished')">Finished <span id="doneCount">0</span></button>
+        <button class="segment is-active" type="button" data-filter="all" aria-pressed="true" onclick="setProjectFilter('all')">All <span id="allCount">0</span></button>
+        <button class="segment" type="button" data-filter="open" aria-pressed="false" onclick="setProjectFilter('open')">Open <span id="openCount">0</span></button>
+        <button class="segment" type="button" data-filter="finished" aria-pressed="false" onclick="setProjectFilter('finished')">Finished <span id="doneCount">0</span></button>
       </div>
       <div class="projects-surface">
         <div id="projectList" class="project-list" aria-live="polite"><div class="empty loading-skeleton">Loading projects…</div></div>
@@ -556,12 +564,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   </div>
 
   <div class="floating-actions" id="floatingActions">
-    <div id="floatingActionsMenu" class="floating-actions-menu">
-      <button class="menu-item" type="button" onclick="openCreateProjectModal()">New project</button>
-      <button class="menu-item" type="button" onclick="enterVisibilityMode()">Visibility</button>
-      <button class="menu-item danger" type="button" onclick="enterDeleteMode()">Delete</button>
-    </div>
-    <button class="floating-trigger" type="button" onclick="toggleFloatingActions(event)" aria-label="Project actions" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="floating-trigger" type="button" onclick="openCreateProjectModal()" aria-label="New project"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
 
   <div id="createProjectBackdrop" class="modal-backdrop">
@@ -618,6 +621,8 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     const createProjectBackdrop = document.getElementById("createProjectBackdrop");
     const floatingActions = document.getElementById("floatingActions");
     const floatingActionsMenu = document.getElementById("floatingActionsMenu");
+    const managementActions = document.getElementById("managementActions");
+    const managementActionsMenu = document.getElementById("managementActionsMenu");
     const deleteToolbar = document.getElementById("deleteToolbar");
     const deleteCount = document.getElementById("deleteCount");
     const toolbarHint = document.getElementById("toolbarHint");
@@ -778,7 +783,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     function buildIconPickerHtml(targetInputId, fallback) {
       const currentValue = String(document.getElementById(targetInputId)?.value || "").trim();
       return `
-        <div id="iconPicker" class="icon-picker show" data-target-input-id="${targetInputId}" data-fallback="${fallback}">
+        <div id="iconPicker" class="icon-picker show" data-target-input-id="${targetInputId}" data-fallback="${fallback}" role="dialog" aria-modal="true" aria-label="Choose project icon">
           <div class="icon-picker-panel">
             <div class="panel-head">
               <h2 class="panel-title">Choose icon</h2>
@@ -799,6 +804,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
       closeIconPicker();
       document.body.insertAdjacentHTML("beforeend", buildIconPickerHtml(targetInputId, fallback));
       wireIconPicker(targetInputId);
+      window.pmSheetOpened?.(document.getElementById("iconPicker"), "#landingIconSearchInput");
     }
 
     function wireIconPicker(targetInputId) {
@@ -823,7 +829,10 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     }
 
     function closeIconPicker() {
-      document.getElementById("iconPicker")?.remove();
+      const picker = document.getElementById("iconPicker");
+      if (!picker) return;
+      window.pmSheetClosed?.(picker);
+      picker.remove();
     }
 
     function selectStandardIcon(targetInputId, value) {
@@ -888,25 +897,40 @@ matchMedia("(prefers-color-scheme: light)").addEventListener("change", event => 
 });
 
 function closeCreateProjectModal() {
+  const wasOpen = createProjectBackdrop.classList.contains("show");
   projectForm.reset();
   updateIconPreview("icon");
   createProjectBackdrop.classList.remove("show");
+  if (wasOpen) window.pmSheetClosed?.(createProjectBackdrop);
 }
 
 function openCreateProjectModal() {
   closeFloatingActions();
+  closeManagementActions();
   createProjectBackdrop.classList.add("show");
+  window.pmSheetOpened?.(createProjectBackdrop, "#name");
 }
 
 function toggleFloatingActions(event) {
   event.stopPropagation();
-  const isOpen = floatingActionsMenu.classList.toggle("show");
+  const isOpen = floatingActionsMenu?.classList.toggle("show") || false;
   event.currentTarget?.setAttribute("aria-expanded", String(isOpen));
 }
 
 function closeFloatingActions() {
-  floatingActionsMenu.classList.remove("show");
+  floatingActionsMenu?.classList.remove("show");
   floatingActions.querySelector(".floating-trigger")?.setAttribute("aria-expanded", "false");
+}
+
+function toggleManagementActions(event) {
+  event.stopPropagation();
+  const isOpen = managementActionsMenu.classList.toggle("show");
+  event.currentTarget.setAttribute("aria-expanded", String(isOpen));
+}
+
+function closeManagementActions() {
+  managementActionsMenu?.classList.remove("show");
+  managementActions?.querySelector(".floating-trigger")?.setAttribute("aria-expanded", "false");
 }
 
 function updateDeleteToolbar() {
@@ -928,6 +952,7 @@ function updateDeleteToolbar() {
 
 function enterDeleteMode() {
   closeFloatingActions();
+  closeManagementActions();
   visibilityMode = false;
   deleteMode = true;
   selectedProjectIds.clear();
@@ -937,6 +962,7 @@ function enterDeleteMode() {
 
 function enterVisibilityMode() {
   closeFloatingActions();
+  closeManagementActions();
   deleteMode = false;
   visibilityMode = true;
   selectedProjectIds = new Set(currentProjects.filter(project => !hiddenIds.has(project.id)).map(project => project.id));
@@ -999,7 +1025,9 @@ function confirmVisibilityChanges() {
 function setProjectFilter(filter) {
   activeProjectFilter = ["all", "open", "finished"].includes(filter) ? filter : "all";
   document.querySelectorAll(".segment").forEach(button => {
-    button.classList.toggle("is-active", button.dataset.filter === activeProjectFilter);
+    const isActive = button.dataset.filter === activeProjectFilter;
+    button.classList.toggle("is-active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
   });
   renderProjects();
 }
@@ -1067,7 +1095,7 @@ function renderProjects() {
     return `
       <div class="swipe-row" style="view-transition-name: p-${String(p.id).replace(/[^a-zA-Z0-9-]/g, "")}">
       ${swipeable ? `<div class="swipe-actions"><button class="swipe-btn swipe-hide" type="button" onclick="swipeToggleHidden(event, '${p.id}')">${hiddenIds.has(p.id) ? SWIPE_ICON_SHOW : SWIPE_ICON_HIDE}<span>${hiddenIds.has(p.id) ? "Show" : "Hide"}</span></button><button class="swipe-btn swipe-delete" type="button" onclick="swipeDelete(event, '${p.id}')">${SWIPE_ICON_DELETE}<span>Delete</span></button></div>` : ""}
-      <a class="project-card swipe-target${p.finished ? " is-finished" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" href="/project?id=${encodeURIComponent(p.id)}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : visibilityMode ? `togglePendingVisibility(event, '${p.id}')` : ""}">
+      <${deleteMode || visibilityMode ? "button" : "a"} class="project-card swipe-target${p.finished ? " is-finished" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" ${deleteMode || visibilityMode ? `type="button" aria-pressed="${deleteMode ? selectedProjectIds.has(p.id) : isVisible}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : `togglePendingVisibility(event, '${p.id}')`}"` : `href="/project?id=${encodeURIComponent(p.id)}"`}>
         <div class="project-icon">
           ${renderIcon(p.icon, "📌", p.name)}
         </div>
@@ -1082,8 +1110,8 @@ function renderProjects() {
           ${Number(p.task_total) > 0 ? `<div class="project-progress"><div class="project-progress-track"><div class="project-progress-fill" style="width:${Math.round((Number(p.task_done) || 0) / Number(p.task_total) * 100)}%"></div></div><span>${Number(p.task_done) || 0}/${Number(p.task_total)} tasks</span></div>` : ""}
           ${window.pmMeta.line({ deadline: p.deadline, secondsLeft: p.seconds_left, finished: p.finished })}
         </div>
-        ${visibilityMode ? `<button class="btn btn-secondary visibility-toggle" type="button" onclick="togglePendingVisibility(event, '${p.id}')">${isVisible ? "Visible" : "Hidden"}</button>` : ""}
-      </a>
+        ${visibilityMode ? `<span class="btn btn-secondary visibility-toggle">${isVisible ? "Visible" : "Hidden"}</span>` : ""}
+      </${deleteMode || visibilityMode ? "button" : "a"}>
       </div>`;
   };
 
@@ -1094,7 +1122,9 @@ function renderProjects() {
     const visible = visibilityMode ? filtered : filtered.filter(p => !hiddenIds.has(p.id));
     const hidden = visibilityMode ? [] : filtered.filter(p => hiddenIds.has(p.id));
 
-  projectList.innerHTML = visible.length ? visible.map(renderCard).join("") : `<div class="empty">${query || activeProjectFilter !== "all" ? "No matching projects." : "No active projects yet."}</div>`;
+  projectList.innerHTML = visible.length ? visible.map(renderCard).join("") : query || activeProjectFilter !== "all"
+    ? `<div class="empty">No matching projects.</div>`
+    : `<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.5h6l2-2h9v13h-17Z"/></svg></div><strong>No projects yet</strong><button class="btn empty-action" type="button" onclick="openCreateProjectModal()">Create project</button></div>`;
   
   const hSection = document.getElementById("hiddenSection");
   if (hidden.length) {
@@ -1164,6 +1194,7 @@ function renderCachedProjects() {
     window.openCreateProjectModal = openCreateProjectModal;
     window.closeCreateProjectModal = closeCreateProjectModal;
     window.toggleFloatingActions = toggleFloatingActions;
+    window.toggleManagementActions = toggleManagementActions;
     window.enterDeleteMode = enterDeleteMode;
     window.enterVisibilityMode = enterVisibilityMode;
     window.cancelActionMode = cancelActionMode;
@@ -1183,12 +1214,13 @@ function renderCachedProjects() {
     });
     settingsBackdrop?.addEventListener("click", (event) => { if (event.target === settingsBackdrop) closeSettingsModal(); });
     createProjectBackdrop?.addEventListener("click", (event) => { if (event.target === createProjectBackdrop) closeCreateProjectModal(); });
-    document.addEventListener("click", () => closeFloatingActions());
+    document.addEventListener("click", () => { closeFloatingActions(); closeManagementActions(); });
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") return;
       closeSettingsModal();
       closeCreateProjectModal();
       closeFloatingActions();
+      closeManagementActions();
     });
     updateDeleteToolbar();
     renderCachedProjects();

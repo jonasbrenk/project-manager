@@ -251,10 +251,8 @@ function pmInitSheetDismiss() {
 }
 
 /* Shared swipe engine: any `.swipe-row` (wrapper of `.swipe-actions` +
-   `.swipe-target` foreground) swipes left to reveal its actions, iOS style.
-   Long-pressing a row that has a `.card-menu-trigger` opens its context menu
-   — the touch replacement for the three-dot button. Pages can veto swiping
-   via `window.pmSwipeDisabled` (e.g. during delete/move modes). */
+   `.swipe-target` foreground) swipes left to reveal its complete action set,
+   iOS style. Pointer devices use the three-dot menu instead. */
 function pmInitSwipe() {
   let row = null;
   let startX = 0;
@@ -264,11 +262,13 @@ function pmInitSwipe() {
   let active = false;
   let openRow = null;
   let suppressClick = false;
-  let pressTimer = null;
 
   const target = r => r.querySelector(".swipe-target");
   const disabled = () => typeof window.pmSwipeDisabled === "function" && window.pmSwipeDisabled();
-  const cancelPress = () => { clearTimeout(pressTimer); pressTimer = null; };
+
+  if (matchMedia("(pointer: coarse)").matches) {
+    document.documentElement.classList.add("swipe-enabled");
+  }
 
   function close() {
     if (!openRow) return;
@@ -280,6 +280,7 @@ function pmInitSwipe() {
   window.pmSwipeClose = close;
 
   document.addEventListener("touchstart", e => {
+    document.documentElement.classList.add("swipe-enabled");
     suppressClick = false;
     const r = e.target.closest(".swipe-row");
     if (openRow && r !== openRow) close();
@@ -290,21 +291,12 @@ function pmInitSwipe() {
     offset = 0;
     active = false;
     width = row.querySelector(".swipe-actions")?.offsetWidth || 0;
-    const trigger = row !== openRow && !e.target.closest(".card-menu") ? row.querySelector(".card-menu-trigger") : null;
-    if (trigger) {
-      pressTimer = setTimeout(() => {
-        pressTimer = null;
-        suppressClick = true;
-        trigger.click();
-      }, 480);
-    }
   }, { passive: true });
 
   document.addEventListener("touchmove", e => {
     if (!row) return;
     const dx = e.touches[0].clientX - startX;
     const dy = Math.abs(e.touches[0].clientY - startY);
-    if (Math.abs(dx) > 10 || dy > 10) cancelPress();
     if (!active && width && Math.abs(dx) > 12 && Math.abs(dx) > dy * 1.4) active = true;
     if (!active) return;
     const base = row === openRow ? -width : 0;
@@ -315,7 +307,6 @@ function pmInitSwipe() {
   }, { passive: true });
 
   document.addEventListener("touchend", () => {
-    cancelPress();
     if (!row) return;
     row.classList.remove("dragging");
     if (active) {
@@ -336,7 +327,6 @@ function pmInitSwipe() {
   }, { passive: true });
 
   document.addEventListener("touchcancel", () => {
-    cancelPress();
     if (row) row.classList.remove("dragging");
     row = null;
     active = false;
@@ -356,6 +346,38 @@ function pmInitSwipe() {
     }
   }, true);
 }
+
+/* Native-feeling sheet focus: focus the first useful field, keep keyboard
+   navigation inside the active sheet, and return focus to its trigger. */
+window.pmSheetOpened = (sheet, preferredSelector = "") => {
+  if (!sheet) return;
+  sheet._pmReturnFocus = document.activeElement;
+  requestAnimationFrame(() => {
+    const preferred = preferredSelector ? sheet.querySelector(preferredSelector) : null;
+    const fallback = sheet.querySelector('input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), button:not([disabled]), [href]');
+    (preferred || fallback)?.focus({ preventScroll: true });
+  });
+};
+
+window.pmSheetClosed = sheet => {
+  const target = sheet?._pmReturnFocus;
+  if (target?.isConnected) requestAnimationFrame(() => target.focus({ preventScroll: true }));
+};
+
+document.addEventListener("keydown", event => {
+  if (event.key !== "Tab") return;
+  const sheets = [...document.querySelectorAll('[aria-modal="true"]')]
+    .filter(sheet => sheet.getClientRects().length && getComputedStyle(sheet).visibility !== "hidden");
+  const sheet = sheets.at(-1);
+  if (!sheet) return;
+  const focusable = [...sheet.querySelectorAll('button:not([disabled]), [href], input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+    .filter(element => element.getClientRects().length);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable.at(-1);
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+});
 
 function pmInit() {
   pmInitScroll();
