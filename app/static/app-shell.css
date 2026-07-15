@@ -19,9 +19,15 @@
   --successSoft: rgba(48, 209, 88, .14);
   --successBorder: rgba(48, 209, 88, .28);
   --successText: #63e682;
+  --warning: #ff9f0a;
   --shadow: 0 18px 55px rgba(0, 0, 0, .36);
   --radius: 20px;
   --spring: cubic-bezier(.2, .8, .2, 1);
+  /* iOS-style type scale: body / subhead / footnote / caption */
+  --fs-body: .95rem;
+  --fs-sub: .88rem;
+  --fs-footnote: .8rem;
+  --fs-caption: .74rem;
 }
 
 html[data-theme="light"] {
@@ -44,6 +50,7 @@ html[data-theme="light"] {
   --successSoft: rgba(52, 199, 89, .12);
   --successBorder: rgba(52, 199, 89, .24);
   --successText: #248a3d;
+  --warning: #ff9500;
   --shadow: 0 1px 2px rgba(37, 45, 62, .05), 0 4px 14px rgba(37, 45, 62, .05);
 }
 
@@ -137,12 +144,12 @@ button:disabled, .btn:disabled { opacity: .45; cursor: default; transform: none;
   /* Safe-area is handled by the sticky headers themselves */
   padding-top: 20px;
   /* Clear the floating action button so the last items can scroll past it */
-  padding-bottom: calc(104px + env(safe-area-inset-bottom));
+  padding-bottom: calc(86px + max(18px, env(safe-area-inset-bottom)));
 }
 
 /* Bottom toolbars are taller than the FAB — give the list extra clearance while one is up */
 body:has(.delete-toolbar.show, .move-toolbar) .page {
-  padding-bottom: calc(208px + env(safe-area-inset-bottom));
+  padding-bottom: calc(190px + max(18px, env(safe-area-inset-bottom)));
 }
 
 .landing-page {
@@ -343,12 +350,16 @@ input:focus, textarea:focus {
 
 .topbar .back-link {
   min-height: 40px;
+  max-width: 58vw;
   padding: 7px 2px;
   border: 0;
   background: transparent;
   color: var(--accent);
   font-size: .95rem;
   font-weight: 570;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .topbar .settings-trigger {
@@ -431,35 +442,41 @@ input:focus, textarea:focus {
 
 .project-description { font-size: .88rem; line-height: 1.4; }
 
+/* Date left, remaining time right — one quiet footnote row, like Reminders */
 .project-meta-line {
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: space-between;
+  gap: 10px;
   color: var(--muted);
-  font-size: .78rem;
+  font-size: var(--fs-caption);
   font-variant-numeric: tabular-nums;
 }
 
-.project-meta-item {
+.meta-date {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.project-meta-separator { color: color-mix(in srgb, var(--muted) 45%, transparent); }
+.meta-countdown { flex: 0 0 auto; font-weight: 590; }
 
-.project-meta-line .meta-danger { color: var(--dangerText); font-weight: 590; }
+.project-meta-line .meta-danger { color: var(--danger); font-weight: 590; }
 .project-meta-line .meta-success { color: var(--successText); font-weight: 590; }
-.project-meta-line .meta-warning { color: var(--accent); font-weight: 590; }
+.project-meta-line .meta-warning { color: var(--warning); font-weight: 590; }
 
-/* Meta line inside list cards mirrors the project-view hierarchy, small text */
-.project-card .project-meta-line { font-size: .74rem; }
-.project-card .project-desc { font-size: .8rem; }
+/* Type scale applied to list rows */
+.project-card .project-name { font-size: var(--fs-body); }
+.project-card .project-desc { font-size: var(--fs-footnote); }
 .project-card .project-card-body { gap: 8px; }
+.project-description { font-size: var(--fs-sub); }
+.links-grid .link-title, .links-grid .proj-link-name { font-size: var(--fs-body); }
+.link-subtitle { font-size: var(--fs-caption); }
+.step-item .step-title { font-size: var(--fs-body); margin-bottom: 2px; }
+.step-item .muted { font-size: var(--fs-footnote); }
 .step-item .step-sub { display: block; }
-.step-item .project-meta-line { font-size: .74rem; }
 
 .stats {
   padding: 3px;
@@ -489,6 +506,64 @@ input:focus, textarea:focus {
 .project-card {
   content-visibility: auto;
   contain-intrinsic-size: auto 120px;
+}
+
+/* Swipe-to-reveal actions on list rows (touch), iOS Mail style */
+.swipe-row {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  z-index: 0;
+  /* Only present while a swipe is engaged — the card above is translucent */
+  visibility: hidden;
+}
+
+.swipe-row.dragging .swipe-actions,
+.swipe-row.swipe-open .swipe-actions { visibility: visible; }
+
+.swipe-btn {
+  width: 76px;
+  border: 0;
+  color: #fff;
+  font: inherit;
+  font-size: .66rem;
+  font-weight: 570;
+  letter-spacing: .01em;
+  display: grid;
+  gap: 3px;
+  place-content: center;
+  justify-items: center;
+}
+
+.swipe-btn svg { width: 15px; height: 15px; display: block; }
+.swipe-btn.swipe-hide { background: #8e8e93; }
+.swipe-btn.swipe-delete { background: var(--danger); }
+
+.swipe-row .project-card {
+  position: relative;
+  z-index: 1;
+  transition: transform .3s var(--spring), border-color .15s, background .15s;
+}
+
+.swipe-row.dragging .project-card { transition: border-color .15s, background .15s; }
+
+/* Cards are fully opaque: their former alpha tint flattened onto the solid
+   panel color, so nothing (e.g. swipe actions) shows through */
+.project-card { background: color-mix(in srgb, var(--accent) 6%, var(--panelBg)); }
+.project-card:hover { background: color-mix(in srgb, var(--accent) 11%, var(--panelBg)); }
+.project-card.is-finished { background: color-mix(in srgb, var(--muted) 7%, var(--panelBg)); }
+
+.project-card.selected-for-delete,
+.project-card.visibility-selected {
+  background: color-mix(in srgb, var(--accent) 18%, var(--panelBg));
 }
 
 .project-card:hover, .link-card:hover {
@@ -782,7 +857,9 @@ input:focus, textarea:focus {
 
 .floating-actions {
   right: max(18px, env(safe-area-inset-right));
-  bottom: calc(18px + env(safe-area-inset-bottom));
+  /* The safe-area inset replaces the margin in PWA rather than adding to it —
+     otherwise floating controls hover a home-indicator height too high */
+  bottom: max(18px, calc(env(safe-area-inset-bottom) + 2px));
   z-index: 70;
 }
 
@@ -956,9 +1033,34 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 }
 
 .modal, .modal-panel { width: min(560px, 100%); }
-.modal-head { min-height: 38px; margin-bottom: 12px; flex-wrap: nowrap; }
-.modal-head h3 { flex: 1; padding-left: 38px; font-size: 1.02rem; font-weight: 680; text-align: center; }
-.modal-head .icon-btn { border: 0; background: transparent; color: var(--muted); }
+.modal-head {
+  min-height: 38px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.modal-head h3 { flex: 1; padding-left: 32px; font-size: 1.02rem; font-weight: 680; text-align: center; }
+
+/* One close-button style for every modal: small round chip, iOS sheet style */
+.modal-head .icon-btn, .panel-x {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surfaceSoft);
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+}
 
 :is(#modalForm, #projectForm) {
   max-height: min(72dvh, 680px);
@@ -991,6 +1093,7 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 :is(#modalForm, #projectForm) .field label { color: var(--muted); font-size: .7rem; font-weight: 560; }
 
 :is(#modalForm, #projectForm) .field > input,
+:is(#modalForm, #projectForm) .name-icon-row > input,
 :is(#modalForm, #projectForm) .field > textarea {
   min-height: 34px;
   padding: 5px 0;
@@ -998,6 +1101,21 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+/* Icon button inline at the left of the name input — no separate icon row */
+.name-icon-row {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.name-icon-row .icon-picker-button {
+  width: 44px;
+  min-height: 44px;
+  border-radius: 11px;
 }
 
 :is(#modalForm, #projectForm) .field > textarea { min-height: 72px; }
@@ -1200,7 +1318,7 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 .proj-picker-grid .proj-picker-meta { margin-top: 2px; font-size: .7rem; }
 
 .delete-toolbar, .move-toolbar {
-  bottom: calc(12px + env(safe-area-inset-bottom));
+  bottom: max(12px, calc(env(safe-area-inset-bottom) + 2px));
   border: 1px solid var(--line);
   background: color-mix(in srgb, var(--panelBg) 92%, transparent);
   backdrop-filter: blur(28px) saturate(170%);
@@ -1208,18 +1326,65 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   box-shadow: 0 16px 44px rgba(0, 0, 0, .3);
 }
 
-.step-tree { gap: 8px; }
+/* Tasks render as one grouped inset list (Reminders-style): flat rows with
+   hairline separators inside a single rounded container; depth = indent */
+.step-tree {
+  gap: 0;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--card2) 70%, transparent);
+}
+
+.step-tree > :first-child { border-radius: 15px 15px 0 0; }
+.step-tree > :last-child { border-radius: 0 0 15px 15px; }
+.step-tree > :only-child { border-radius: 15px; }
+
+.step-item {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 11px 12px;
+  gap: 6px;
+}
+
+.step-tree > * + * { border-top: .5px solid var(--line); }
 
 .step-item[data-depth] {
   width: auto;
-  margin-left: calc(var(--tree-depth, 0) * 12px);
+  margin-left: 0;
+  padding-left: calc(12px + var(--tree-depth, 0) * 24px);
 }
 
-.step-item[data-depth]:not([data-depth="0"]) {
-  border-left: 3px solid color-mix(in srgb, var(--accent) 48%, var(--line));
+.step-item[data-depth]:not([data-depth="0"]) { border-left: 0; }
+
+/* Circular iOS checkboxes on every viewport */
+.step-check {
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  margin: 1px 0 0;
+  padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--muted) 42%, var(--line));
+  background: transparent;
+  cursor: pointer;
 }
 
-.step-item[data-depth="2"] { border-left-color: color-mix(in srgb, var(--accent) 76%, var(--line)); }
+.step-check:checked {
+  border-color: var(--accent);
+  background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.2 6.6 11 12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 12px 12px no-repeat;
+}
+
+/* Selection/move states use inset rings so they stay inside the group */
+.step-item.selected-for-delete { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--danger) 30%, transparent); }
+.step-item.move-source { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 32%, transparent); }
+.step-item.move-target { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--successText) 26%, transparent); }
 
 .step-title-row {
   display: flex;
@@ -1233,20 +1398,19 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 .step-item.is-collapsible { cursor: pointer; }
 
 .step-item.is-collapsed {
-  margin-bottom: 4px;
-  box-shadow:
-    0 3px 0 -1px color-mix(in srgb, var(--card2) 88%, var(--line)),
-    0 6px 0 -2px color-mix(in srgb, var(--card2) 68%, var(--line));
+  margin-bottom: 0;
+  box-shadow: none;
 }
 
 .completed-sequence {
   width: auto;
-  min-height: 30px;
-  margin-left: calc(var(--tree-depth, 0) * 12px);
-  padding: 0;
+  min-height: 34px;
+  margin-left: 0;
+  padding: 4px 12px 4px calc(12px + var(--tree-depth, 0) * 24px);
   border: 0;
-  border-radius: 9px;
+  border-radius: 0;
   background: transparent;
+  text-align: left;
   color: var(--muted);
   font: inherit;
   font-size: 1.15rem;
@@ -1270,7 +1434,7 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 .app-toast {
   position: fixed;
   left: 50%;
-  bottom: calc(86px + env(safe-area-inset-bottom));
+  bottom: calc(68px + max(18px, env(safe-area-inset-bottom)));
   z-index: 160;
   max-width: min(420px, calc(100vw - 32px));
   padding: 11px 15px;
@@ -1389,7 +1553,7 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   .page {
     width: calc(100% - 20px);
     padding-top: 10px;
-    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    padding-bottom: calc(80px + max(16px, env(safe-area-inset-bottom)));
   }
 
   .landing-page { width: calc(100% - 20px); gap: 10px; }
@@ -1423,7 +1587,7 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
     max-height: calc(92dvh - env(safe-area-inset-top));
     border-radius: 24px 24px 0 0;
     border-bottom: 0;
-    padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+    padding: 18px 16px max(18px, calc(env(safe-area-inset-bottom) + 4px));
   }
 
   :is(#modalForm, #projectForm) { max-height: calc(78dvh - env(safe-area-inset-top)); }
@@ -1431,6 +1595,8 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 
   .modal::before, .modal-panel::before, .settings-modal::before, .icon-picker-panel::before {
     content: "";
+    display: block;
+    flex: 0 0 auto;
     width: 36px;
     height: 5px;
     border-radius: 999px;
@@ -1438,11 +1604,13 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
     margin: -8px auto 10px;
   }
 
-  .step-item { padding: 12px; }
-  .step-item[data-depth] { margin-left: calc(var(--tree-depth, 0) * 9px); }
-  .completed-sequence { margin-left: calc(var(--tree-depth, 0) * 9px); }
+  .step-item { padding: 11px 12px; }
+  .step-item[data-depth] { padding-left: calc(12px + var(--tree-depth, 0) * 18px); }
+  .completed-sequence { padding-left: calc(12px + var(--tree-depth, 0) * 18px); }
   .danger-zone { margin-top: 8px; }
 }
+
+::view-transition-group(*) { animation-duration: .3s; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
