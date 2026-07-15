@@ -1,52 +1,74 @@
-/* Shared meta-line component: renders deadline/status as an iOS-style
-   secondary text line ("Due 14 Mar · 3d 4h left") identically on all pages. */
+/* Runs a DOM mutation inside a View Transition so list changes (hide/show,
+   delete, reorder) animate smoothly; falls back to an instant update. Rows
+   with a unique view-transition-name morph between positions. */
+window.pmAnimate = fn => {
+  if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.startViewTransition(fn);
+  } else {
+    fn();
+  }
+};
+
+/* Shared meta-line component: iOS-style secondary line, identical on all
+   pages. Relative date on the left ("Tomorrow, 18:30"), remaining time on
+   the right ("3d 4h"), colored by urgency: red overdue, orange < 24h. */
 window.pmMeta = (() => {
   const esc = value => String(value).replace(/[&<>"']/g, c => (
     { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]
   ));
 
-  function compactDate(value) {
+  function relativeDate(value) {
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return null;
-    const month = dt.toLocaleDateString([], { month: "long" });
-    const year = dt.getFullYear() !== new Date().getFullYear() ? ` ${dt.getFullYear()}` : "";
-    const date = `${dt.getDate()}. ${month}${year}`;
-    if (!dt.getHours() && !dt.getMinutes()) return date;
-    return `${date}, ${dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    const now = new Date();
+    const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const dayDiff = Math.round((startOfDay(dt) - startOfDay(now)) / 86400000);
+    let date;
+    if (dayDiff === 0) date = "Today";
+    else if (dayDiff === 1) date = "Tomorrow";
+    else if (dayDiff === -1) date = "Yesterday";
+    else if (dayDiff > 1 && dayDiff < 7) date = dt.toLocaleDateString([], { weekday: "long" });
+    else {
+      const year = dt.getFullYear() !== now.getFullYear() ? ` ${dt.getFullYear()}` : "";
+      date = `${dt.getDate()}. ${dt.toLocaleDateString([], { month: "long" })}${year}`;
+    }
+    if (dt.getHours() || dt.getMinutes()) {
+      date += `, ${dt.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+    }
+    return date;
   }
 
   function timeLeft(seconds) {
     const d = Math.floor(seconds / 86400);
     const h = Math.floor((seconds % 86400) / 3600);
     const m = Math.floor((seconds % 3600) / 60);
-    if (d > 0) return `${d}d ${h}h left`;
-    if (h > 0) return `${h}h ${m}m left`;
-    return `${m}m left`;
+    if (d > 0) return `${d}d ${h}h`;
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
   }
 
-  function items({ deadline = null, secondsLeft = null, finished = false } = {}) {
-    const list = [];
-    const date = deadline ? compactDate(deadline) : null;
-    if (date) list.push(`<span class="project-meta-item">📅 ${esc(date)}</span>`);
+  function line({ deadline = null, secondsLeft = null, finished = false } = {}) {
+    const date = deadline ? relativeDate(deadline) : null;
+    let left = "";
+    let right = "";
     if (finished) {
-      list.push(`<span class="project-meta-item meta-success">✓ Finished</span>`);
-    } else if (secondsLeft == null) {
-      if (!date) list.push(`<span class="project-meta-item">No deadline</span>`);
-    } else if (secondsLeft <= 0) {
-      list.push(`<span class="project-meta-item meta-danger">◷ Overdue</span>`);
+      left = date ? `<span class="meta-date">${esc(date)}</span>` : "";
+      right = `<span class="meta-countdown meta-success">✓ Finished</span>`;
+    } else if (!date) {
+      left = `<span class="meta-date">No deadline</span>`;
+    } else if (secondsLeft != null && secondsLeft <= 0) {
+      left = `<span class="meta-date meta-danger">${esc(date)}</span>`;
+      right = `<span class="meta-countdown meta-danger">Overdue</span>`;
     } else {
-      const soon = secondsLeft <= 7 * 86400;
-      list.push(`<span class="project-meta-item${soon ? " meta-warning" : ""}">◷ ${esc(timeLeft(secondsLeft))}</span>`);
+      const soon = secondsLeft != null && secondsLeft <= 86400;
+      left = `<span class="meta-date${soon ? " meta-warning" : ""}">${esc(date)}</span>`;
+      if (secondsLeft != null) right = `<span class="meta-countdown${soon ? " meta-warning" : ""}">${esc(timeLeft(secondsLeft))}</span>`;
     }
-    return list;
+    if (!left && !right) return "";
+    return `<div class="project-meta-line">${left}${right}</div>`;
   }
 
-  function wrap(list) {
-    if (!list.length) return "";
-    return `<div class="project-meta-line">${list.join(`<span class="project-meta-separator">•</span>`)}</div>`;
-  }
-
-  return { line: opts => wrap(items(opts)), items, wrap };
+  return { line };
 })();
 
 /* Drives the iOS-style header behavior. The headers condense linearly with
@@ -113,5 +135,65 @@ function pmInitScroll() {
   update();
 }
 
-if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pmInitScroll);
-else pmInitScroll();
+/* iOS edge-swipe back: drag from the left screen edge to slide the page
+   away and navigate back. Only active on pages with a back link. */
+function pmInitEdgeBack() {
+  const surface = document.getElementById("appScroll");
+  if (!surface || !document.querySelector(".back-link")) return;
+  let startX = null;
+  let startY = 0;
+  let dx = 0;
+  let active = false;
+
+  function goBack() {
+    if (document.referrer.startsWith(location.origin) && history.length > 1) history.back();
+    else location.href = "/";
+  }
+
+  window.addEventListener("touchstart", e => {
+    const t = e.touches[0];
+    startX = t.clientX <= 28 ? t.clientX : null;
+    startY = t.clientY;
+    dx = 0;
+    active = false;
+  }, { passive: true });
+
+  window.addEventListener("touchmove", e => {
+    if (startX == null) return;
+    const t = e.touches[0];
+    dx = t.clientX - startX;
+    const dy = Math.abs(t.clientY - startY);
+    if (!active && dx > 14 && dx > dy * 1.4) active = true;
+    if (active) {
+      surface.style.transition = "none";
+      surface.style.transform = `translateX(${Math.max(0, dx)}px)`;
+    }
+  }, { passive: true });
+
+  window.addEventListener("touchend", () => {
+    if (startX == null) return;
+    surface.style.transition = "transform .28s cubic-bezier(.2, .8, .2, 1)";
+    if (active && dx > 90) {
+      surface.style.transform = "translateX(100vw)";
+      setTimeout(goBack, 130);
+    } else {
+      surface.style.transform = "";
+    }
+    startX = null;
+    active = false;
+  }, { passive: true });
+
+  // Restore the surface when returning via back/forward cache.
+  window.addEventListener("pageshow", () => {
+    surface.style.transition = "none";
+    surface.style.transform = "";
+  });
+}
+
+function pmInit() {
+  pmInitScroll();
+  pmInitEdgeBack();
+}
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pmInit);
+else pmInit();
