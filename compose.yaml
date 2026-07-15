@@ -1,0 +1,25 @@
+services:
+  project-manager:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      secrets:
+        - host_ca
+    container_name: project-manager
+    init: true
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - type: bind
+        source: ./app/data
+        target: /srv/project-manager/app/data
+    environment:
+      TZ: Europe/Berlin
+    security_opt:
+      - no-new-privileges:true
+    stop_grace_period: 15s
+
+secrets:
+  host_ca:
+    file: /etc/ssl/certs/ca-certificates.crt

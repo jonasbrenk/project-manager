@@ -1,14 +1,7 @@
 #!/bin/bash
+set -euo pipefail
 
-if ! pgrep -f 'project-manager' >/dev/null 2>&1; then
-    echo "No matching process found."
-    echo "Done."
-    exit 0
-fi
+ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
 
-echo "Killing following processes:"
-pgrep -af 'project-manager'
-
-kill $(pgrep -f 'project-manager') 2>/dev/null || true
-
-echo "Done."
+docker compose down

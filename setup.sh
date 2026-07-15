@@ -1,24 +1,16 @@
 #!/bin/bash
+set -euo pipefail
 
-echo "-- STARTUP SCRIPT --"
+ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
 
+command -v docker >/dev/null 2>&1 || {
+    echo "Docker is required but was not found."
+    exit 1
+}
 
-echo "Install venv library..."
+docker compose version >/dev/null
+mkdir -p app/data
+docker compose build
 
-sudo apt install python3.10-venv
-
-echo "Creating venv..."
-
-python3 -m venv .venv
-
-echo "Venv created in '.venv/'"
-
-echo "Activating..."
-
-source .venv/bin/activate
-
-echo "Installing requirements from 'requirements.txt'..."
-
-pip install -r requirements.txt
-
-echo "--  STARTUP DONE  --"
+echo "Setup complete. Start the app with ./up.sh"
