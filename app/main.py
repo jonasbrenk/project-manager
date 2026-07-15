@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import math
+import os
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
+from threading import RLock
 from typing import Any
 from uuid import uuid4
 
@@ -13,8 +15,10 @@ from flask import Flask, jsonify, request, send_from_directory
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 DATA_FILE = DATA_DIR / "projects.json"
+STORAGE_LOCK = RLock()
 
 app = Flask(__name__, static_folder=str(BASE_DIR), static_url_path="")
+app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
 
 
 def utc_now_iso() -> str:
@@ -22,9 +26,10 @@ def utc_now_iso() -> str:
 
 
 def ensure_storage() -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    if DATA_FILE.exists():
-        return
+    with STORAGE_LOCK:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        if DATA_FILE.exists():
+            return
 
     sample_data = {
         "projects": [
@@ -84,19 +89,29 @@ def ensure_storage() -> None:
             }
         ]
     }
-    write_data(sample_data)
+    with STORAGE_LOCK:
+        if not DATA_FILE.exists():
+            write_data(sample_data)
 
 
 def read_data() -> dict[str, Any]:
     ensure_storage()
-    with DATA_FILE.open("r", encoding="utf-8") as f:
-        return json.load(f)
+    with STORAGE_LOCK, DATA_FILE.open("r", encoding="utf-8") as f:
+        data = json.load(f)
+    if not isinstance(data, dict) or not isinstance(data.get("projects"), list):
+        raise ValueError("Project data has an invalid structure")
+    return data
 
 
 def write_data(data: dict[str, Any]) -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    with DATA_FILE.open("w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    with STORAGE_LOCK:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        temporary_file = DATA_FILE.with_suffix(".json.tmp")
+        with temporary_file.open("w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(temporary_file, DATA_FILE)
 
 
 def parse_deadline(deadline: str | None) -> datetime | None:
@@ -138,6 +153,35 @@ def enrich_project(project: dict[str, Any]) -> dict[str, Any]:
     enriched["seconds_left"] = seconds_left(project.get("deadline"))
     enriched["steps"] = [enrich_step(step) for step in project.get("steps", [])]
     return enriched
+
+
+def count_steps(steps: list[dict[str, Any]]) -> tuple[int, int]:
+    total = 0
+    done = 0
+    for step in steps:
+        total += 1
+        done += int(bool(step.get("done")))
+        child_total, child_done = count_steps(step.get("children") or [])
+        total += child_total
+        done += child_done
+    return total, done
+
+
+def summarize_project(project: dict[str, Any]) -> dict[str, Any]:
+    task_total, task_done = count_steps(project.get("steps") or [])
+    return {
+        "id": project["id"],
+        "name": project.get("name", "Untitled Project"),
+        "deadline": project.get("deadline"),
+        "description": project.get("description", ""),
+        "finished": bool(project.get("finished")),
+        "icon": project.get("icon", "📌"),
+        "seconds_left": seconds_left(project.get("deadline")),
+        "task_total": task_total,
+        "task_done": task_done,
+        "created_at": project.get("created_at"),
+        "updated_at": project.get("updated_at"),
+    }
 
 
 def find_project(data: dict[str, Any], project_id: str) -> dict[str, Any] | None:
@@ -185,6 +229,20 @@ def sanitize_project(payload: dict[str, Any], current: dict[str, Any] | None = N
     }
 
 
+@app.after_request
+def set_response_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "same-origin"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    if request.path.startswith("/static/"):
+        response.headers["Cache-Control"] = "public, max-age=604800, immutable"
+    elif request.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store"
+    else:
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 @app.get("/")
 def landing_page():
     return send_from_directory(BASE_DIR, "landing_page.html")
@@ -198,7 +256,8 @@ def project_view():
 @app.get("/api/projects")
 def get_projects():
     data = read_data()
-    projects = sorted((enrich_project(p) for p in data["projects"]), key=sort_key)
+    project_builder = summarize_project if request.args.get("summary") == "1" else enrich_project
+    projects = sorted((project_builder(p) for p in data["projects"]), key=sort_key)
     return jsonify(projects)
 
 

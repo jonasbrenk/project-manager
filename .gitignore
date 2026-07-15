@@ -3,4 +3,5 @@ log.txt
 nohup.out
 */data/*
 **/data/
-
+__pycache__/
+*.py[cod]

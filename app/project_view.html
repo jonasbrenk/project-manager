@@ -3,10 +3,11 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png?v=3">
   <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png?v=3">
   <link rel="manifest" href="/site.webmanifest?v=1">
+  <script src="/static/iconify-catalog.js?v=1" defer></script>
   <meta name="theme-color" content="#0b1020">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,11 +15,13 @@
   <title>Project View</title>
   <script>
     (() => {
-      const key = "pm_theme_mode";
-      const saved = localStorage.getItem(key);
-      const theme = saved === "light" ? "light" : "dark";
+      const saved = localStorage.getItem("pm_theme_mode");
+      const theme = saved === "light" || saved === "dark"
+        ? saved
+        : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
       document.documentElement.dataset.theme = theme;
       document.documentElement.style.colorScheme = theme;
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f2f2f7" : "#0b1020");
     })();
   </script>
 
@@ -1420,22 +1423,25 @@
       }
     }
   </style>
+  <link rel="stylesheet" href="/static/app-shell.css?v=18">
 
 </head>
 
 <body>
   <main class="page">
-    <div class="topbar"><a class="back-link" href="/">← Back to projects</a><button class="btn btn-secondary settings-trigger" type="button" onclick="openSettingsModal()" aria-label="Open settings"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 4.889c-.02.12-.115.26-.297.348a7.493 7.493 0 0 0-.986.57c-.166.115-.334.126-.45.083L6.3 5.508a1.875 1.875 0 0 0-2.282.819l-.922 1.597a1.875 1.875 0 0 0 .432 2.385l.84.692c.095.078.17.229.154.43a7.598 7.598 0 0 0 0 1.139c.015.2-.059.352-.153.43l-.841.692a1.875 1.875 0 0 0-.432 2.385l.922 1.597a1.875 1.875 0 0 0 2.282.818l1.019-.382c.115-.043.283-.031.45.082.312.214.641.405.985.57.182.088.277.228.297.35l.178 1.071c.151.904.933 1.567 1.85 1.567h1.844c.916 0 1.699-.663 1.85-1.567l.178-1.072c.02-.12.114-.26.297-.349.344-.165.673-.356.985-.57.167-.114.335-.125.45-.082l1.02.382a1.875 1.875 0 0 0 2.28-.819l.923-1.597a1.875 1.875 0 0 0-.432-2.385l-.84-.692c-.095-.078-.17-.229-.154-.43a7.614 7.614 0 0 0 0-1.139c-.016-.2.059-.352.153-.43l.84-.692c.708-.582.891-1.59.433-2.385l-.922-1.597a1.875 1.875 0 0 0-2.282-.818l-1.02.382c-.114.043-.282.031-.449-.083a7.49 7.49 0 0 0-.985-.57c-.183-.087-.277-.227-.297-.348l-.179-1.072a1.875 1.875 0 0 0-1.85-1.567h-1.843ZM12 15.75a3.75 3.75 0 1 0 0-7.5 3.75 3.75 0 0 0 0 7.5Z" clip-rule="evenodd"/></svg></button></div>
-    <div id="loadingState" class="card">Loading project...</div>
+    <div class="topbar"><a class="back-link" href="/" onclick="goBack(event)">‹ Projects</a><div class="nav-actions"><button id="themeToggleBtn" class="settings-trigger" type="button" onclick="toggleTheme()" aria-label="Toggle light or dark appearance"></button></div></div>
+    <div id="loadingState" class="card loading-skeleton">Loading project…</div>
     <div id="app" class="layout" hidden></div>
   </main>
+
   <div class="floating-actions" id="floatingActions">
     <div id="floatingActionsMenu" class="floating-actions-menu">
-      <button class="menu-item" type="button" onclick="openAddLinkFromMenu()">Add link</button>
-      <button class="menu-item" type="button" onclick="openAddStepFromMenu()">Add step</button>
+      <button class="menu-item" type="button" onclick="openAddStepFromMenu()">New task</button>
+      <button class="menu-item" type="button" onclick="openAddLinkFromMenu()">New link</button>
+      <button class="menu-item" type="button" onclick="openAddProjectLinkFromMenu()">Link project</button>
       <button class="menu-item danger" type="button" onclick="enterDeleteMode()">Delete</button>
     </div>
-    <button class="btn btn-primary floating-trigger" type="button" onclick="toggleFloatingActions(event)">⋯</button>
+    <button class="floating-trigger" type="button" onclick="toggleFloatingActions(event)" aria-label="Project actions" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
   <div id="deleteToolbar" class="delete-toolbar">
     <div class="delete-toolbar-copy">
@@ -1449,41 +1455,22 @@
   </div>
 
   <div id="modalBackdrop" class="modal-backdrop">
-    <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" onclick="event.stopPropagation()">
       <div class="modal-head">
         <h3 id="modalTitle">Edit</h3>
         <button class="icon-btn" id="closeModalBtn" type="button">×</button>
       </div>
-      <form id="modalForm" style="overflow-y: auto; max-height: 70vh; padding: 4px;"></form>
+      <form id="modalForm"></form>
     </div>
   </div>
 
     <div id="iconPickerBackdrop" class="modal-backdrop">
-    <div class="modal icon-picker-modal" onclick="event.stopPropagation()">
+    <div class="modal icon-picker-modal" role="dialog" aria-modal="true" aria-label="Choose icon template" onclick="event.stopPropagation()">
       <div class="modal-head">
-        <h3>Choose Icon Template</h3>
+        <h3>Choose icon</h3>
         <button class="icon-btn" id="closeIconPickerBtn" type="button">×</button>
       </div>
-      <div id="iconPickerBody" style="overflow-y:auto;padding:4px;"></div>
-    </div>
-  </div>
-
-  <div id="settingsBackdrop" class="modal-backdrop">
-    <div class="settings-modal" onclick="event.stopPropagation()">
-      <div class="settings-head">
-        <div>
-          <h3 style="margin:0;">Settings</h3>
-          <div class="muted">Saved automatically on this device.</div>
-        </div>
-        <button class="btn btn-secondary" type="button" onclick="closeSettingsModal()">Close</button>
-      </div>
-      <div class="settings-row">
-        <div class="settings-copy">
-          <strong>Light mode</strong>
-          <div class="muted">Switch instantly between the current dark theme and a light theme.</div>
-        </div>
-        <button id="themeSwitch" class="theme-switch" type="button" role="switch" aria-checked="false" onclick="toggleTheme()"></button>
-      </div>
+      <div id="iconPickerBody"></div>
     </div>
   </div>
 
@@ -1524,6 +1511,11 @@
     let moveState = null;
     let deleteMode = false;
     let selectedDeleteIds = new Set();
+    const MAX_STEP_DEPTH = 2;
+    const collapsedStepIds = new Set();
+    let hideCompletedSteps = localStorage.getItem("pm_hide_completed_steps") === "1";
+    let iconSearchTimer = null;
+    let toastTimer = null;
 
     // Cache for linked project data: id -> project object (or null on error)
     const projectCache = {};
@@ -1541,21 +1533,59 @@
     function escapeHtml(value = "") { return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
     function normalizeDisplayText(value = "") { return String(value).replaceAll("-->", "→"); }
     function isImageUrl(value = "") { const v = String(value).trim(); return /^https?:\/\//i.test(v) && /\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(v); }
+    function formatLinkDestination(value = "") { try { return new URL(String(value), window.location.origin).hostname.replace(/^www\./i, "") || "Link"; } catch { return String(value).replace(/^https?:\/\//i, "").split("/")[0] || "Link"; } }
     function renderIcon(icon, fallback = "📌", alt = "icon") { const value = String(icon || "").trim(); return isImageUrl(value) ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(alt)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;" />` : escapeHtml(value || fallback); }
-    function applyTheme(theme) {
+    function notify(message) {
+      document.querySelector(".app-toast")?.remove();
+      const toast = document.createElement("div");
+      toast.className = "app-toast";
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.remove(), 2400);
+    }
+    function goBack(event) {
+      try {
+        const referrer = new URL(document.referrer);
+        if (referrer.origin === location.origin && history.length > 1) {
+          event.preventDefault();
+          history.back();
+        }
+      } catch { }
+    }
+    const THEME_ICON_SUN = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`;
+    const THEME_ICON_MOON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>`;
+    function applyTheme(theme, persist = false) {
       const resolved = theme === "light" ? "light" : "dark";
       document.documentElement.dataset.theme = resolved;
       document.documentElement.style.colorScheme = resolved;
-      localStorage.setItem(THEME_STORAGE_KEY, resolved);
-      if (themeSwitch) {
-        const isLight = resolved === "light";
-        themeSwitch.classList.toggle("active", isLight);
-        themeSwitch.setAttribute("aria-checked", String(isLight));
-      }
+      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolved === "light" ? "#f2f2f7" : "#0b1020");
+      if (persist) localStorage.setItem(THEME_STORAGE_KEY, resolved);
+      const toggleBtn = document.getElementById("themeToggleBtn");
+      if (toggleBtn) toggleBtn.innerHTML = resolved === "light" ? THEME_ICON_SUN : THEME_ICON_MOON;
     }
-    function toggleTheme() { applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light"); }
-    function openSettingsModal() { settingsBackdrop.classList.add("show"); }
-    function closeSettingsModal() { settingsBackdrop.classList.remove("show"); }
+    function toggleTheme() { applyTheme(document.documentElement.dataset.theme === "light" ? "dark" : "light", true); }
+    function confirmSheet({ title, message = "", confirmLabel = "OK", cancelLabel = "Cancel", destructive = false }) {
+      return new Promise(resolve => {
+        document.getElementById("confirmSheet")?.remove();
+        const backdrop = document.createElement("div");
+        backdrop.id = "confirmSheet";
+        backdrop.className = "confirm-backdrop";
+        backdrop.innerHTML = `<div class="confirm-alert" role="alertdialog" aria-modal="true" aria-label="${escapeHtml(title)}"><div class="confirm-copy"><strong>${escapeHtml(title)}</strong>${message ? `<p>${escapeHtml(message)}</p>` : ""}</div><div class="confirm-actions">${cancelLabel != null ? `<button class="confirm-btn" type="button" data-action="cancel">${escapeHtml(cancelLabel)}</button>` : ""}<button class="confirm-btn confirm-primary${destructive ? " destructive" : ""}" type="button" data-action="confirm">${escapeHtml(confirmLabel)}</button></div></div>`;
+        const done = value => { backdrop.remove(); document.removeEventListener("keydown", onKey, true); resolve(value); };
+        const onKey = event => { if (event.key === "Escape") { event.stopPropagation(); done(false); } };
+        backdrop.addEventListener("click", event => {
+          const action = event.target.closest("[data-action]")?.dataset.action;
+          if (action) done(action === "confirm");
+          else if (event.target === backdrop) done(false);
+        });
+        document.addEventListener("keydown", onKey, true);
+        document.body.appendChild(backdrop);
+        backdrop.querySelector(".confirm-primary")?.focus();
+      });
+    }
+    function openSettingsModal() { settingsBackdrop?.classList.add("show"); }
+    function closeSettingsModal() { settingsBackdrop?.classList.remove("show"); }
     function clampIndent(level) { return Math.max(0, Math.min(3, Number(level) || 0)); }
     function renderFormattedText(value, fallback = "No description", compact = false) {
       const source = String(value || "").replace(/\r\n?/g, "\n");
@@ -1616,9 +1646,23 @@
     function getProjectMetaState() { if (project.finished) return { label: "Status", value: "Finished", extraClass: "meta-value-success" }; if (!project.deadline) return { label: "Status", value: "Open", extraClass: "" }; if (project.seconds_left != null && project.seconds_left <= 0) return { label: "Time left", value: "Deadline passed", extraClass: "meta-value-danger" }; return { label: "Time left", value: formatTimeLeft(project.seconds_left), extraClass: "" }; }
     function stepTimeLeft(deadline) { if (!deadline) return null; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return null; return Math.floor((dt.getTime() - Date.now()) / 1000); }
     function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
+    function countTaskProgress(steps) { return (steps || []).reduce((total, step) => { const nested = countTaskProgress(step.children || []); return { total: total.total + 1 + nested.total, done: total.done + Number(!!step.done) + nested.done }; }, { total: 0, done: 0 }); }
+    function cacheProjectState(value) {
+      try {
+        localStorage.setItem(`pm_project_${projectId}`, JSON.stringify(value));
+        const summaries = JSON.parse(localStorage.getItem("pm_project_summaries") || "null");
+        if (!Array.isArray(summaries)) return;
+        const index = summaries.findIndex(summary => summary.id === value.id);
+        if (index < 0) return;
+        const taskProgress = countTaskProgress(value.steps || []);
+        summaries[index] = { ...summaries[index], id: value.id, name: value.name, deadline: value.deadline, description: value.description, finished: !!value.finished, icon: value.icon, seconds_left: value.seconds_left, task_total: taskProgress.total, task_done: taskProgress.done, updated_at: value.updated_at };
+        localStorage.setItem("pm_project_summaries", JSON.stringify(summaries));
+      } catch { }
+    }
     function parseDateSafe(val) { const str = String(val || "").trim(); if (!str) return null; const dt = new Date(str); return Number.isNaN(dt.getTime()) ? null : dt.toISOString(); }
     function buildCardMenu(menuId, actions) {
-      return `<div class="card-menu-wrap${openContextMenuId === menuId ? " open" : ""}"><button class="icon-btn card-menu-trigger" type="button" onclick='toggleContextMenu(${JSON.stringify(menuId)}, event)' aria-label="Open menu">⋯</button><div class="card-menu${openContextMenuId === menuId ? " show" : ""}" id="${escapeHtml(menuId)}">${actions.map(action => `<button class="card-menu-item${action.danger ? " danger" : ""}" type="button" onclick="closeContextMenu(); ${action.onclick}">${escapeHtml(action.label)}</button>`).join("")}</div></div>`;
+      const isOpen = openContextMenuId === menuId;
+      return `<div class="card-menu-wrap${isOpen ? " open" : ""}"><button class="card-menu-trigger" type="button" onclick='toggleContextMenu(${JSON.stringify(menuId)}, event)' aria-label="More actions" aria-expanded="${isOpen}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.65"/><circle cx="12" cy="12" r="1.65"/><circle cx="19" cy="12" r="1.65"/></svg></button><div class="card-menu${isOpen ? " show" : ""}" id="${escapeHtml(menuId)}">${actions.map(action => `<button class="card-menu-item${action.danger ? " danger" : ""}" type="button" onclick="event.stopPropagation(); closeContextMenu(); ${action.onclick}">${escapeHtml(action.label)}</button>`).join("")}</div></div>`;
     }
 
     async function api(url, options = {}) {
@@ -1673,24 +1717,18 @@
       const projectUrl = proj ? `${window.location.origin}/project?id=${proj.id}` : "#";
       const icon = renderIcon(proj?.icon || link.icon || "📌", "📌", proj?.name || link.title);
       const name = escapeHtml(normalizeDisplayText(proj?.name || link.title || "Project link"));
+      const subtitle = loading ? "Project" : error ? "Unavailable" : proj?.finished ? "Finished" : proj?.seconds_left != null ? formatTimeLeft(proj.seconds_left) : "Project";
       const menu = buildCardMenu(`project-link-menu-${index}`, [
-        { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal(${index});` },
-        { label: "Delete", onclick: `event.stopPropagation(); deleteLink(${index});`, danger: true }
+        { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal('${link.id}');` },
+        { label: "Delete", onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
       ]);
 
       return `<div class="link-card link-card-project${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(projectUrl)}')`}">
         ${menu}
         <div class="proj-link-icon">${loading ? "⏳" : icon}</div>
         <div class="proj-link-body">
-          <div class="proj-link-header">
-            <div class="proj-link-name">${loading ? "Loading…" : name}</div>
-          </div>
-          ${error ? `<div class="proj-link-desc" style="color:var(--danger)">Could not load project.</div>` : ""}
-          ${proj?.description ? `<div class="proj-link-desc">${renderFormattedText(proj.description, "", true)}</div>` : ""}
-        </div>
-        <div class="proj-link-meta">
-          ${proj?.deadline ? `<span class="pill ${isDueSoon(proj.seconds_left) ? "warning" : ""}">📅 ${escapeHtml(formatDeadline(proj.deadline))}</span>` : !loading && !error ? `<span class="pill" style="color:var(--muted)">No deadline</span>` : ""}
-          ${proj?.finished ? `<span class="pill done">✓ Finished</span>` : proj?.seconds_left != null ? `<span class="pill ${proj.seconds_left <= 0 ? "danger" : isDueSoon(proj.seconds_left) ? "warning" : ""}">⏱ ${escapeHtml(formatTimeLeft(proj.seconds_left))}</span>` : !loading && !error ? `<span class="pill">Open</span>` : ""}
+          <div class="proj-link-name">${loading ? "Loading…" : name}</div>
+          <div class="link-subtitle${error ? " danger" : proj?.finished ? " done" : ""}">${escapeHtml(subtitle)}</div>
         </div>
       </div>`;
     }
@@ -1709,7 +1747,7 @@
         try {
           await onSubmit(new FormData(modalForm));
         } catch (err) {
-          alert("Error: " + err.message);
+          confirmSheet({ title: "Could Not Save", message: err.message || "Please try again.", cancelLabel: null });
           if (btn) btn.disabled = false;
         }
       };
@@ -1717,6 +1755,14 @@
 
     function closeModal() { modalBackdrop.classList.remove("show"); modalForm.innerHTML = ""; modalForm.onsubmit = null; closeIconPickerModal(); }
     function findStepAndParent(steps, targetId, parent = null) { for (let i = 0; i < (steps || []).length; i++) { const step = steps[i]; if (step.id === targetId) return { step, parent, index: i, collection: steps }; const nested = findStepAndParent(step.children || [], targetId, step); if (nested) return nested; } return null; }
+    function getStepDepth(steps, targetId, depth = 0) { for (const step of (steps || [])) { if (step.id === targetId) return depth; const nestedDepth = getStepDepth(step.children || [], targetId, depth + 1); if (nestedDepth != null) return nestedDepth; } return null; }
+    function getSubtreeDepth(step) { const children = step?.children || []; return children.length ? 1 + Math.max(...children.map(getSubtreeDepth)) : 0; }
+    function canPlaceStepAt(source, targetParentId) { const parentDepth = targetParentId == null ? -1 : getStepDepth(project.steps || [], targetParentId); return parentDepth != null && parentDepth + 1 + getSubtreeDepth(source) <= MAX_STEP_DEPTH; }
+    function toggleStepCollapse(stepId, event) { event?.stopPropagation(); if (collapsedStepIds.has(stepId)) collapsedStepIds.delete(stepId); else collapsedStepIds.add(stepId); render(); }
+    function hasCompletedSteps(steps) { return (steps || []).some(step => step.done || hasCompletedSteps(step.children || [])); }
+    function renderTaskVisibilityChange() { if (document.startViewTransition) document.startViewTransition(() => render()); else render(); }
+    function toggleCompletedSteps(event) { event?.stopPropagation(); hideCompletedSteps = !hideCompletedSteps; localStorage.setItem("pm_hide_completed_steps", hideCompletedSteps ? "1" : "0"); renderTaskVisibilityChange(); }
+    function showCompletedSteps(event) { event?.stopPropagation(); if (!hideCompletedSteps) return; hideCompletedSteps = false; localStorage.setItem("pm_hide_completed_steps", "0"); renderTaskVisibilityChange(); }
     function updateStepRecursive(steps, targetId, updater) { return (steps || []).map(step => step.id === targetId ? updater(step) : ({ ...step, children: updateStepRecursive(step.children || [], targetId, updater) })); }
     function removeStepRecursive(steps, targetId) { return (steps || []).filter(step => step.id !== targetId).map(step => ({ ...step, children: removeStepRecursive(step.children || [], targetId) })); }
     function containsStepId(steps, targetId) { return !!findStepAndParent(steps || [], targetId); }
@@ -1754,6 +1800,7 @@
       const source = findStepAndParent(project.steps || [], moveState.stepId)?.step;
       if (!source) return;
       if (targetParentId && containsStepId(source.children || [], targetParentId)) return;
+      if (!canPlaceStepAt(source, targetParentId)) { notify("Tasks can be nested up to three levels."); return; }
       moveState = { ...moveState, targetParentId };
       render();
     }
@@ -1762,13 +1809,15 @@
       const updated = deepClone(project);
       const removed = removeStepAndCapture(updated.steps || [], moveState.stepId);
       if (!removed.captured) return cancelMoveStep();
+      if (!canPlaceStepAt(removed.captured, moveState.targetParentId)) { notify("That move would exceed the three-level task structure."); return; }
       updated.steps = insertStepAtTarget(removed.steps, moveState.targetParentId, removed.captured, position);
       moveState = null;
       await saveProject(updated);
     }
-    function toggleFloatingActions(event) { event.stopPropagation(); floatingActionsMenu.classList.toggle("show"); }
-    function closeFloatingActions() { floatingActionsMenu.classList.remove("show"); }
+    function toggleFloatingActions(event) { event.stopPropagation(); const isOpen = floatingActionsMenu.classList.toggle("show"); event.currentTarget?.setAttribute("aria-expanded", String(isOpen)); }
+    function closeFloatingActions() { floatingActionsMenu.classList.remove("show"); floatingActions.querySelector(".floating-trigger")?.setAttribute("aria-expanded", "false"); }
     function openAddLinkFromMenu() { closeFloatingActions(); openAddLinkModal(); }
+    function openAddProjectLinkFromMenu() { closeFloatingActions(); openAddProjectLinkModal(); }
     function openAddStepFromMenu() { closeFloatingActions(); openAddStepModal(); }
     function updateDeleteToolbar() {
       deleteCount.textContent = `${selectedDeleteIds.size} selected`;
@@ -1801,7 +1850,14 @@
     }
     async function confirmDeleteSelected() {
       if (!selectedDeleteIds.size) return;
-      if (!confirm(`Delete ${selectedDeleteIds.size} selected item(s)? This cannot be undone.`)) return;
+      const count = selectedDeleteIds.size;
+      const confirmed = await confirmSheet({
+        title: count === 1 ? "Delete Item?" : `Delete ${count} Items?`,
+        message: "This cannot be undone.",
+        confirmLabel: "Delete",
+        destructive: true
+      });
+      if (!confirmed) return;
       const updated = deepClone(project);
       const linkIds = [...selectedDeleteIds].filter(key => key.startsWith("link:")).map(key => key.slice(5));
       const stepIds = [...selectedDeleteIds].filter(key => key.startsWith("step:")).map(key => key.slice(5));
@@ -1814,7 +1870,7 @@
     }
 
     function buildIconInputField(targetInputId, fallback = "📌", value = "", placeholder = "Icon or image URL") {
-      return `<div class="field"><label>Icon</label><div class="icon-input-row"><input id="${escapeHtml(targetInputId)}" name="icon" data-icon-fallback="${escapeHtml(fallback)}" data-icon-preview="${escapeHtml(`${targetInputId}Preview`)}" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" /><div class="icon-preview" id="${escapeHtml(`${targetInputId}Preview`)}">${renderIcon(value, fallback, "icon preview")}</div><button class="btn btn-secondary template-icon-btn" type="button" onclick='openIconPickerModal(${JSON.stringify(targetInputId)})' aria-label="Choose template icon" title="Choose template icon"><span>🗂️</span></button></div></div>`;
+      return `<div class="field icon-field"><label>Icon</label><div class="icon-editor-row"><button class="icon-picker-button" type="button" onclick='openIconPickerModal(${JSON.stringify(targetInputId)})' aria-label="Choose icon"><span class="icon-picker-preview" id="${escapeHtml(`${targetInputId}Preview`)}">${renderIcon(value, fallback, "icon preview")}</span><span class="icon-picker-edit" aria-hidden="true">＋</span></button><input type="hidden" id="${escapeHtml(targetInputId)}" name="icon" data-icon-fallback="${escapeHtml(fallback)}" data-icon-preview="${escapeHtml(`${targetInputId}Preview`)}" value="${escapeHtml(value)}" /></div></div>`;
     }
 
     function updateIconPreview(targetInputId) {
@@ -1833,15 +1889,19 @@
       });
     }
 
+    function standardIconChoicesHtml(targetInputId, fallback, currentValue = "") {
+      return STANDARD_ICONS.map(icon => `<button class="icon-choice${String(icon.value).trim() === currentValue ? " is-selected" : ""}" type="button" onclick='selectStandardIcon(${JSON.stringify(targetInputId)}, ${JSON.stringify(icon.value)})' aria-label="${escapeHtml(icon.label)}" title="${escapeHtml(icon.label)}"><span class="icon-choice-visual">${renderIcon(icon.value, fallback, icon.label)}</span></button>`).join("");
+    }
+
     function openIconPickerModal(targetInputId) {
       const input = document.getElementById(targetInputId);
       const fallback = input?.dataset.iconFallback || "📌";
-      iconPickerBody.innerHTML = `<div class="muted" style="margin:0 0 14px;">Click an icon to fill the input field.</div><div class="icon-picker-grid" style="margin-top:0;">${STANDARD_ICONS.map(icon => `
-        <button class="icon-choice" type="button" onclick='selectStandardIcon(${JSON.stringify(targetInputId)}, ${JSON.stringify(icon.value)})'>
-          <div class="icon-choice-visual">${renderIcon(icon.value, fallback, icon.label)}</div>
-          <div class="icon-choice-label">${escapeHtml(icon.label)}</div>
-        </button>`).join("")}</div>`;
+      const currentValue = String(input?.value || "").trim();
+      iconPickerBody.innerHTML = `<div class="icon-search-row"><input id="iconSearchInput" type="search" inputmode="search" autocomplete="off" placeholder="Search open-source icons" aria-label="Search open-source icons"></div><div id="iconSearchStatus" class="icon-search-status">Suggestions</div><div id="iconPickerGrid" class="icon-picker-grid">${standardIconChoicesHtml(targetInputId, fallback, currentValue)}</div><details class="icon-custom-details"><summary>Use emoji or image URL</summary><div class="icon-custom-row"><input id="iconPickerCustomInput" value="${escapeHtml(currentValue)}" placeholder="Emoji or image URL" aria-label="Custom icon value"><button class="btn btn-primary" type="button" onclick='applyCustomIcon(${JSON.stringify(targetInputId)})'>Use</button></div></details><a class="icon-source-note" href="https://iconify.design" target="_blank" rel="noreferrer">Open-source icons via Iconify</a>`;
       iconPickerBackdrop.classList.add("show");
+      document.getElementById("iconSearchInput")?.addEventListener("input", event => scheduleIconSearch(targetInputId, fallback, event.target.value));
+      const customInput = document.getElementById("iconPickerCustomInput");
+      customInput?.addEventListener("keydown", event => { if (event.key === "Enter") { event.preventDefault(); applyCustomIcon(targetInputId); } });
     }
 
     function closeIconPickerModal() {
@@ -1857,6 +1917,38 @@
       closeIconPickerModal();
     }
 
+    function applyCustomIcon(targetInputId) {
+      const value = document.getElementById("iconPickerCustomInput")?.value.trim();
+      if (!value) return;
+      selectStandardIcon(targetInputId, value);
+    }
+
+    function scheduleIconSearch(targetInputId, fallback, query) {
+      clearTimeout(iconSearchTimer);
+      iconSearchTimer = setTimeout(() => searchRemoteIcons(targetInputId, fallback, query), 280);
+    }
+
+    async function searchRemoteIcons(targetInputId, fallback, query) {
+      const normalized = String(query || "").trim();
+      const grid = document.getElementById("iconPickerGrid");
+      const status = document.getElementById("iconSearchStatus");
+      if (!grid || !status) return;
+      if (normalized.length < 2) {
+        status.textContent = "Suggestions";
+        grid.innerHTML = standardIconChoicesHtml(targetInputId, fallback, String(document.getElementById(targetInputId)?.value || "").trim());
+        return;
+      }
+      status.textContent = "Searching…";
+      try {
+        const icons = await window.IconifyCatalog.search(normalized);
+        if (document.getElementById("iconSearchInput")?.value.trim() !== normalized) return;
+        status.textContent = icons.length ? `${icons.length} results` : "No icons found";
+        grid.innerHTML = icons.map(icon => `<button class="icon-choice" type="button" onclick='selectStandardIcon(${JSON.stringify(targetInputId)}, ${JSON.stringify(icon.url)})' aria-label="${escapeHtml(icon.name)}" title="${escapeHtml(icon.name)}"><span class="icon-choice-visual">${renderIcon(icon.url, fallback, icon.name)}</span></button>`).join("");
+      } catch {
+        status.textContent = "Icon search unavailable";
+      }
+    }
+
     function toggleContextMenu(menuId, event) {
       event.stopPropagation();
       openContextMenuId = openContextMenuId === menuId ? null : menuId;
@@ -1870,34 +1962,79 @@
     }
 
     async function saveProject(updatedProject) {
-      project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updatedProject) });
-      render();
-      closeModal();
+      try {
+        project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updatedProject) });
+        cacheProjectState(project);
+        render();
+        closeModal();
+      } catch (error) {
+        notify("Could not save changes. Please try again.");
+        throw error;
+      }
     }
 
     // --- Render ---
 
-    function renderStep(step) {
-      const menu = buildCardMenu(`step-menu-${step.id}`, [
+    function renderStep(step, depth = 0) {
+      const actions = [
         { label: "Edit", onclick: `event.stopPropagation(); openStepEditor('${step.id}');` },
         { label: "Move", onclick: `event.stopPropagation(); beginMoveStep('${step.id}');` },
-        { label: "Add sub-step", onclick: `event.stopPropagation(); openAddSubStepModal('${step.id}');` },
         { label: "Delete", onclick: `event.stopPropagation(); deleteStep('${step.id}');`, danger: true }
-      ]);
+      ];
+      if (depth < MAX_STEP_DEPTH) actions.splice(2, 0, { label: "Add sub-task", onclick: `event.stopPropagation(); openAddSubStepModal('${step.id}');` });
+      const menu = buildCardMenu(`step-menu-${step.id}`, actions);
       const moveClass = moveState?.stepId === step.id ? " move-source" : moveState?.targetParentId === step.id ? " move-target" : "";
       const deleteClass = deleteMode && selectedDeleteIds.has(`step:${step.id}`) ? " selected-for-delete" : "";
-      const clickHandler = deleteMode ? `toggleDeleteSelection(event, 'step:${step.id}')` : moveState ? `selectMoveTarget('${step.id}', event)` : "";
-      return `<div class="step-item${moveClass}${deleteClass}" ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
-        <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onchange="toggleStepDone('${step.id}', this.checked)" />
-        <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div><div class="muted">${renderFormattedText(step.description, "No description", true)}</div>
+      const childCount = (step.children || []).length;
+      const childrenOpen = childCount && !collapsedStepIds.has(step.id);
+      const clickHandler = deleteMode ? `toggleDeleteSelection(event, 'step:${step.id}')` : moveState ? `selectMoveTarget('${step.id}', event)` : childCount ? `toggleStepCollapse('${step.id}', event)` : "";
+      const metadata = [
+        step.until_deadline ? `<span class="pill">⏳ until deadline</span>` : "",
+        step.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(step.deadline))}</span>` : "",
+        step.deadline ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(stepTimeLeft(step.deadline)))}</span>` : ""
+      ].filter(Boolean).join("");
+      return `<div class="step-item${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
+        <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onclick="event.stopPropagation()" onchange="toggleStepDone('${step.id}', this.checked)" />
+        <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title-row"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div></div><div class="muted">${renderFormattedText(step.description, "No description", true)}</div>
         </div>
-      </div><div class="step-sub ${step.done ? "done-state" : ""}">${step.until_deadline ? `<span class="pill">⏳ until deadline</span>` : ""}${step.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(step.deadline))}</span>` : ""}${step.deadline ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(stepTimeLeft(step.deadline)))}</span>` : ""}${(step.children || []).length ? `<span class="pill substep-count-pill">↳ ${(step.children || []).length} sub-step(s)</span>` : ""}</div>${(step.children || []).length ? `<div class="children">${(step.children || []).map(child => renderStep(child)).join("")}</div>` : ""}</div>`;
+      </div>${metadata ? `<div class="step-sub ${step.done ? "done-state" : ""}">${metadata}</div>` : ""}</div>`;
+    }
+
+    function flattenVisibleSteps(steps, depth = 0, rows = []) {
+      for (const step of (steps || [])) {
+        rows.push({ step, depth });
+        if ((step.children || []).length && !collapsedStepIds.has(step.id)) flattenVisibleSteps(step.children, depth + 1, rows);
+      }
+      return rows;
+    }
+
+    function compactCompletedRows(rows) {
+      if (!hideCompletedSteps || moveState || deleteMode) return rows.map(row => ({ type: "step", ...row }));
+      const compacted = [];
+      let completedSequence = [];
+      const flushCompleted = () => {
+        if (!completedSequence.length) return;
+        compacted.push({ type: "completed", rows: completedSequence });
+        completedSequence = [];
+      };
+      for (const row of rows) {
+        if (row.step.done) completedSequence.push(row);
+        else { flushCompleted(); compacted.push({ type: "step", ...row }); }
+      }
+      flushCompleted();
+      return compacted;
+    }
+
+    function renderCompletedSequence(rows) {
+      const depth = Math.min(rows[0]?.depth || 0, MAX_STEP_DEPTH);
+      return `<button class="completed-sequence" type="button" style="--tree-depth:${depth}" onclick="showCompletedSteps(event)" aria-label="Show completed tasks"><span aria-hidden="true">…</span></button>`;
     }
 
     function renderStepTree(steps) {
       const s = steps || [];
       if (!s.length && !moveState) return `<div class="empty">No steps yet.</div>`;
-      return `<div class="step-tree">${s.map(step => renderStep(step)).join("")}</div>`;
+      const rows = compactCompletedRows(flattenVisibleSteps(s));
+      return `<div class="step-tree">${rows.map(row => row.type === "completed" ? renderCompletedSequence(row.rows) : renderStep(row.step, row.depth)).join("")}</div>`;
     }
 
     function renderLinks() {
@@ -1936,13 +2073,13 @@
 
         return `<div class="link-card${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(processedUrl)}')`}">
           ${buildCardMenu(`link-menu-${index}`, [
-            { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal(${index});` },
-            { label: "Delete", onclick: `event.stopPropagation(); deleteLink(${index});`, danger: true }
+            { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal('${link.id}');` },
+            { label: "Delete", onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
           ])}
           <div class="link-icon">${renderIcon(link.icon, "🔗", link.title || "link icon")}</div>
           <div class="link-main">
             <div class="link-title">${escapeHtml(normalizeDisplayText(link.title || "Untitled link"))}</div>
-            <a class="link-url" href="${escapeHtml(processedUrl)}" target="_blank" rel="noreferrer">${escapeHtml(processedUrl)}</a>
+            <div class="link-subtitle">${escapeHtml(formatLinkDestination(processedUrl))}</div>
           </div>
         </div>`;
       }).join("")}</div>`;
@@ -1951,15 +2088,15 @@
     function render() {
       if (!project) return;
       const projectMetaState = getProjectMetaState();
+      const hasDoneTasks = hasCompletedSteps(project.steps || []);
       const linksMenuOpen = !!openContextMenuId && (openContextMenuId.startsWith("link-menu-") || openContextMenuId.startsWith("project-link-menu-"));
       const stepsMenuOpen = (!!openContextMenuId && openContextMenuId.startsWith("step-menu-")) || !!moveState;
       document.title = project.name ? `${project.name} · Project View` : "Project View";
       app.hidden = false; loadingState.hidden = true;
       app.className = `layout${deleteMode ? " delete-mode" : ""}`;
-      app.innerHTML = `<section class="card hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div class="hero-copy"><h1 class="project-title">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</h1><div class="muted">${renderFormattedText(project.description, "No description")}</div></div></div><div class="inline-actions"><button class="btn btn-secondary" type="button" onclick="openProjectEditor()">Edit project</button><button class="btn ${project.finished ? "btn-ok" : "btn-secondary"}" type="button" onclick="toggleFinished()">${project.finished ? "✓ Finished" : "Mark finished"}</button></div></div><div class="meta-grid"><div class="meta-box ${isDueSoon(project.seconds_left) ? "warning" : ""}"><div class="meta-label">Deadline</div><div class="meta-value">${escapeHtml(formatDeadline(project.deadline))}</div></div><div class="meta-box ${isDueSoon(project.seconds_left) && !project.finished && !(project.seconds_left != null && project.seconds_left <= 0) ? "warning" : ""}"><div class="meta-label">${escapeHtml(projectMetaState.label)}</div><div class="meta-value ${projectMetaState.extraClass}">${escapeHtml(projectMetaState.value)}</div></div></div></section>
-      <section class="card${linksMenuOpen ? " has-open-menu" : ""}"><div class="section-head"><div><h2 class="section-title">Links</h2><div class="muted">Websites, files and project links.</div></div></div>${renderLinks()}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="openAddLinkModal()">Add link</button><button class="btn btn-secondary" type="button" onclick="openAddProjectLinkModal()">🔗 Link project</button></div></section>
-      <section class="card steps-section${stepsMenuOpen ? " has-open-menu" : ""}${moveState && moveState.targetParentId == null ? " move-target" : ""}" ${moveState ? `onclick="selectMoveTarget(null, event)"` : ""}><div class="section-head"><div><h2 class="section-title">WILL-DO List</h2><div class="muted">${moveState ? "Select a destination step or this box, then choose insert position below." : "Project tasks and hierarchy."}</div></div></div>${renderStepTree(project.steps)}<div class="inline-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" onclick="event.stopPropagation(); openAddStepModal()">Add step</button></div></section>
-      <section class="card danger-zone"><div class="section-head"><div><h2 class="section-title">Delete project</h2><div class="muted">Irreversible action.</div></div><button class="btn btn-danger" type="button" onclick="deleteProject()">Delete project</button></div></section>`;
+      app.innerHTML = `<section class="card hero project-hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div class="hero-copy"><h1 class="project-title">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</h1></div></div><div class="project-hero-actions"><button class="icon-action" type="button" onclick="openProjectEditor()" aria-label="Edit project" title="Edit project"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button class="icon-action${project.finished ? " is-complete" : ""}" type="button" onclick="toggleFinished()" aria-label="${project.finished ? "Reopen project" : "Mark project finished"}" title="${project.finished ? "Reopen project" : "Mark project finished"}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16.5 9"/></svg></button></div></div>${project.description ? `<div class="project-description muted">${renderFormattedText(project.description)}</div>` : ""}<div class="project-meta-line"><span class="project-meta-item">📅 ${escapeHtml(formatDeadline(project.deadline))}</span><span class="project-meta-separator">•</span><span class="project-meta-item ${projectMetaState.extraClass}">${project.finished ? "✓" : "◷"} ${escapeHtml(projectMetaState.value)}</span></div></section>
+      <section class="content-section${linksMenuOpen ? " has-open-menu" : ""}"><div class="section-head"><h2 class="section-title">Links</h2></div>${renderLinks()}</section>
+      <section class="content-section steps-section${stepsMenuOpen ? " has-open-menu" : ""}${moveState && moveState.targetParentId == null ? " move-target" : ""}" ${moveState ? `onclick="selectMoveTarget(null, event)"` : ""}><div class="section-head"><h2 class="section-title">Tasks</h2>${hasDoneTasks && !moveState && !deleteMode ? `<button class="section-action" type="button" aria-pressed="${hideCompletedSteps}" onclick="toggleCompletedSteps(event)">${hideCompletedSteps ? "Show done" : "Hide done"}</button>` : ""}</div>${renderStepTree(project.steps)}</section>`;
       if (moveState) app.innerHTML += `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('top')">Insert at start</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('bottom')">Insert at end</button></div>`;
 
       // Fetch any uncached linked project data and re-render when ready
@@ -1969,23 +2106,26 @@
     // --- Link modals ---
 
     function openProjectEditor() {
-      openModal("Edit project", `<div class="form-grid"><div class="field"><label>Name</label><input name="name" value="${escapeHtml(project.name || "")}" required /></div>${buildIconInputField("projectIconInput", "📌", project.icon || "📌", "Icon or image URL")}<div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0, 16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
+      openModal("Edit project", `<div class="form-grid"><div class="field"><label>Name</label><input name="name" value="${escapeHtml(project.name || "")}" required /></div>${buildIconInputField("projectIconInput", "📌", project.icon || "📌", "Icon or image URL")}<div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0, 16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="modal-actions"><div class="modal-action-group"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div></div><div class="editor-danger"><button class="editor-danger-button" type="button" onclick="deleteProject()">Delete project…</button></div>`, async (formData) => {
         const updated = deepClone(project); updated.name = String(formData.get("name") || "").trim(); updated.icon = String(formData.get("icon") || "").trim() || "📌"; updated.description = String(formData.get("description") || "").trim();
         updated.deadline = parseDateSafe(formData.get("deadline")); addToStandardIcons(updated.icon, updated.name || "Project"); await saveProject(updated);
       });
     }
 
     function openAddLinkModal() {
-      openModal("Add link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" placeholder="Link title" required /></div>${buildIconInputField("newLinkIconInput", "🔗", "", "Icon or image URL")}<div class="field full"><label>URL</label><input name="url" placeholder="https://example.com" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Add link</button></div>`, async (formData) => {
+      openModal("Add link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" placeholder="Link title" required /></div>${buildIconInputField("newLinkIconInput", "🔗", "", "Icon or image URL")}<div class="field full"><label>URL</label><input name="url" inputmode="url" placeholder="https://example.com" required /></div></div><div class="modal-actions"><div class="modal-action-group"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Add link</button></div></div>`, async (formData) => {
         const updated = deepClone(project); const newLink = { id: generateId(), title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" };
         updated.links = updated.links || []; updated.links.push(newLink); addToStandardIcons(newLink.icon, newLink.title || "Link"); await saveProject(updated);
       });
     }
 
-    function openEditLinkModal(index) {
-      const link = (project.links || [])[index]; if (!link) return;
-      openModal("Edit link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" value="${escapeHtml(link.title || "")}" required /></div>${buildIconInputField("editLinkIconInput", "🔗", link.icon || "🔗", "Icon or image URL")}<div class="field full"><label>URL</label><input name="url" value="${escapeHtml(link.url || "")}" required /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div>`, async (formData) => {
-        const updated = deepClone(project); updated.links[index] = { ...updated.links[index], title: String(formData.get("title") || "").trim(), url: String(formData.get("url") || "").trim(), icon: String(formData.get("icon") || "").trim() || "🔗" }; await saveProject(updated);
+    function openEditLinkModal(linkId) {
+      const link = (project.links || []).find(l => l.id === linkId); if (!link) return;
+      openModal("Edit link", `<div class="form-grid"><div class="field"><label>Title</label><input name="title" value="${escapeHtml(link.title || "")}" required /></div>${buildIconInputField("editLinkIconInput", "🔗", link.icon || "🔗", "Icon or image URL")}<div class="field full"><label>URL</label><input name="url" inputmode="url" value="${escapeHtml(link.url || "")}" required /></div></div><div class="modal-actions"><div class="modal-action-group"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div></div>`, async (formData) => {
+        const updated = deepClone(project);
+        const target = (updated.links || []).find(l => l.id === linkId); if (!target) return;
+        target.title = String(formData.get("title") || "").trim(); target.url = String(formData.get("url") || "").trim(); target.icon = String(formData.get("icon") || "").trim() || "🔗";
+        await saveProject(updated);
       });
     }
 
@@ -2023,7 +2163,6 @@
                 <div class="proj-picker-name">${escapeHtml(p.name || "Untitled project")}</div>
                 <div class="proj-picker-meta">${p.deadline ? escapeHtml(formatDeadline(p.deadline)) : "No deadline"} · ${p.finished ? "Finished" : "Open"}</div>
               </div>
-              <div class="proj-picker-arrow">↗</div>
             </button>
           `).join("")}
         </div>
@@ -2052,51 +2191,81 @@
     // --- Step modals ---
 
     function stepFormHtml(step = null, submitLabel = "Save") {
-      return `<div class="form-grid"><div class="field full"><label>Title</label><input name="title" value="${escapeHtml(step?.title || "")}" required /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(step?.description || "")}</textarea></div><div class="field full"><label>Step deadline</label><input name="deadline" type="datetime-local" value="${step?.deadline ? new Date(step.deadline).toISOString().slice(0, 16) : ""}" /></div></div><div class="inline-actions" style="margin-top:16px;justify-content:flex-end;padding-bottom:12px;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">${submitLabel}</button></div>`;
+      return `<div class="form-grid"><div class="field full"><label>Title</label><input name="title" value="${escapeHtml(step?.title || "")}" required /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(step?.description || "")}</textarea></div><div class="field full"><label>Step deadline</label><input name="deadline" type="datetime-local" value="${step?.deadline ? new Date(step.deadline).toISOString().slice(0, 16) : ""}" /></div></div><div class="modal-actions"><div class="modal-action-group"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">${submitLabel}</button></div></div>`;
     }
 
-    function openAddStepModal() { openModal("Add step", stepFormHtml(null, "Add step"), async (formData) => { const updated = deepClone(project); updated.steps = updated.steps || []; updated.steps.push({ id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: false, until_deadline: false, deadline: parseDateSafe(formData.get("deadline")), children: [] }); await saveProject(updated); }); }
-    function openAddSubStepModal(parentId) { openModal("Add sub-step", stepFormHtml(null, "Add sub-step"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], parentId, step => ({ ...step, children: [...(step.children || []), { id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: false, until_deadline: false, deadline: parseDateSafe(formData.get("deadline")), children: [] }] })); await saveProject(updated); }); }
+    function openAddStepModal() { openModal("New task", stepFormHtml(null, "Add task"), async (formData) => { const updated = deepClone(project); updated.steps = updated.steps || []; updated.steps.push({ id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: false, until_deadline: false, deadline: parseDateSafe(formData.get("deadline")), children: [] }); await saveProject(updated); }); }
+    function openAddSubStepModal(parentId) {
+      const parentDepth = getStepDepth(project.steps || [], parentId);
+      if (parentDepth == null || parentDepth >= MAX_STEP_DEPTH) { notify("Tasks can be nested up to three levels."); return; }
+      openModal("New sub-task", stepFormHtml(null, "Add sub-task"), async (formData) => {
+        const updated = deepClone(project);
+        updated.steps = updateStepRecursive(updated.steps || [], parentId, step => ({ ...step, children: [...(step.children || []), { id: generateId(), title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), done: false, until_deadline: false, deadline: parseDateSafe(formData.get("deadline")), children: [] }] }));
+        await saveProject(updated);
+      });
+    }
     function openStepEditor(stepId) { const found = findStepAndParent(project.steps || [], stepId); if (!found) return; openModal("Edit step", stepFormHtml(found.step, "Save"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), deadline: parseDateSafe(formData.get("deadline")) })); await saveProject(updated); }); }
 
     async function toggleStepDone(stepId, done) { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, done })); await saveProject(updated); }
-    async function deleteStep(stepId) { if (!confirm("Delete this?")) return; const updated = deepClone(project); updated.steps = removeStepRecursive(updated.steps || [], stepId); await saveProject(updated); }
-    async function toggleFinished() { project = await api(`/api/projects/${projectId}/finish`, { method: "PATCH", body: JSON.stringify({ finished: !project.finished }) }); render(); }
-    async function deleteProject() { if (!confirm("Permanent delete?")) return; await api(`/api/projects/${projectId}`, { method: "DELETE" }); location.href = "/"; }
-    async function loadProject() { try { project = await api(`/api/projects/${projectId}`); render(); } catch (e) { loadingState.textContent = "Error loading project."; } }
+    async function deleteStep(stepId) { if (!(await confirmSheet({ title: "Delete Task?", message: "Sub-tasks will be deleted too.", confirmLabel: "Delete", destructive: true }))) return; const updated = deepClone(project); updated.steps = removeStepRecursive(updated.steps || [], stepId); await saveProject(updated); }
+    async function toggleFinished() { project = await api(`/api/projects/${projectId}/finish`, { method: "PATCH", body: JSON.stringify({ finished: !project.finished }) }); cacheProjectState(project); render(); }
+    async function deleteProject() { if (!(await confirmSheet({ title: "Delete Project?", message: "This permanently deletes the project, its links, and all tasks.", confirmLabel: "Delete", destructive: true }))) return; await api(`/api/projects/${projectId}`, { method: "DELETE" }); try { localStorage.removeItem(`pm_project_${projectId}`); const summaries = JSON.parse(localStorage.getItem("pm_project_summaries") || "null"); if (Array.isArray(summaries)) localStorage.setItem("pm_project_summaries", JSON.stringify(summaries.filter(summary => summary.id !== projectId))); } catch { } location.href = "/"; }
+    async function loadProject() {
+      if (!projectId) { loadingState.textContent = "No project selected."; return; }
+      try {
+        const cached = JSON.parse(localStorage.getItem(`pm_project_${projectId}`) || "null");
+        if (cached?.id === projectId) { project = cached; render(); }
+      } catch { }
+      try {
+        project = await api(`/api/projects/${projectId}`);
+        try { localStorage.setItem(`pm_project_${projectId}`, JSON.stringify(project)); } catch { }
+        render();
+      } catch (e) {
+        if (!project) loadingState.textContent = "Could not load this project.";
+        else notify("Showing the most recently loaded version.");
+      }
+    }
 
     applyTheme(document.documentElement.dataset.theme || "dark");
+    matchMedia("(prefers-color-scheme: light)").addEventListener("change", event => {
+      if (!localStorage.getItem(THEME_STORAGE_KEY)) applyTheme(event.matches ? "light" : "dark");
+    });
     closeModalBtn.addEventListener("click", closeModal);
     closeIconPickerBtn.addEventListener("click", closeIconPickerModal);
     modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
     iconPickerBackdrop.addEventListener("click", (e) => { if (e.target === iconPickerBackdrop) closeIconPickerModal(); });
-    settingsBackdrop.addEventListener("click", (e) => { if (e.target === settingsBackdrop) closeSettingsModal(); });
+    settingsBackdrop?.addEventListener("click", (e) => { if (e.target === settingsBackdrop) closeSettingsModal(); });
     document.addEventListener("click", (e) => {
       if (openContextMenuId && !e.target.closest(".card-menu-wrap")) closeContextMenu();
       if (!e.target.closest(".floating-actions")) closeFloatingActions();
     });
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
-      if (settingsBackdrop.classList.contains("show")) closeSettingsModal();
+      if (settingsBackdrop?.classList.contains("show")) closeSettingsModal();
       else if (iconPickerBackdrop.classList.contains("show")) closeIconPickerModal();
       else closeModal();
     });
 
     window.openSettingsModal = openSettingsModal;
+    window.goBack = goBack;
     window.closeSettingsModal = closeSettingsModal;
     window.toggleTheme = toggleTheme;
     window.openIconPickerModal = openIconPickerModal;
     window.closeIconPickerModal = closeIconPickerModal;
     window.selectStandardIcon = selectStandardIcon;
+    window.applyCustomIcon = applyCustomIcon;
     window.toggleContextMenu = toggleContextMenu;
     window.openProjectEditor = openProjectEditor;
     window.openAddLinkModal = openAddLinkModal;
     window.openEditLinkModal = openEditLinkModal;
-    window.deleteLink = (i) => { if (confirm("Delete link?")) { const u = deepClone(project); u.links.splice(i, 1); saveProject(u); } };
+    window.deleteLink = async (linkId) => { if (await confirmSheet({ title: "Delete Link?", confirmLabel: "Delete", destructive: true })) { const u = deepClone(project); u.links = (u.links || []).filter(l => l.id !== linkId); saveProject(u); } };
     window.openAddProjectLinkModal = openAddProjectLinkModal;
     window.addProjectLink = addProjectLink;
     window.openAddStepModal = openAddStepModal;
     window.openAddSubStepModal = openAddSubStepModal;
+    window.toggleStepCollapse = toggleStepCollapse;
+    window.toggleCompletedSteps = toggleCompletedSteps;
+    window.showCompletedSteps = showCompletedSteps;
     window.openStepEditor = openStepEditor;
     window.toggleStepDone = toggleStepDone;
     window.deleteStep = deleteStep;
@@ -2106,6 +2275,7 @@
     window.confirmMoveStep = confirmMoveStep;
     window.toggleFloatingActions = toggleFloatingActions;
     window.openAddLinkFromMenu = openAddLinkFromMenu;
+    window.openAddProjectLinkFromMenu = openAddProjectLinkFromMenu;
     window.openAddStepFromMenu = openAddStepFromMenu;
     window.enterDeleteMode = enterDeleteMode;
     window.cancelDeleteMode = cancelDeleteMode;
