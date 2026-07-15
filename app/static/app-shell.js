@@ -47,22 +47,30 @@ window.pmMeta = (() => {
     return `${m}m`;
   }
 
+  const ICON_CAL = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="16" rx="3.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>`;
+  const ICON_CLOCK = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>`;
+  const ICON_CHECK = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 5 5L19 7"/></svg>`;
+  const ICON_ALERT = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v9"/><circle cx="12" cy="18.4" r="1.3" fill="currentColor" stroke="none"/></svg>`;
+
+  const dateSpan = (date, cls = "") => `<span class="meta-date${cls}">${ICON_CAL}${esc(date)}</span>`;
+  const chip = (icon, label, cls = "") => `<span class="meta-chip${cls}">${icon}${esc(label)}</span>`;
+
   function line({ deadline = null, secondsLeft = null, finished = false } = {}) {
     const date = deadline ? relativeDate(deadline) : null;
     let left = "";
     let right = "";
     if (finished) {
-      left = date ? `<span class="meta-date">${esc(date)}</span>` : "";
-      right = `<span class="meta-countdown meta-success">✓ Finished</span>`;
+      left = date ? dateSpan(date) : "";
+      right = chip(ICON_CHECK, "Finished", " chip-success");
     } else if (!date) {
-      left = `<span class="meta-date">No deadline</span>`;
+      left = `<span class="meta-date">${ICON_CAL}No deadline</span>`;
     } else if (secondsLeft != null && secondsLeft <= 0) {
-      left = `<span class="meta-date meta-danger">${esc(date)}</span>`;
-      right = `<span class="meta-countdown meta-danger">Overdue</span>`;
+      left = dateSpan(date, " meta-danger");
+      right = chip(ICON_ALERT, "Overdue", " chip-danger");
     } else {
       const soon = secondsLeft != null && secondsLeft <= 86400;
-      left = `<span class="meta-date${soon ? " meta-warning" : ""}">${esc(date)}</span>`;
-      if (secondsLeft != null) right = `<span class="meta-countdown${soon ? " meta-warning" : ""}">${esc(timeLeft(secondsLeft))}</span>`;
+      left = dateSpan(date, soon ? " meta-warning" : "");
+      if (secondsLeft != null) right = chip(ICON_CLOCK, timeLeft(secondsLeft), soon ? " chip-warning" : "");
     }
     if (!left && !right) return "";
     return `<div class="project-meta-line">${left}${right}</div>`;
@@ -190,9 +198,62 @@ function pmInitEdgeBack() {
   });
 }
 
+/* Sheets dismiss by dragging down from their grab-handle area, like native
+   iOS sheets. Dismissal clicks the sheet's own close control so each page's
+   close logic (form reset etc.) runs. */
+function pmInitSheetDismiss() {
+  const SHEETS = ".modal, .modal-panel, .settings-modal, .icon-picker-panel";
+  let sheet = null;
+  let startY = 0;
+  let dy = 0;
+  let dragging = false;
+
+  document.addEventListener("touchstart", e => {
+    sheet = null;
+    if (matchMedia("(min-width: 621px)").matches) return;
+    const s = e.target.closest(SHEETS);
+    if (!s) return;
+    if (e.touches[0].clientY - s.getBoundingClientRect().top > 64) return;
+    if (e.target.closest("input, textarea, select")) return;
+    sheet = s;
+    startY = e.touches[0].clientY;
+    dy = 0;
+    dragging = false;
+  }, { passive: true });
+
+  document.addEventListener("touchmove", e => {
+    if (!sheet) return;
+    dy = e.touches[0].clientY - startY;
+    if (!dragging && dy > 10) dragging = true;
+    if (dragging) {
+      sheet.style.transition = "none";
+      sheet.style.transform = `translateY(${Math.max(0, dy)}px)`;
+    }
+  }, { passive: true });
+
+  document.addEventListener("touchend", () => {
+    if (!sheet) return;
+    const s = sheet;
+    sheet = null;
+    if (!dragging) return;
+    s.style.transition = "transform .28s cubic-bezier(.2, .8, .2, 1)";
+    if (dy > 110) {
+      s.style.transform = "translateY(110%)";
+      setTimeout(() => {
+        s.querySelector('[aria-label="Close"], .panel-x')?.click();
+        s.style.transform = "";
+        s.style.transition = "";
+      }, 170);
+    } else {
+      s.style.transform = "";
+    }
+  }, { passive: true });
+}
+
 function pmInit() {
   pmInitScroll();
   pmInitEdgeBack();
+  pmInitSheetDismiss();
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pmInit);

@@ -456,12 +456,38 @@ input:focus, textarea:focus {
 
 .meta-date {
   min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.meta-countdown { flex: 0 0 auto; font-weight: 590; }
+.meta-date svg { flex: 0 0 auto; width: 13px; height: 13px; opacity: .75; }
+
+/* Countdown / status as a tinted iOS capsule */
+.meta-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 21px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surfaceSoft);
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 620;
+  letter-spacing: .01em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.meta-chip svg { width: 11px; height: 11px; }
+.meta-chip.chip-danger { background: var(--dangerSoft); color: var(--danger); }
+.meta-chip.chip-warning { background: color-mix(in srgb, var(--warning) 15%, transparent); color: var(--warning); }
+.meta-chip.chip-success { background: var(--successSoft); color: var(--successText); }
 
 .project-meta-line .meta-danger { color: var(--danger); font-weight: 590; }
 .project-meta-line .meta-success { color: var(--successText); font-weight: 590; }
@@ -1611,6 +1637,22 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 }
 
 ::view-transition-group(*) { animation-duration: .3s; }
+
+/* Installed PWA: iOS can size the viewport short of the home-indicator area,
+   leaving a dead strip at the bottom. Pin every full-screen fixed layer to
+   the full large-viewport height so the app spans the whole screen. */
+@media (display-mode: standalone) {
+  body::before,
+  .app-scroll,
+  .modal-backdrop,
+  .settings-backdrop,
+  .icon-picker,
+  .confirm-backdrop {
+    top: 0;
+    bottom: auto;
+    height: 100lvh;
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
