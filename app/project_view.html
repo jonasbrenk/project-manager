@@ -1423,8 +1423,8 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="/static/app-shell.css?v=29">
-  <script src="/static/app-shell.js?v=8"></script>
+  <link rel="stylesheet" href="/static/app-shell.css?v=31">
+  <script src="/static/app-shell.js?v=9"></script>
 
 </head>
 
@@ -1749,14 +1749,14 @@
         { label: "Delete", onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
       ]);
 
-      return `<div class="link-card link-card-project${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `location.href='${escapeHtml(projectUrl)}'`}">
+      return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card link-card-project swipe-target${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `location.href='${escapeHtml(projectUrl)}'`}">
         ${menu}
         <div class="proj-link-icon">${loading ? "⏳" : icon}</div>
         <div class="proj-link-body">
           <div class="proj-link-name">${loading ? "Loading…" : name}</div>
           <div class="link-subtitle${error ? " danger" : proj?.finished ? " done" : ""}">${escapeHtml(subtitle)}</div>
         </div>
-      </div>`;
+      </div></div>`;
     }
 
     // --- Modal helpers ---
@@ -2098,7 +2098,7 @@
           ? rawUrl.replace("PROJECTS/", currentOrigin + "/")
           : rawUrl;
 
-        return `<div class="link-card${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(processedUrl)}')`}">
+        return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card swipe-target${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(processedUrl)}')`}">
           ${buildCardMenu(`link-menu-${index}`, [
             { label: "Edit", onclick: `event.stopPropagation(); openEditLinkModal('${link.id}');` },
             { label: "Delete", onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
@@ -2108,12 +2108,13 @@
             <div class="link-title">${escapeHtml(normalizeDisplayText(link.title || "Untitled link"))}</div>
             <div class="link-subtitle">${escapeHtml(formatLinkDestination(processedUrl))}</div>
           </div>
-        </div>`;
+        </div></div>`;
       }).join("")}</div>`;
     }
 
     function render() {
       if (!project) return;
+      window.pmSwipeClose?.();
       const hasDoneTasks = hasCompletedSteps(project.steps || []);
       const linksMenuOpen = !!openContextMenuId && (openContextMenuId.startsWith("link-menu-") || openContextMenuId.startsWith("project-link-menu-"));
       const stepsMenuOpen = (!!openContextMenuId && openContextMenuId.startsWith("step-menu-")) || !!moveState;
