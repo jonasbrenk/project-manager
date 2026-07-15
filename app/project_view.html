@@ -1520,6 +1520,14 @@
     let iconSearchTimer = null;
     let toastTimer = null;
 
+    const SWIPE_ICON_EDIT = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>`;
+    const SWIPE_ICON_DELETE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`;
+    window.pmSwipeDisabled = () => deleteMode || !!moveState;
+
+    function swipeActionsHtml(editCall, deleteCall) {
+      return `<div class="swipe-actions"><button class="swipe-btn swipe-hide" type="button" onclick="event.stopPropagation(); window.pmSwipeClose?.(); ${editCall}">${SWIPE_ICON_EDIT}<span>Edit</span></button><button class="swipe-btn swipe-delete" type="button" onclick="event.stopPropagation(); window.pmSwipeClose?.(); ${deleteCall}">${SWIPE_ICON_DELETE}<span>Delete</span></button></div>`;
+    }
+
     // Cache for linked project data: id -> project object (or null on error)
     const projectCache = {};
     // Temp storage for project picker modal
@@ -2012,11 +2020,11 @@
         : step.until_deadline
           ? `<div class="project-meta-line"><span class="meta-date">Until project deadline</span></div>`
           : "";
-      return `<div class="step-item${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}; view-transition-name: s-${String(step.id).replace(/[^a-zA-Z0-9-]/g, "")}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
+      return `<div class="swipe-row" style="view-transition-name: s-${String(step.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(`openStepEditor('${step.id}');`, `deleteStep('${step.id}');`)}<div class="step-item swipe-target${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
         <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onclick="event.stopPropagation()" onchange="toggleStepDone('${step.id}', this.checked)" />
         <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title-row"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div></div>${String(step.description || "").trim() ? `<div class="muted">${renderFormattedText(step.description, "", true)}</div>` : ""}
         </div>
-      </div>${metadata ? `<div class="step-sub ${step.done ? "done-state" : ""}">${metadata}</div>` : ""}</div>`;
+      </div>${metadata ? `<div class="step-sub ${step.done ? "done-state" : ""}">${metadata}</div>` : ""}</div></div>`;
     }
 
     function flattenVisibleSteps(steps, depth = 0, rows = []) {

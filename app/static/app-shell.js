@@ -250,10 +250,118 @@ function pmInitSheetDismiss() {
   }, { passive: true });
 }
 
+/* Shared swipe engine: any `.swipe-row` (wrapper of `.swipe-actions` +
+   `.swipe-target` foreground) swipes left to reveal its actions, iOS style.
+   Long-pressing a row that has a `.card-menu-trigger` opens its context menu
+   — the touch replacement for the three-dot button. Pages can veto swiping
+   via `window.pmSwipeDisabled` (e.g. during delete/move modes). */
+function pmInitSwipe() {
+  let row = null;
+  let startX = 0;
+  let startY = 0;
+  let offset = 0;
+  let width = 0;
+  let active = false;
+  let openRow = null;
+  let suppressClick = false;
+  let pressTimer = null;
+
+  const target = r => r.querySelector(".swipe-target");
+  const disabled = () => typeof window.pmSwipeDisabled === "function" && window.pmSwipeDisabled();
+  const cancelPress = () => { clearTimeout(pressTimer); pressTimer = null; };
+
+  function close() {
+    if (!openRow) return;
+    const t = target(openRow);
+    if (t) t.style.transform = "";
+    openRow.classList.remove("swipe-open");
+    openRow = null;
+  }
+  window.pmSwipeClose = close;
+
+  document.addEventListener("touchstart", e => {
+    suppressClick = false;
+    const r = e.target.closest(".swipe-row");
+    if (openRow && r !== openRow) close();
+    row = r && !disabled() ? r : null;
+    if (!row) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    offset = 0;
+    active = false;
+    width = row.querySelector(".swipe-actions")?.offsetWidth || 0;
+    const trigger = row !== openRow && !e.target.closest(".card-menu") ? row.querySelector(".card-menu-trigger") : null;
+    if (trigger) {
+      pressTimer = setTimeout(() => {
+        pressTimer = null;
+        suppressClick = true;
+        trigger.click();
+      }, 480);
+    }
+  }, { passive: true });
+
+  document.addEventListener("touchmove", e => {
+    if (!row) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = Math.abs(e.touches[0].clientY - startY);
+    if (Math.abs(dx) > 10 || dy > 10) cancelPress();
+    if (!active && width && Math.abs(dx) > 12 && Math.abs(dx) > dy * 1.4) active = true;
+    if (!active) return;
+    const base = row === openRow ? -width : 0;
+    offset = Math.min(0, Math.max(-width - 24, base + dx));
+    row.classList.add("dragging");
+    const t = target(row);
+    if (t) t.style.transform = `translateX(${offset}px)`;
+  }, { passive: true });
+
+  document.addEventListener("touchend", () => {
+    cancelPress();
+    if (!row) return;
+    row.classList.remove("dragging");
+    if (active) {
+      const t = target(row);
+      if (offset < -width / 2) {
+        if (t) t.style.transform = `translateX(${-width}px)`;
+        row.classList.add("swipe-open");
+        openRow = row;
+      } else {
+        if (t) t.style.transform = "";
+        row.classList.remove("swipe-open");
+        if (openRow === row) openRow = null;
+      }
+      suppressClick = true;
+    }
+    row = null;
+    active = false;
+  }, { passive: true });
+
+  document.addEventListener("touchcancel", () => {
+    cancelPress();
+    if (row) row.classList.remove("dragging");
+    row = null;
+    active = false;
+  }, { passive: true });
+
+  document.addEventListener("click", e => {
+    if (suppressClick) {
+      suppressClick = false;
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    if (openRow && !e.target.closest(".swipe-actions")) {
+      e.preventDefault();
+      e.stopPropagation();
+      close();
+    }
+  }, true);
+}
+
 function pmInit() {
   pmInitScroll();
   pmInitEdgeBack();
   pmInitSheetDismiss();
+  pmInitSwipe();
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pmInit);
