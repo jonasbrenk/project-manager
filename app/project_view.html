@@ -1423,16 +1423,19 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="/static/app-shell.css?v=20">
+  <link rel="stylesheet" href="/static/app-shell.css?v=26">
+  <script src="/static/app-shell.js?v=6"></script>
 
 </head>
 
 <body>
+  <div class="app-scroll" id="appScroll">
   <main class="page">
     <div class="topbar"><a class="back-link" href="/" onclick="goBack(event)">‹ Projects</a><div class="nav-actions"><button id="themeToggleBtn" class="settings-trigger" type="button" onclick="toggleTheme()" aria-label="Toggle light or dark appearance"></button></div></div>
     <div id="loadingState" class="card loading-skeleton">Loading project…</div>
     <div id="app" class="layout" hidden></div>
   </main>
+  </div>
 
   <div class="floating-actions" id="floatingActions">
     <div id="floatingActionsMenu" class="floating-actions-menu">
@@ -1988,11 +1991,11 @@
       const childCount = (step.children || []).length;
       const childrenOpen = childCount && !collapsedStepIds.has(step.id);
       const clickHandler = deleteMode ? `toggleDeleteSelection(event, 'step:${step.id}')` : moveState ? `selectMoveTarget('${step.id}', event)` : childCount ? `toggleStepCollapse('${step.id}', event)` : "";
-      const metadata = [
-        step.until_deadline ? `<span class="pill">⏳ until deadline</span>` : "",
-        step.deadline ? `<span class="pill">📅 ${escapeHtml(formatDeadline(step.deadline))}</span>` : "",
-        step.deadline ? `<span class="pill">⏱ ${escapeHtml(formatTimeLeft(stepTimeLeft(step.deadline)))}</span>` : ""
-      ].filter(Boolean).join("");
+      const metaItems = [
+        ...(step.until_deadline ? [`<span class="project-meta-item">Until deadline</span>`] : []),
+        ...(step.deadline ? window.pmMeta.items({ deadline: step.deadline, secondsLeft: step.done ? null : stepTimeLeft(step.deadline) }) : [])
+      ];
+      const metadata = window.pmMeta.wrap(metaItems);
       return `<div class="step-item${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
         <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onclick="event.stopPropagation()" onchange="toggleStepDone('${step.id}', this.checked)" />
         <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title-row"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div></div><div class="muted">${renderFormattedText(step.description, "No description", true)}</div>
@@ -2087,14 +2090,13 @@
 
     function render() {
       if (!project) return;
-      const projectMetaState = getProjectMetaState();
       const hasDoneTasks = hasCompletedSteps(project.steps || []);
       const linksMenuOpen = !!openContextMenuId && (openContextMenuId.startsWith("link-menu-") || openContextMenuId.startsWith("project-link-menu-"));
       const stepsMenuOpen = (!!openContextMenuId && openContextMenuId.startsWith("step-menu-")) || !!moveState;
       document.title = project.name ? `${project.name} · Project View` : "Project View";
       app.hidden = false; loadingState.hidden = true;
       app.className = `layout${deleteMode ? " delete-mode" : ""}`;
-      app.innerHTML = `<section class="card hero project-hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div class="hero-copy"><h1 class="project-title">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</h1></div></div><div class="project-hero-actions"><button class="icon-action" type="button" onclick="openProjectEditor()" aria-label="Edit project" title="Edit project"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button class="icon-action${project.finished ? " is-complete" : ""}" type="button" onclick="toggleFinished()" aria-label="${project.finished ? "Reopen project" : "Mark project finished"}" title="${project.finished ? "Reopen project" : "Mark project finished"}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16.5 9"/></svg></button></div></div>${project.description ? `<div class="project-description muted">${renderFormattedText(project.description)}</div>` : ""}<div class="project-meta-line"><span class="project-meta-item">📅 ${escapeHtml(formatDeadline(project.deadline))}</span><span class="project-meta-separator">•</span><span class="project-meta-item ${projectMetaState.extraClass}">${project.finished ? "✓" : "◷"} ${escapeHtml(projectMetaState.value)}</span></div></section>
+      app.innerHTML = `<section class="card hero project-hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div class="hero-copy"><h1 class="project-title">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</h1></div></div><div class="project-hero-actions"><button class="icon-action" type="button" onclick="openProjectEditor()" aria-label="Edit project" title="Edit project"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button class="icon-action${project.finished ? " is-complete" : ""}" type="button" onclick="toggleFinished()" aria-label="${project.finished ? "Reopen project" : "Mark project finished"}" title="${project.finished ? "Reopen project" : "Mark project finished"}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16.5 9"/></svg></button></div></div>${project.description ? `<div class="project-description muted">${renderFormattedText(project.description)}</div>` : ""}${window.pmMeta.line({ deadline: project.deadline, secondsLeft: project.seconds_left, finished: project.finished })}</section>
       <section class="content-section${linksMenuOpen ? " has-open-menu" : ""}"><div class="section-head"><h2 class="section-title">Links</h2></div>${renderLinks()}</section>
       <section class="content-section steps-section${stepsMenuOpen ? " has-open-menu" : ""}${moveState && moveState.targetParentId == null ? " move-target" : ""}" ${moveState ? `onclick="selectMoveTarget(null, event)"` : ""}><div class="section-head"><h2 class="section-title">Tasks</h2>${hasDoneTasks && !moveState && !deleteMode ? `<button class="section-action" type="button" aria-pressed="${hideCompletedSteps}" onclick="toggleCompletedSteps(event)">${hideCompletedSteps ? "Show done" : "Hide done"}</button>` : ""}</div>${renderStepTree(project.steps)}</section>`;
       if (moveState) app.innerHTML += `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('top')">Insert at start</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('bottom')">Insert at end</button></div>`;

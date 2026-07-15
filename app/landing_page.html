@@ -513,9 +513,11 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 
  </style>
-  <link rel="stylesheet" href="/static/app-shell.css?v=20">
+  <link rel="stylesheet" href="/static/app-shell.css?v=26">
+  <script src="/static/app-shell.js?v=6"></script>
 </head>
 <body>
+  <div class="app-scroll" id="appScroll">
   <main class="page landing-page">
     <header class="landing-header">
       <h1 class="title">Projects</h1>
@@ -544,6 +546,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
       </div>
     </section>
   </main>
+  </div>
 
   <div class="floating-actions" id="floatingActions">
     <div id="floatingActionsMenu" class="floating-actions-menu">
@@ -1024,12 +1027,9 @@ function renderProjects() {
             </div>
           </div>
           ${Number(p.task_total) > 0 ? `<div class="project-progress"><div class="project-progress-track"><div class="project-progress-fill" style="width:${Math.round((Number(p.task_done) || 0) / Number(p.task_total) * 100)}%"></div></div><span>${Number(p.task_done) || 0}/${Number(p.task_total)} tasks</span></div>` : ""}
+          ${window.pmMeta.line({ deadline: p.deadline, secondsLeft: p.seconds_left, finished: p.finished })}
         </div>
         ${visibilityMode ? `<button class="btn btn-secondary visibility-toggle" type="button" onclick="togglePendingVisibility(event, '${p.id}')">${isVisible ? "Visible" : "Hidden"}</button>` : ""}
-          <div class="project-meta">
-          <div class="badge ${isDueSoon(p.seconds_left) ? "warning" : ""}">${escapeHtml("📅 " + formatDeadline(p.deadline))}</div>
-          <div class="badge ${p.finished ? "done" : p.seconds_left != null && p.seconds_left <= 0 ? "danger" : isDueSoon(p.seconds_left) ? "warning" : ""}">${p.finished ? "✓ Finished" : escapeHtml("⏱ " + formatTimeLeft(p.seconds_left))}</div>
-        </div>
       </a>`;
   };
 

@@ -57,21 +57,63 @@ html {
 html[data-theme="light"] { color-scheme: light; }
 
 html, body {
-  background: radial-gradient(circle at top, var(--bgTop) 0%, var(--bgBottom) 58%);
+  height: 100%;
+  overflow: hidden;
+  background: var(--bgBottom);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 body {
-  min-height: 100dvh;
-  overscroll-behavior-y: none;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
-body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) { overflow: hidden; }
+/* Background lives on a fixed layer so it never scrolls with the content */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(circle at top, var(--bgTop) 0%, var(--bgBottom) 58%);
+  pointer-events: none;
+}
+
+/* The app scroll surface — the only thing that scrolls, like a UIScrollView */
+.app-scroll {
+  position: fixed;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* No visible scrollbars anywhere — apps don't have them */
+* { scrollbar-width: none; }
+*::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* Text the user may want to copy stays selectable */
+input, textarea, .formatted-text, .link-url { user-select: text; -webkit-user-select: text; }
+
+/* No I-beam cursors, no link/image ghost-dragging — apps don't do that */
+body { cursor: default; }
+a, button { cursor: pointer; }
+a, img { -webkit-user-drag: none; }
+
+/* The custom clear button replaces the native search decorations */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration { display: none; -webkit-appearance: none; }
+
+body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .app-scroll { overflow: hidden; }
 
 button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
-button, .btn, .project-card, .link-card, .back-link { touch-action: manipulation; }
+/* Panning and pinch stay enabled; only double-tap zoom is dropped */
+* { touch-action: manipulation; }
 
 button, .btn, .project-card, .link-card, .back-link, .icon-choice {
   transition: transform .22s var(--spring), background-color .22s ease, border-color .22s ease,
@@ -92,7 +134,8 @@ button:disabled, .btn:disabled { opacity: .45; cursor: default; transform: none;
 
 .page {
   width: min(980px, calc(100% - 32px));
-  padding-top: max(20px, env(safe-area-inset-top));
+  /* Safe-area is handled by the sticky headers themselves */
+  padding-top: 20px;
   /* Clear the floating action button so the last items can scroll past it */
   padding-bottom: calc(104px + env(safe-area-inset-bottom));
 }
@@ -108,17 +151,50 @@ body:has(.delete-toolbar.show, .move-toolbar) .page {
 }
 
 .landing-header {
-  min-height: 52px;
-  padding: 2px 3px 0;
+  min-height: calc(52px - 8px * var(--condense, 0));
+  padding: max(2px, env(safe-area-inset-top)) 3px 6px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 60;
 }
 
-.landing-header .title { margin: 0; }
+/* Full-bleed iOS nav-bar blur that fades in once content scrolls beneath */
+.landing-header::before,
+.topbar::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -24px;
+  bottom: 0;
+  left: calc(50% - 50vw);
+  right: calc(50% - 50vw);
+  background: color-mix(in srgb, var(--bgBottom) 62%, transparent);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  border-bottom: 1px solid var(--line);
+  opacity: 0;
+  transition: opacity .25s ease;
+  pointer-events: none;
+}
+
+html.is-scrolled .landing-header::before,
+html.is-scrolled .topbar::before { opacity: 1; }
+
+/* As the hero condenses, the topbar strip fuses with it into one layer */
+.topbar::before {
+  border-bottom-color: color-mix(in srgb, var(--line) calc(100% * (1 - var(--condense, 0))), transparent);
+}
+
+/* Large title scrubs down to a compact nav title, iOS-style */
+.landing-header .title {
+  --titleSize: clamp(2rem, 7vw, 3.25rem);
+  margin: 0;
+  font-size: calc(var(--titleSize) * (1 - var(--condense, 0)) + 1.35rem * var(--condense, 0));
+}
 
 .landing-settings {
   position: static;
@@ -250,12 +326,12 @@ input:focus, textarea:focus {
 }
 
 .topbar {
-  position: relative;
-  top: auto;
+  position: sticky;
+  top: 0;
   z-index: 60;
   min-height: 40px;
   margin-bottom: 6px;
-  padding: 0 2px;
+  padding: env(safe-area-inset-top, 0px) 2px 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -286,11 +362,50 @@ input:focus, textarea:focus {
 
 .settings-trigger svg { width: 20px; height: 20px; }
 
-.project-hero { gap: 11px; padding: 16px; }
+/* .card.project-hero: must outrank the mobile `.card` padding/radius rules
+   so the scroll-scrubbed values below always win */
+.card.project-hero {
+  --p: var(--condense, 0);
+  --heroPad: 16px;
+  gap: calc(11px * (1 - var(--p)));
+  padding: calc(var(--heroPad) - 7px * var(--p)) calc(var(--heroPad) + (50vw - 50%) * var(--p));
+  position: sticky;
+  top: calc(40px + env(safe-area-inset-top, 0px));
+  z-index: 55;
+  /* Grows edge-to-edge as it condenses; corners and side borders scrub away */
+  margin-inline: calc((50% - 50vw) * var(--p));
+  border-radius: calc(var(--radius) * (1 - var(--p)));
+  border-inline-color: color-mix(in srgb, var(--line) calc(100% * (1 - var(--p))), transparent);
+  border-top-color: color-mix(in srgb, var(--line) calc(100% * (1 - var(--p))), transparent);
+  background: color-mix(in srgb, var(--panelBg) calc(60% * var(--p)), var(--card));
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .035) inset, var(--shadow),
+    0 12px 30px rgba(0, 0, 0, calc(.22 * var(--p)));
+}
 .project-hero .hero-head { align-items: center; gap: 10px; flex-wrap: nowrap; }
 .project-hero .hero-title-wrap { flex: 1; min-width: 0; }
 .project-hero .hero-copy { gap: 0; }
-.project-hero .project-title { margin: 0; font-size: clamp(1.35rem, 5vw, 2rem); }
+
+/* Title and icon scrub between full and nav-bar size with --condense */
+.project-hero .project-title {
+  margin: 0;
+  font-size: calc(clamp(1.35rem, 5vw, 2rem) * (1 - var(--p)) + 1.08rem * var(--p));
+}
+
+.project-hero .hero-icon {
+  --iconSize: 64px;
+  --iconRadius: 20px;
+  width: calc(var(--iconSize) * (1 - var(--p)) + 34px * var(--p));
+  height: calc(var(--iconSize) * (1 - var(--p)) + 34px * var(--p));
+  border-radius: calc(var(--iconRadius) * (1 - var(--p)) + 10px * var(--p));
+  font-size: calc(1.7rem * (1 - var(--p)) + .95rem * var(--p));
+}
+
+/* Description + meta heights are interpolated inline by app-shell.js
+   (content-dependent); CSS just clips the overflow */
+.project-hero .project-description,
+.project-hero .project-meta-line {
+  overflow: hidden;
+}
 
 .project-hero-actions {
   display: flex;
@@ -333,9 +448,18 @@ input:focus, textarea:focus {
   white-space: nowrap;
 }
 
-.project-meta-item:first-child { flex: 1; }
-.project-meta-item:last-child { flex: 0 1 auto; }
-.project-meta-separator { color: var(--line); }
+.project-meta-separator { color: color-mix(in srgb, var(--muted) 45%, transparent); }
+
+.project-meta-line .meta-danger { color: var(--dangerText); font-weight: 590; }
+.project-meta-line .meta-success { color: var(--successText); font-weight: 590; }
+.project-meta-line .meta-warning { color: var(--accent); font-weight: 590; }
+
+/* Meta line inside list cards mirrors the project-view hierarchy, small text */
+.project-card .project-meta-line { font-size: .74rem; }
+.project-card .project-desc { font-size: .8rem; }
+.project-card .project-card-body { gap: 8px; }
+.step-item .step-sub { display: block; }
+.step-item .project-meta-line { font-size: .74rem; }
 
 .stats {
   padding: 3px;
@@ -663,25 +787,29 @@ input:focus, textarea:focus {
 }
 
 .floating-trigger {
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   padding: 0;
   display: grid;
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--accent) 84%, #fff) 0%, var(--accent) 100%);
   color: #fff;
-  box-shadow: 0 12px 30px color-mix(in srgb, var(--accent) 38%, transparent);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .22) inset,
+    0 8px 22px color-mix(in srgb, var(--accent) 32%, transparent),
+    0 2px 6px rgba(0, 0, 0, .16);
 }
 
 .floating-trigger svg {
-  width: 26px;
-  height: 26px;
+  width: 21px;
+  height: 21px;
   display: block;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
+  stroke-width: 2;
   stroke-linecap: round;
   transition: transform .24s var(--spring);
 }
@@ -1260,13 +1388,13 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 @media (max-width: 620px) {
   .page {
     width: calc(100% - 20px);
-    padding-top: max(10px, env(safe-area-inset-top));
+    padding-top: 10px;
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
   }
 
   .landing-page { width: calc(100% - 20px); gap: 10px; }
   .landing-header { min-height: 44px; padding-inline: 2px; }
-  .landing-header .title { font-size: 2.15rem; }
+  .landing-header .title { --titleSize: 2.15rem; }
   .project-browser { gap: 8px; }
   .modal-actions { align-items: stretch; flex-direction: column-reverse; }
   .modal-action-group { width: 100%; margin-left: 0; }
@@ -1275,8 +1403,8 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   .card { border-radius: 18px; padding: 15px; }
   .hero-card { padding-top: 18px; }
   .topbar { margin-bottom: 4px; }
-  .project-hero { padding: 14px; }
-  .project-hero .hero-icon { width: 50px; height: 50px; border-radius: 15px; }
+  .card.project-hero { --heroPad: 14px; }
+  .project-hero .hero-icon { --iconSize: 50px; --iconRadius: 15px; }
   .project-hero-actions { gap: 2px; }
   .icon-action { width: 36px; min-height: 36px; padding: 8px; }
   .project-meta { grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr); gap: 6px; }
