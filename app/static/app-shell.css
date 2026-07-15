@@ -860,28 +860,42 @@ input:focus, textarea:focus {
 
 .hidden-section[hidden] { display: none; }
 
-.hidden-section summary {
+.hidden-summary {
+  width: 100%;
   min-height: 44px;
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
   cursor: pointer;
-  list-style: none;
   color: var(--muted);
+  font: inherit;
   font-size: .88rem;
   font-weight: 620;
+  text-align: left;
 }
 
-.hidden-section summary::-webkit-details-marker { display: none; }
+.hidden-summary:active {
+  transform: none;
+  background: var(--surfaceSoft);
+}
 
-.hidden-section summary::after {
-  content: "›";
+.hidden-chevron {
+  width: 18px;
+  height: 18px;
   margin-left: auto;
-  font-size: 1.2rem;
-  transition: transform .2s var(--spring);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .3s var(--spring);
 }
 
-.hidden-section[open] summary::after { transform: rotate(90deg); }
+.hidden-section.is-open .hidden-chevron { transform: rotate(90deg); }
 
 .hidden-count {
   min-width: 22px;
@@ -892,7 +906,29 @@ input:focus, textarea:focus {
   text-align: center;
 }
 
-.hidden-section .project-list { margin-top: 8px; }
+.hidden-disclosure {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition:
+    grid-template-rows .3s var(--spring),
+    visibility 0s linear .3s;
+}
+
+.hidden-section.is-open .hidden-disclosure {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.hidden-disclosure-clip {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hidden-section .project-list {
+  margin: 8px 1px 1px;
+}
 
 .segment {
   min-height: 34px;
