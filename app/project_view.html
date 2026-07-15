@@ -1423,8 +1423,8 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="/static/app-shell.css?v=27">
-  <script src="/static/app-shell.js?v=7"></script>
+  <link rel="stylesheet" href="/static/app-shell.css?v=29">
+  <script src="/static/app-shell.js?v=8"></script>
 
 </head>
 
@@ -1605,9 +1605,9 @@
     function openSettingsModal() { settingsBackdrop?.classList.add("show"); }
     function closeSettingsModal() { settingsBackdrop?.classList.remove("show"); }
     function clampIndent(level) { return Math.max(0, Math.min(3, Number(level) || 0)); }
-    function renderFormattedText(value, fallback = "No description", compact = false) {
+    function renderFormattedText(value, fallback = "", compact = false) {
       const source = String(value || "").replace(/\r\n?/g, "\n");
-      if (!source.trim()) return `<div class="formatted-text${compact ? " compact" : ""}"><p class="formatted-paragraph">${escapeHtml(normalizeDisplayText(fallback))}</p></div>`;
+      if (!source.trim()) return fallback ? `<div class="formatted-text${compact ? " compact" : ""}"><p class="formatted-paragraph">${escapeHtml(normalizeDisplayText(fallback))}</p></div>` : "";
 
       const lines = source.split("\n");
       const parts = [];
@@ -2014,7 +2014,7 @@
           : "";
       return `<div class="step-item${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}; view-transition-name: s-${String(step.id).replace(/[^a-zA-Z0-9-]/g, "")}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
         <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onclick="event.stopPropagation()" onchange="toggleStepDone('${step.id}', this.checked)" />
-        <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title-row"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div></div><div class="muted">${renderFormattedText(step.description, "No description", true)}</div>
+        <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title-row"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div></div>${String(step.description || "").trim() ? `<div class="muted">${renderFormattedText(step.description, "", true)}</div>` : ""}
         </div>
       </div>${metadata ? `<div class="step-sub ${step.done ? "done-state" : ""}">${metadata}</div>` : ""}</div>`;
     }
