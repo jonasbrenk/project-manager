@@ -573,13 +573,45 @@ input:focus, textarea:focus {
 .swipe-btn.swipe-hide { background: #8e8e93; }
 .swipe-btn.swipe-delete { background: var(--danger); }
 
-.swipe-row .project-card {
+.swipe-actions { border-radius: inherit; overflow: hidden; }
+
+.swipe-row .swipe-target {
   position: relative;
   z-index: 1;
-  transition: transform .3s var(--spring), border-color .15s, background .15s;
+  transition: transform .3s var(--spring), border-color .15s, background-color .15s;
 }
 
-.swipe-row.dragging .project-card { transition: border-color .15s, background .15s; }
+.swipe-row.dragging .swipe-target { transition: border-color .15s, background-color .15s; }
+
+/* Open context menus must escape the row's clipping */
+.swipe-row:has(.card-menu.show) { overflow: visible; z-index: 130; }
+
+/* Rows inside grouped lists: square by default, group corners on the ends */
+.step-tree > .swipe-row, .links-grid > .swipe-row { border-radius: 0; }
+.step-tree > .swipe-row:first-child, .links-grid > .swipe-row:first-child { border-radius: 15px 15px 0 0; }
+.step-tree > .swipe-row:last-child, .links-grid > .swipe-row:last-child { border-radius: 0 0 15px 15px; }
+.step-tree > .swipe-row:only-child, .links-grid > .swipe-row:only-child { border-radius: 15px; }
+
+/* Translucent group rows get an opaque backing while actions are behind */
+:is(.step-tree, .links-grid) > .swipe-row:is(.dragging, .swipe-open) .swipe-target {
+  background: color-mix(in srgb, var(--card2) 60%, var(--panelBg));
+}
+
+/* Three-dot triggers: never visible on touch (swipe + long-press instead),
+   hover-revealed with a pointer — Apple shows no row chrome */
+@media (hover: none) {
+  .card-menu-trigger { display: none; }
+  .step-head { padding-right: 12px; }
+  .links-grid .link-card { padding-right: 10px; }
+  .proj-link-body { padding-right: 0; }
+}
+
+@media (hover: hover) {
+  .card-menu-trigger { opacity: 0; transition: opacity .15s ease; }
+  :is(.link-card, .step-item):hover .card-menu-trigger,
+  .card-menu-trigger[aria-expanded="true"],
+  .card-menu-trigger:focus-visible { opacity: 1; }
+}
 
 /* Cards are fully opaque: their former alpha tint flattened onto the solid
    panel color, so nothing (e.g. swipe actions) shows through */
@@ -618,10 +650,8 @@ input:focus, textarea:focus {
   box-shadow: none;
 }
 
-.links-grid .link-card + .link-card { border-top: 1px solid var(--line); }
-.links-grid .link-card:first-child { border-radius: 15px 15px 0 0; }
-.links-grid .link-card:last-child { border-radius: 0 0 15px 15px; }
-.links-grid .link-card:only-child { border-radius: 15px; }
+.links-grid > * + * { border-top: .5px solid var(--line); }
+.links-grid .link-card { border-radius: 0; }
 .links-grid .link-card:has(.card-menu.show) { z-index: 130; }
 
 .links-grid .link-icon, .links-grid .proj-link-icon {
@@ -1638,10 +1668,17 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 
 ::view-transition-group(*) { animation-duration: .3s; }
 
-/* Installed PWA: iOS can size the viewport short of the home-indicator area,
-   leaving a dead strip at the bottom. Pin every full-screen fixed layer to
-   the full large-viewport height so the app spans the whole screen. */
+/* Installed PWA: WebKit can resolve the modern viewport units and percentage
+   root height without the bottom safe-area inset. In standalone mode legacy
+   100vh is the unit that includes that area, so use it for the root canvas and
+   every full-screen layer. This prevents a home-indicator-sized dead strip. */
 @media (display-mode: standalone) {
+  html,
+  body {
+    height: 100vh;
+    min-height: 100vh;
+  }
+
   body::before,
   .app-scroll,
   .modal-backdrop,
@@ -1650,7 +1687,8 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   .confirm-backdrop {
     top: 0;
     bottom: auto;
-    height: 100lvh;
+    height: 100vh;
+    min-height: 100vh;
   }
 }
 
