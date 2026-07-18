@@ -26,1524 +26,13 @@
     })();
   </script>
 
-  <style>
-    :root {
-      --bg: #0b1020;
-      --card: rgba(19, 26, 47, .92);
-      --card2: rgba(28, 38, 70, .8);
-      --text: #eef2ff;
-      --muted: #a8b3cf;
-      --line: rgba(255, 255, 255, .08);
-      --accent: #4f7cff;
-      --accentSoft: rgba(79, 124, 255, .15);
-      --danger: #ff6a6a;
-      --dangerSoft: rgba(255, 106, 106, .12);
-      --dangerSoftAlt: rgba(255, 106, 106, .06);
-      --dangerBorder: rgba(255, 106, 106, .28);
-      --dangerText: #ffd9d9;
-      --successSoft: rgba(88, 196, 143, .12);
-      --successBorder: rgba(88, 196, 143, .28);
-      --successText: #d9ffea;
-      --shadow: 0 18px 50px rgba(0, 0, 0, .28);
-      --radius: 22px;
-      --bgTop: #172344;
-      --bgBottom: #0b1020;
-      --surfaceSoft: rgba(255, 255, 255, .05);
-      --panelBg: #0f172d;
-      --toggleOff: rgba(255, 255, 255, .16);
-      --doneFade: .56
-    }
-
-    html[data-theme="light"] {
-      --bg: #edf3ff;
-      --card: rgba(255, 255, 255, .88);
-      --card2: rgba(242, 247, 255, .92);
-      --text: #17233c;
-      --muted: #5d6a84;
-      --line: rgba(23, 35, 60, .12);
-      --accent: #2f6df6;
-      --accentSoft: rgba(47, 109, 246, .12);
-      --danger: #d74d4d;
-      --dangerSoft: rgba(215, 77, 77, .12);
-      --dangerSoftAlt: rgba(215, 77, 77, .08);
-      --dangerBorder: rgba(215, 77, 77, .28);
-      --dangerText: #b43333;
-      --successSoft: rgba(88, 196, 143, .14);
-      --successBorder: rgba(88, 196, 143, .32);
-      --successText: #217a52;
-      --shadow: 0 18px 45px rgba(63, 88, 138, .14);
-      --bgTop: #f9fbff;
-      --bgBottom: #dfe9ff;
-      --surfaceSoft: rgba(20, 34, 59, .04);
-      --panelBg: #ffffff;
-      --toggleOff: rgba(21, 34, 59, .16);
-      --doneFade: .5
-    }
-
-    * {
-      box-sizing: border-box
-    }
-
-    html,
-    body {
-      margin: 0;
-      min-height: 100%;
-      background: radial-gradient(circle at top, var(--bgTop) 0%, var(--bgBottom) 58%);
-      color: var(--text);
-      font-family: Inter, system-ui, sans-serif
-    }
-
-    button,
-    input,
-    textarea {
-      font: inherit
-    }
-
-    .page {
-      width: min(1120px, calc(100% - 24px));
-      margin: 0 auto;
-      padding: 24px 0 90px
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 16px;
-      align-items: center;
-      margin-bottom: 16px;
-      flex-wrap: wrap
-    }
-
-    .settings-trigger {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      padding: 0
-    }
-
-    .settings-trigger svg {
-      width: 16px;
-      height: 16px;
-      display: block;
-      flex-shrink: 0
-    }
-
-    .back-link {
-      text-decoration: none;
-      color: var(--text);
-      background: var(--surfaceSoft);
-      border: 1px solid var(--line);
-      padding: 10px 14px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px
-    }
-
-    .layout {
-      display: grid;
-      gap: 16px
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-      padding: 18px;
-      position: relative;
-      z-index: 0
-    }
-
-    .card.has-open-menu {
-      z-index: 40
-    }
-
-    .hero {
-      display: grid;
-      gap: 18px
-    }
-
-    .hero-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 18px;
-      flex-wrap: wrap
-    }
-
-    .hero-title-wrap {
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      min-width: 0
-    }
-
-    .hero-copy {
-      min-width: 0;
-      flex: 1 1 auto;
-      display: grid;
-      gap: 8px
-    }
-
-    .hero-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 20px;
-      display: grid;
-      place-items: center;
-      background: var(--accentSoft);
-      border: 1px solid rgba(79, 124, 255, .28);
-      font-size: 1.7rem;
-      flex-shrink: 0;
-      overflow: hidden
-    }
-
-    h1,
-    h2,
-    h3,
-    p {
-      margin: 0
-    }
-
-    .project-title {
-      font-size: clamp(1.5rem, 3vw, 2.4rem);
-      line-height: 1.1;
-      margin-bottom: 8px;
-      word-break: break-word
-    }
-
-    .muted {
-      color: var(--muted);
-      line-height: 1.5
-    }
-
-    .formatted-text {
-      display: grid;
-      gap: 8px;
-      min-width: 0
-    }
-
-    .formatted-text.compact {
-      gap: 6px
-    }
-
-    .formatted-paragraph {
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: anywhere
-    }
-
-    .formatted-list {
-      margin: 0;
-      padding-left: 1.2rem;
-      display: grid;
-      gap: 4px
-    }
-
-    .formatted-list li {
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: anywhere
-    }
-
-    .indent-1 {
-      margin-left: 1.4rem
-    }
-
-    .indent-2 {
-      margin-left: 2.8rem
-    }
-
-    .indent-3 {
-      margin-left: 4.2rem
-    }
-
-    .meta-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px
-    }
-
-    .meta-box {
-      padding: 12px 16px;
-      border-radius: 16px;
-      background: var(--card2);
-      border: 1px solid var(--line);
-      display: flex;
-      flex-direction: column;
-      justify-content: center
-    }
-
-    .meta-label {
-      color: var(--muted);
-      font-size: .65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 4px
-    }
-
-    .meta-value {
-      font-size: .95rem;
-      font-weight: 700;
-      line-height: 1.3;
-      word-break: break-word
-    }
-
-    .meta-value-danger {
-      color: var(--dangerText)
-    }
-
-    .meta-value-success {
-      color: var(--successText)
-    }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-      flex-wrap: wrap
-    }
-
-    .section-head-actions { display: flex; align-items: center; gap: 8px }
-
-    .section-title {
-      font-size: 1.08rem;
-      font-weight: 700
-    }
-
-    .section-toggle {
-      width: 32px;
-      height: 32px;
-      display: grid;
-      place-items: center;
-      border: 0;
-      border-radius: 50%;
-      background: var(--surfaceSoft);
-      color: var(--muted);
-      cursor: pointer;
-      transition: transform .18s ease, background-color .18s ease
-    }
-
-    .content-section.is-collapsed .section-toggle { transform: rotate(-90deg) }
-    .content-section.is-collapsed .section-body { display: none }
-    html[data-theme="dark"] .section-toggle {
-      background: rgba(91, 117, 177, .3);
-      border: 1px solid rgba(183, 205, 255, .2);
-      color: #dce7ff;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, .22)
-    }
-
-    .btn {
-      border: 0;
-      border-radius: 999px;
-      padding: 11px 15px;
-      cursor: pointer;
-      font-weight: 600;
-      white-space: nowrap
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: white
-    }
-
-    .btn-secondary {
-      background: var(--surfaceSoft);
-      color: var(--text);
-      border: 1px solid var(--line)
-    }
-
-    .btn-danger {
-      background: var(--dangerSoft);
-      color: var(--dangerText);
-      border: 1px solid var(--dangerBorder)
-    }
-
-    .btn-ok {
-      background: var(--successSoft);
-      color: var(--successText);
-      border: 1px solid var(--successBorder)
-    }
-
-    .inline-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap
-    }
-
-    .links-grid,
-    .step-tree {
-      display: grid;
-      gap: 12px
-    }
-
-    /* Standard link card */
-    .link-card {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      gap: 14px;
-      align-items: center;
-      padding: 14px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .03);
-      position: relative
-    }
-
-    .link-icon {
-      width: 50px;
-      height: 50px;
-      display: grid;
-      place-items: center;
-      border-radius: 16px;
-      background: var(--accentSoft);
-      border: 1px solid rgba(79, 124, 255, .25);
-      font-size: 1.35rem;
-      overflow: hidden
-    }
-
-    .file-type-icon {
-      width: 100%;
-      height: 100%;
-      display: block
-    }
-
-    .file-image-preview { width: 100%; height: 100%; object-fit: cover; display: block }
-
-    .button-spinner {
-      width: 15px;
-      height: 15px;
-      border: 2px solid currentColor;
-      border-right-color: transparent;
-      border-radius: 50%;
-      display: inline-block;
-      animation: button-spin .7s linear infinite
-    }
-
-    @keyframes button-spin { to { transform: rotate(360deg) } }
-
-    .link-main {
-      min-width: 0;
-      overflow: hidden
-    }
-
-    .link-title {
-      font-weight: 700;
-      margin-bottom: 6px
-    }
-
-    .link-url {
-      color: var(--muted);
-      text-decoration: none;
-      word-break: break-all;
-      line-height: 1.4;
-      text-wrap: nowrap;
-      text-overflow: ellipsis;
-    }
-
-    /* Project link card */
-    .link-card-project {
-      align-items: flex-start;
-      background: rgba(79, 124, 255, .05);
-      border-color: rgba(79, 124, 255, .18);
-      padding: 16px
-    }
-
-    .proj-link-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      background: var(--accentSoft);
-      border: 1px solid rgba(79, 124, 255, .3);
-      font-size: 1.5rem;
-      overflow: hidden;
-      flex-shrink: 0
-    }
-
-    .proj-link-body {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      padding-right: 42px
-    }
-
-    .proj-link-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 4px;
-      flex-wrap: wrap
-    }
-
-    .proj-link-name {
-      font-weight: 700;
-      font-size: 1rem;
-      line-height: 1.2
-    }
-
-    .proj-link-desc {
-      color: var(--muted);
-      font-size: .88rem;
-      line-height: 1.4;
-      margin-bottom: 6px
-    }
-
-    .proj-link-meta {
-      grid-column: 1 / -1;
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px;
-      margin-top: 4px;
-      justify-self: stretch
-    }
-
-    .proj-link-meta .pill.warning,
-    .meta-grid .meta-box.warning {
-      border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent);
-    }
-
-    .proj-link-meta .pill.danger {
-      color: var(--dangerText);
-      border-color: var(--dangerBorder);
-      background: var(--dangerSoft);
-    }
-
-    .proj-link-loading {
-      opacity: .6
-    }
-
-    .link-card-project.is-finished {
-      opacity: .68
-    }
-
-    .link-card-project.is-finished .card-menu-trigger {
-      opacity: .58
-    }
-
-    .pill.done {
-      color: #58c48f;
-      border-color: rgba(88, 196, 143, .3);
-      background: rgba(88, 196, 143, .12)
-    }
-
-    /* Project link picker modal */
-    .proj-picker-grid {
-      display: grid;
-      gap: 8px;
-      max-height: 52vh;
-      overflow-y: auto;
-      padding-right: 2px
-    }
-
-    .proj-picker-item {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 12px;
-      align-items: center;
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, .03);
-      cursor: pointer;
-      color: var(--text);
-      text-align: left;
-      transition: border-color .15s, background .15s;
-      width: 100%
-    }
-
-    .proj-picker-item:hover {
-      border-color: rgba(79, 124, 255, .4);
-      background: rgba(79, 124, 255, .08)
-    }
-
-    .proj-picker-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 13px;
-      display: grid;
-      place-items: center;
-      background: var(--accentSoft);
-      border: 1px solid rgba(79, 124, 255, .25);
-      font-size: 1.25rem;
-      overflow: hidden;
-      flex-shrink: 0
-    }
-
-    .proj-picker-info {
-      min-width: 0
-    }
-
-    .proj-picker-name {
-      font-weight: 700;
-      font-size: .95rem;
-      margin-bottom: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis
-    }
-
-    .proj-picker-meta {
-      color: var(--muted);
-      font-size: .82rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis
-    }
-
-    .proj-picker-arrow {
-      color: var(--muted);
-      font-size: 1.1rem;
-      flex-shrink: 0
-    }
-
-    .card-menu-wrap {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 3
-    }
-
-    .card-menu-wrap.open {
-      z-index: 120
-    }
-
-    .card-menu-trigger {
-      width: 34px;
-      height: 34px;
-      position: relative;
-      z-index: 1;
-      font-family: "SF Pro Display", "Segoe UI", Inter, system-ui, sans-serif;
-      font-size: 1.02rem;
-      font-weight: 800;
-      letter-spacing: .14em;
-      line-height: 1
-    }
-
-    .card-menu {
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      min-width: 176px;
-      padding: 10px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: var(--panelBg);
-      box-shadow: var(--shadow);
-      display: none;
-      gap: 8px;
-      z-index: 121
-    }
-
-    .card-menu.show {
-      display: grid
-    }
-
-    .card-menu-item {
-      width: 100%;
-      border: 1px solid transparent;
-      border-radius: 12px;
-      background: var(--surfaceSoft);
-      color: var(--text);
-      padding: 12px 14px;
-      text-align: left;
-      cursor: pointer;
-      font-family: "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
-      font-size: .89rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase
-    }
-
-    .card-menu-item:hover {
-      border-color: rgba(79, 124, 255, .4);
-      background: rgba(79, 124, 255, .1)
-    }
-
-    .card-menu-item.danger {
-      color: var(--dangerText);
-      background: var(--dangerSoft);
-      border-color: var(--dangerBorder)
-    }
-
-    .icon-btn {
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .05);
-      color: var(--text);
-      width: 38px;
-      height: 38px;
-      border-radius: 999px;
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      font-weight: 700;
-      flex-shrink: 0;
-      text-decoration: none;
-      font-size: .95rem
-    }
-
-    .icon-btn.danger {
-      color: var(--dangerText);
-      border-color: var(--dangerBorder);
-      background: var(--dangerSoft)
-    }
-
-    .step-item {
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, .03);
-      border-radius: 18px;
-      padding: 14px;
-      position: relative;
-      display: grid;
-      gap: 10px
-    }
-
-    .step-head {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 12px;
-      align-items: flex-start;
-      padding-right: 42px
-    }
-
-    .step-check {
-      margin-top: 4px;
-      width: 19px;
-      height: 19px;
-      accent-color: var(--accent);
-      cursor: pointer
-    }
-
-    .project-hero-actions .icon-action {
-      transition: color .18s ease, background-color .18s ease, transform .18s ease
-    }
-
-    .step-title {
-      font-weight: 700;
-      margin-bottom: 6px;
-      transition: color .18s ease, opacity .18s ease
-    }
-
-    .step-title.done {
-      text-decoration: line-through;
-      color: var(--muted)
-    }
-
-    .step-main.done-state,
-    .step-sub.done-state {
-      opacity: var(--doneFade)
-    }
-
-    .step-item:has(.step-check:checked) .card-menu-trigger {
-      opacity: var(--doneFade)
-    }
-
-    .step-main {
-      min-width: 0;
-      width: 100%;
-      transition: opacity .18s ease
-    }
-
-    .step-sub {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-      color: var(--muted);
-      font-size: .9rem;
-      width: 100%;
-      transition: opacity .18s ease
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border-radius: 999px;
-      padding: 7px 10px;
-      border: 1px solid var(--line);
-      background: var(--surfaceSoft);
-      width: 100%;
-      min-width: 0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis
-    }
-
-    .children {
-      margin-top: 4px;
-      margin-left: 18px;
-      display: grid;
-      gap: 10px;
-      border-left: 2px solid rgba(255, 255, 255, .07);
-      padding-left: 12px;
-      min-width: 0;
-      box-sizing: border-box
-    }
-
-    .children>.step-item {
-      width: 100%;
-      max-width: 100%
-    }
-
-    .empty {
-      padding: 24px;
-      border: 1px dashed var(--line);
-      border-radius: 18px;
-      text-align: center;
-      color: var(--muted)
-    }
-
-    .step-item.move-target {
-      border-color: color-mix(in srgb, var(--successText) 42%, var(--line));
-      background: color-mix(in srgb, var(--successSoft) 62%, var(--card));
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--successText) 20%, transparent)
-    }
-
-    .step-item.move-source {
-      border-color: color-mix(in srgb, var(--accent) 52%, var(--line));
-      background: color-mix(in srgb, var(--accentSoft) 48%, var(--card));
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 26%, transparent)
-    }
-
-    .steps-section.move-target {
-      border-color: color-mix(in srgb, var(--successText) 42%, var(--line));
-      background: color-mix(in srgb, var(--successSoft) 35%, var(--card));
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--successText) 20%, transparent)
-    }
-
-    .move-toolbar {
-      position: fixed;
-      right: 18px;
-      left: 18px;
-      bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-      z-index: 135;
-
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: nowrap;
-
-      padding: 10px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: var(--panelBg);
-      box-shadow: var(--shadow);
-      box-sizing: border-box;
-
-      max-width: 100%;
-      overflow: hidden;
-    }
-
-    .move-toolbar .btn {
-      min-height: 34px;
-      padding: 7px 10px;
-      border-radius: 12px;
-      box-sizing: border-box;
-
-      flex: 1 1 0;
-      min-width: 0;
-      white-space: nowrap;
-      font-size: 14px;
-    }
-
-    .link-card.selected-for-delete,
-    .step-item.selected-for-delete {
-      border-color: var(--dangerBorder);
-      background: color-mix(in srgb, var(--dangerSoft) 70%, var(--card));
-      box-shadow: none
-    }
-
-    .file-unavailable { opacity: .52; cursor: not-allowed; }
-    .file-unavailable .link-subtitle { color: var(--muted); }
-
-    .file-cache-toggle {
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
-      width: 36px;
-      height: 36px;
-      min-height: 36px;
-      display: grid;
-      place-items: center;
-      padding: 0;
-      border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
-      border-radius: 11px;
-      background: color-mix(in srgb, var(--panelBg) 82%, var(--accent));
-      color: var(--muted);
-      z-index: 4;
-    }
-
-    .file-cache-toggle.is-cached { color: var(--accent); }
-    .file-cache-toggle:hover { background: color-mix(in srgb, var(--panelBg) 68%, var(--accent)); }
-    .file-cache-toggle svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-    .file-row { padding-right: 98px !important; }
-    .file-row .card-menu-wrap { right: 52px !important; }
-
-    @media (hover: none), (pointer: coarse) {
-      .file-row { padding-right: 56px !important; }
-      .file-row .file-cache-toggle { right: 8px; }
-    }
-
-    .delete-indicator {
-      position: absolute;
-      top: 9px;
-      right: 10px;
-      width: 22px;
-      height: 22px;
-      display: grid;
-      place-items: center;
-      color: var(--danger);
-      pointer-events: none;
-      z-index: 12;
-    }
-
-    .delete-indicator svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .delete-mode .selected-for-delete .card-menu-wrap { display: none; }
-
-    .delete-mode .step-check {
-      pointer-events: none
-    }
-
-    .floating-actions {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      z-index: 110
-    }
-
-    .floating-actions.hidden {
-      opacity: 0;
-      pointer-events: none
-    }
-
-    .floating-actions-menu {
-      position: absolute;
-      right: 0;
-      bottom: calc(100% + 10px);
-      min-width: 196px;
-      padding: 10px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: var(--panelBg);
-      box-shadow: var(--shadow);
-      display: none;
-      gap: 8px
-    }
-
-    .floating-actions-menu.show {
-      display: grid
-    }
-
-    .menu-item {
-      width: 100%;
-      border: 1px solid transparent;
-      border-radius: 12px;
-      background: var(--surfaceSoft);
-      color: var(--text);
-      padding: 12px 14px;
-      text-align: left;
-      cursor: pointer;
-      font-family: "SF Pro Text", "Segoe UI", Inter, system-ui, sans-serif;
-      font-size: .9rem;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase
-    }
-
-    .menu-item:hover {
-      border-color: rgba(79, 124, 255, .4);
-      background: rgba(79, 124, 255, .1)
-    }
-
-    .menu-item.danger {
-      color: var(--danger)
-    }
-
-    .floating-trigger {
-      width: 56px;
-      height: 56px;
-      border-radius: 999px;
-      box-shadow: var(--shadow);
-      background: var(--panelBg);
-      color: var(--text);
-      border: 1px solid var(--line);
-      font-family: "SF Pro Display", "Segoe UI", Inter, system-ui, sans-serif;
-      font-size: 1.18rem;
-      font-weight: 800;
-      letter-spacing: .16em;
-      line-height: 1
-    }
-
-    .delete-toolbar {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      z-index: 111;
-      display: none;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      border: 1px solid var(--dangerBorder);
-      background: var(--panelBg);
-      color: var(--dangerText);
-      box-shadow: var(--shadow)
-    }
-
-    .delete-toolbar.show {
-      display: flex
-    }
-
-    .delete-toolbar-copy {
-      display: grid;
-      gap: 2px
-    }
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(7, 10, 18, .68);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      z-index: 50
-    }
-
-    .modal-backdrop.show {
-      display: flex
-    }
-
-    .modal {
-      width: min(720px, 100%);
-      max-height: calc(100vh - 32px);
-      overflow: hidden;
-      background: var(--panelBg);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      padding: 18px;
-      display: flex;
-      flex-direction: column
-    }
-
-    .icon-picker-modal {
-      width: min(760px, 100%)
-    }
-
-    .modal-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-      flex-shrink: 0
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      align-items: start
-    }
-
-    .field {
-      display: grid;
-      gap: 8px;
-      min-width: 0
-    }
-
-    .field.full {
-      grid-column: 1/-1
-    }
-
-    label {
-      font-size: .9rem;
-      color: var(--muted)
-    }
-
-    input,
-    textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      background: var(--surfaceSoft);
-      color: var(--text);
-      border-radius: 14px;
-      padding: 12px 14px;
-      outline: none;
-      min-width: 0;
-      color-scheme: inherit
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 110px
-    }
-
-    .check-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap
-    }
-
-    .danger-zone {
-      border: 1px solid var(--dangerBorder);
-      background: var(--dangerSoftAlt)
-    }
-
-    .settings-modal {
-      width: min(420px, 100%);
-      background: var(--panelBg);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      box-shadow: var(--shadow);
-      padding: 18px;
-      display: grid;
-      gap: 18px
-    }
-
-    .settings-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px
-    }
-
-    .settings-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 14px 16px;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--surfaceSoft)
-    }
-
-    .settings-copy {
-      display: grid;
-      gap: 4px
-    }
-
-    .settings-copy strong {
-      font-size: .98rem
-    }
-
-    .theme-switch {
-      position: relative;
-      width: 52px;
-      height: 32px;
-      border: 0;
-      border-radius: 999px;
-      background: var(--toggleOff);
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: background .18s ease
-    }
-
-    .theme-switch::after {
-      content: "";
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      width: 26px;
-      height: 26px;
-      border-radius: 999px;
-      background: #fff;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
-      transition: transform .18s ease
-    }
-
-    .theme-switch.active {
-      background: var(--accent)
-    }
-
-    .theme-switch.active::after {
-      transform: translateX(20px)
-    }
-
-    #loadingState {
-      padding: 28px;
-      text-align: center;
-      color: var(--muted)
-    }
-
-    .project-loading-spinner {
-      min-height: 180px;
-      display: grid;
-      place-content: center;
-      justify-items: center;
-      gap: 14px;
-    }
-
-    .project-loading-spinner::before {
-      content: "";
-      width: 30px;
-      height: 30px;
-      border: 3px solid var(--line);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: project-loading-spin .75s linear infinite;
-    }
-
-    @keyframes project-loading-spin { to { transform: rotate(360deg); } }
-
-    #modalForm {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      overflow: hidden
-    }
-
-    .icon-input-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 48px auto;
-      gap: 10px;
-      align-items: center
-    }
-
-    .icon-input-row input {
-      min-width: 0
-    }
-
-    .icon-preview {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: var(--surfaceSoft);
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      flex-shrink: 0;
-      font-size: 1.35rem
-    }
-
-    .template-icon-btn {
-      width: 44px;
-      height: 44px;
-      min-width: 44px;
-      padding: 0;
-      border-radius: 12px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center
-    }
-
-    .template-icon-btn span {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      font-size: 1.05rem;
-      line-height: 1;
-      transform: translateX(-1px)
-    }
-
-    .icon-preview img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block
-    }
-
-    .icon-picker-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
-      gap: 12px;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding-right: 4px;
-      align-content: start
-    }
-
-    .icon-choice {
-      position: relative;
-      border: 1px solid var(--line);
-      background: var(--surfaceSoft);
-      border-radius: 18px;
-      padding: 12px;
-      cursor: pointer;
-      color: var(--text);
-      display: grid;
-      gap: 10px;
-      justify-items: center;
-      text-align: center;
-      min-width: 0
-    }
-
-    .icon-choice:hover {
-      border-color: rgba(79, 124, 255, .55);
-      background: rgba(79, 124, 255, .08)
-    }
-
-    .icon-choice-visual {
-      width: 46px;
-      height: 46px;
-      border-radius: 14px;
-      overflow: hidden;
-      display: grid;
-      place-items: center;
-      background: var(--accentSoft);
-      border: 1px solid rgba(79, 124, 255, .25);
-      font-size: 1.25rem
-    }
-
-    .icon-choice-label {
-      font-size: .84rem;
-      color: var(--muted);
-      line-height: 1.25;
-      word-break: break-word;
-      overflow-wrap: anywhere
-    }
-
-    .field,
-    .field.full,
-    .field span,
-    .icon-input-row {
-      min-width: 0;
-    }
-
-    input[type="datetime-local"] {
-      display: block;
-      width: 100%;
-      max-width: 100%;
-      min-width: 0;
-      inline-size: 100%;
-      max-inline-size: 100%;
-      min-inline-size: 0;
-      box-sizing: border-box;
-    }
-
-    @supports (-webkit-touch-callout: none) {
-      input[type="datetime-local"] {
-        width: -webkit-fill-available;
-        max-width: -webkit-fill-available;
-      }
-    }
-
-    @media (max-width:620px) {
-      .meta-grid {
-        grid-template-columns: 1fr 1fr
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr
-      }
-
-      .page {
-        width: min(100% - 16px, 1120px);
-        padding-top: 16px;
-        padding-bottom: 168px;
-      }
-
-      .card,
-      .modal {
-        padding: 16px;
-        border-radius: 18px
-      }
-
-      .step-head,
-      .link-card {
-        grid-template-columns: auto 1fr
-      }
-
-      .children {
-        margin-left: 8px;
-        padding-left: 8px
-      }
-
-      .hero-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 18px
-      }
-
-      .link-card {
-        grid-template-columns: auto 1fr;
-        gap: 8px;
-        padding: 10px 10px 8px 10px
-      }
-
-      .link-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px
-      }
-
-      .link-main {
-        min-width: 0;
-        overflow: hidden;
-        min-height: 40px;
-        display: flex;
-        align-items: center
-      }
-
-      .link-title {
-        margin-bottom: 0;
-        font-size: .93rem;
-        line-height: 1.15;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 100%
-      }
-
-      .link-url {
-        display: none
-      }
-
-      .step-item {
-        padding: 10px 10px 8px 10px;
-        border-radius: 16px
-      }
-
-      .step-head {
-        gap: 7px;
-        padding-right: 34px
-      }
-
-      .step-check {
-        display: block;
-        flex: 0 0 19px;
-        inline-size: 19px;
-        block-size: 19px;
-        min-inline-size: 19px;
-        max-inline-size: 19px;
-        min-block-size: 19px;
-        max-block-size: 19px;
-        margin: 2px 0 0;
-        padding: 0;
-        border-radius: 50%;
-        -webkit-appearance: none;
-        appearance: none;
-        box-sizing: border-box;
-        border: 1.5px solid color-mix(in srgb, var(--muted) 42%, var(--line));
-        background: var(--panelBg);
-        box-shadow: inset 0 0 0 2px var(--panelBg);
-        overflow: hidden;
-        background-clip: padding-box
-      }
-
-      .step-check:checked {
-        border-color: var(--accent);
-        background-color: var(--accent);
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.2 6.6 11 12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 11px 11px;
-        box-shadow: none
-      }
-
-      .step-title {
-        margin-bottom: 2px;
-        font-size: .95rem;
-        line-height: 1.15
-      }
-
-      .muted {
-        line-height: 1.25
-      }
-
-      .step-item .muted {
-        font-size: .88rem
-      }
-
-      .step-sub {
-        margin-top: 0 !important;
-        display: grid;
-        grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr);
-        gap: 6px;
-        width: 100%
-      }
-
-      .pill {
-        padding: 4px 7px;
-        font-size: .68rem;
-        width: 100%;
-        min-width: 0;
-        justify-content: center;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis
-      }
-
-      .proj-link-meta {
-        display: grid;
-        grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr);
-        width: 100%
-      }
-
-      .children {
-        margin-left: 10px;
-        padding-left: 10px;
-        min-width: 0;
-        box-sizing: border-box
-      }
-
-      .substep-count-pill {
-        display: none
-      }
-
-      /* Project link card on mobile */
-      /* Project link card on mobile */
-      .link-card-project {
-        grid-template-columns: auto minmax(0, 1fr);
-        align-items: start;
-      }
-
-      .proj-link-body {
-        padding-right: 34px
-      }
-
-      .proj-link-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 13px
-      }
-
-      .move-toolbar {
-        left: 12px;
-        right: 12px;
-        bottom: 12px
-      }
-
-      .move-toolbar .btn {
-        min-height: 34px
-      }
-
-      .floating-actions,
-      .delete-toolbar {
-        right: 12px;
-        bottom: 12px
-      }
-
-      .floating-actions-menu {
-        min-width: 188px
-      }
-
-      .delete-toolbar {
-        left: 12px;
-        align-items: stretch;
-        flex-direction: column
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/static/project-view.css?v=1">
   <link rel="stylesheet" href="/static/app-shell.css?v=47">
+  <script src="/static/app-core.js?v=1"></script>
+  <script src="/static/api-client.js?v=1"></script>
+  <script src="/static/icons.js?v=1"></script>
+  <script src="/static/task-tree.js?v=1"></script>
+  <script src="/static/materials.js?v=1"></script>
   <script src="/static/app-shell.js?v=15"></script>
   <script src="/static/offline-data.js?v=1"></script>
 
@@ -1551,7 +40,7 @@
 
 <body>
   <div class="app-scroll" id="appScroll">
-  <main class="page">
+  <main class="page project-page">
     <div class="topbar"><a class="back-link" href="/" onclick="goBack(event)">‹ Projects</a><div class="nav-actions"><button id="themeToggleBtn" class="settings-trigger" type="button" onclick="toggleTheme()" aria-label="Toggle light or dark appearance"></button><div class="floating-actions management-actions" id="managementActions"><div id="managementActionsMenu" class="floating-actions-menu"><button class="menu-item danger" type="button" onclick="enterDeleteMode()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg><span>Select items to delete</span></button></div><button class="floating-trigger" type="button" onclick="toggleManagementActions(event)" aria-label="Manage project items" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button></div></div></div>
     <div id="loadingState" class="card loading-skeleton">Loading project…</div>
     <div id="app" class="layout" hidden></div>
@@ -1616,7 +105,8 @@
     const STANDARD_ICONS_STORAGE_KEY = "project_manager_standard_icons";
     const DEFAULT_PROJECT_ICON = "/static/icon-placeholder.svg";
     const THEME_STORAGE_KEY = "pm_theme_mode";
-    let STANDARD_ICONS = loadStandardIcons();
+    const iconStore = window.PM.icons.createStore(DEFAULT_STANDARD_ICONS, LEGACY_STANDARD_ICON_VALUES);
+    let STANDARD_ICONS = iconStore.load();
     const projectId = new URLSearchParams(location.search).get("id");
     const app = document.getElementById("app");
     const loadingState = document.getElementById("loadingState");
@@ -1654,7 +144,6 @@
     const SWIPE_ICON_DELETE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`;
     const FILE_CACHE_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5h10.5a3.5 3.5 0 0 0 .7-6.9A6.3 6.3 0 0 0 6.4 9.4 4.6 4.6 0 0 0 7 18.5Z"/><path d="m9.5 14.1 1.7 1.7 3.5-3.7"/></svg>`;
     const FILE_NOT_CACHED_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5h10.5a3.5 3.5 0 0 0 .7-6.9A6.3 6.3 0 0 0 6.4 9.4 4.6 4.6 0 0 0 7 18.5Z"/><path d="M12 10.5v5.2m0 0-2.1-2.1m2.1 2.1 2.1-2.1"/></svg>`;
-    const FILE_CACHE_NAME = "project-manager-files-v1";
     window.pmSwipeDisabled = () => deleteMode || !!moveState;
 
     function swipeActionsHtml(actions) {
@@ -1679,13 +168,11 @@
     }
 
     function loadStandardIcons() { try { const saved = JSON.parse(localStorage.getItem(STANDARD_ICONS_STORAGE_KEY) || "null"); if (Array.isArray(saved) && saved.length) return [...DEFAULT_STANDARD_ICONS, ...saved.filter(icon => !LEGACY_STANDARD_ICON_VALUES.has(String(icon?.value || "").trim()) && !DEFAULT_STANDARD_ICONS.some(defaultIcon => defaultIcon.value === icon?.value))]; } catch { } return [...DEFAULT_STANDARD_ICONS]; }
-    function saveStandardIcons() { localStorage.setItem(STANDARD_ICONS_STORAGE_KEY, JSON.stringify(STANDARD_ICONS)); }
-    function addToStandardIcons(iconValue, label = "Custom") { const value = String(iconValue || "").trim(); if (!value) return; if (STANDARD_ICONS.some(icon => String(icon.value).trim() === value)) return; STANDARD_ICONS.unshift({ label: String(label || "Custom").trim() || "Custom", value, removable: true }); saveStandardIcons(); }
-    function escapeHtml(value = "") { return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
-    function normalizeDisplayText(value = "") { return String(value).replaceAll("-->", "→"); }
-    function isImageUrl(value = "") { const v = String(value).trim(); return /^(?:https?:\/\/|\/static\/).+\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(v); }
+    function saveStandardIcons() { iconStore.save(); }
+    function addToStandardIcons(iconValue, label = "Custom") { iconStore.add(iconValue, label); STANDARD_ICONS = iconStore.values; }
+    const { escape: escapeHtml, normalize: normalizeDisplayText, isImageUrl } = window.PM.html;
     function formatLinkDestination(value = "") { try { return new URL(String(value), window.location.origin).hostname.replace(/^www\./i, "") || "Link"; } catch { return String(value).replace(/^https?:\/\//i, "").split("/")[0] || "Link"; } }
-    function renderIcon(icon, fallback = "📌", alt = "icon") { const value = String(icon || "").trim(); return isImageUrl(value) ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(alt)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;" />` : escapeHtml(value || fallback); }
+    const renderIcon = window.PM.html.icon;
     function notify(message) {
       document.querySelector(".app-toast")?.remove();
       const toast = document.createElement("div");
@@ -1722,11 +209,7 @@
     const THEME_ICON_SUN = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`;
     const THEME_ICON_MOON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>`;
     function applyTheme(theme, persist = false) {
-      const resolved = theme === "light" ? "light" : "dark";
-      document.documentElement.dataset.theme = resolved;
-      document.documentElement.style.colorScheme = resolved;
-      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", resolved === "light" ? "#f2f2f7" : "#0b1020");
-      if (persist) localStorage.setItem(THEME_STORAGE_KEY, resolved);
+      const resolved = window.PM.theme.apply(theme, persist);
       const toggleBtn = document.getElementById("themeToggleBtn");
       if (toggleBtn) toggleBtn.innerHTML = resolved === "light" ? THEME_ICON_SUN : THEME_ICON_MOON;
     }
@@ -1806,13 +289,13 @@
       flushList();
       return `<div class="formatted-text${compact ? " compact" : ""}">${parts.join("")}</div>`;
     }
-    function formatDeadline(deadline) { if (!deadline) return "No deadline"; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return "Invalid deadline"; return dt.toLocaleString([], { year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }); }
-    function formatTimeLeft(seconds) { if (seconds == null) return "No deadline"; if (seconds <= 0) return "Deadline passed"; const days = Math.floor(seconds / 86400); const hours = Math.floor((seconds % 86400) / 3600); const minutes = Math.floor((seconds % 3600) / 60); if (days > 0) return `${days}d, ${hours}h left`; if (hours > 0) return `${hours}h, ${minutes}m left`; return `${minutes} min left`; }
-    function isDueSoon(seconds) { return seconds != null && seconds > 0 && seconds <= 7 * 24 * 60 * 60; }
+    const formatDeadline = window.PM.time.formatDeadline;
+    const formatTimeLeft = seconds => window.PM.time.formatRemaining(seconds, { commas: true });
+    const isDueSoon = window.PM.time.dueSoon;
     function getProjectMetaState() { if (project.finished) return { label: "Status", value: "Finished", extraClass: "meta-value-success" }; if (!project.deadline) return { label: "Status", value: "Open", extraClass: "" }; if (project.seconds_left != null && project.seconds_left <= 0) return { label: "Time left", value: "Deadline passed", extraClass: "meta-value-danger" }; return { label: "Time left", value: formatTimeLeft(project.seconds_left), extraClass: "" }; }
     function stepTimeLeft(deadline) { if (!deadline) return null; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return null; return Math.floor((dt.getTime() - Date.now()) / 1000); }
     function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
-    function countTaskProgress(steps) { return (steps || []).reduce((total, step) => { const nested = countTaskProgress(step.children || []); return { total: total.total + 1 + nested.total, done: total.done + Number(!!step.done) + nested.done }; }, { total: 0, done: 0 }); }
+    const countTaskProgress = steps => window.PM.taskTree.progress(steps);
     function cacheProjectState(value) {
       try {
         localStorage.setItem(`pm_project_${projectId}`, JSON.stringify(value));
@@ -1831,11 +314,7 @@
       return `<div class="card-menu-wrap${isOpen ? " open" : ""}"><button class="card-menu-trigger" type="button" onclick='toggleContextMenu(${JSON.stringify(menuId)}, event)' aria-label="More actions" aria-expanded="${isOpen}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.65"/><circle cx="12" cy="12" r="1.65"/><circle cx="19" cy="12" r="1.65"/></svg></button><div class="card-menu${isOpen ? " show" : ""}" id="${escapeHtml(menuId)}">${actions.map(action => `<button class="card-menu-item${action.danger ? " danger" : ""}" type="button" onclick="event.stopPropagation(); closeContextMenu(); ${action.onclick}">${action.icon || ""}<span>${escapeHtml(action.label)}</span></button>`).join("")}</div></div>`;
     }
 
-    async function api(url, options = {}) {
-      const res = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options });
-      if (!res.ok) throw new Error(await res.text() || "Request failed");
-      return res.headers.get("content-type")?.includes("application/json") ? res.json() : null;
-    }
+    const api = window.PM.api.json;
 
     // --- Project link helpers ---
 
@@ -1936,10 +415,11 @@
     }
 
     function closeModal() { const wasOpen = modalBackdrop.classList.contains("show"); modalBackdrop.classList.remove("show"); modalForm.innerHTML = ""; modalForm.onsubmit = null; closeIconPickerModal(); if (wasOpen) window.pmSheetClosed?.(modalBackdrop); }
-    function findStepAndParent(steps, targetId, parent = null) { for (let i = 0; i < (steps || []).length; i++) { const step = steps[i]; if (step.id === targetId) return { step, parent, index: i, collection: steps }; const nested = findStepAndParent(step.children || [], targetId, step); if (nested) return nested; } return null; }
-    function getStepDepth(steps, targetId, depth = 0) { for (const step of (steps || [])) { if (step.id === targetId) return depth; const nestedDepth = getStepDepth(step.children || [], targetId, depth + 1); if (nestedDepth != null) return nestedDepth; } return null; }
-    function getSubtreeDepth(step) { const children = step?.children || []; return children.length ? 1 + Math.max(...children.map(getSubtreeDepth)) : 0; }
-    function canPlaceStepAt(source, targetParentId) { const parentDepth = targetParentId == null ? -1 : getStepDepth(project.steps || [], targetParentId); return parentDepth != null && parentDepth + 1 + getSubtreeDepth(source) <= MAX_STEP_DEPTH; }
+    const taskTree = window.PM.taskTree;
+    const findStepAndParent = taskTree.find;
+    const getStepDepth = taskTree.depthOf;
+    const getSubtreeDepth = taskTree.subtreeDepth;
+    const canPlaceStepAt = (source, targetParentId) => taskTree.canPlace(project.steps || [], source, targetParentId, MAX_STEP_DEPTH);
     function toggleStepCollapse(stepId, event) { event?.stopPropagation(); if (collapsedStepIds.has(stepId)) collapsedStepIds.delete(stepId); else collapsedStepIds.add(stepId); window.pmAnimate(render); }
     function sectionHeader(id, title, action = "") {
       const collapsed = collapsedSections.has(id);
@@ -1964,34 +444,11 @@
     function renderTaskVisibilityChange() { render(); }
     function toggleCompletedSteps(event) { event?.stopPropagation(); hideCompletedSteps = !hideCompletedSteps; localStorage.setItem("pm_hide_completed_steps", hideCompletedSteps ? "1" : "0"); renderTaskVisibilityChange(); }
     function showCompletedSteps(event) { event?.stopPropagation(); if (!hideCompletedSteps) return; hideCompletedSteps = false; localStorage.setItem("pm_hide_completed_steps", "0"); renderTaskVisibilityChange(); }
-    function updateStepRecursive(steps, targetId, updater) { return (steps || []).map(step => step.id === targetId ? updater(step) : ({ ...step, children: updateStepRecursive(step.children || [], targetId, updater) })); }
-    function removeStepRecursive(steps, targetId) { return (steps || []).filter(step => step.id !== targetId).map(step => ({ ...step, children: removeStepRecursive(step.children || [], targetId) })); }
-    function containsStepId(steps, targetId) { return !!findStepAndParent(steps || [], targetId); }
-    function removeStepAndCapture(steps, targetId) {
-      let captured = null;
-      const next = (steps || []).flatMap(step => {
-        if (step.id === targetId) {
-          captured = step;
-          return [];
-        }
-        const nested = removeStepAndCapture(step.children || [], targetId);
-        if (nested.captured) captured = nested.captured;
-        return [{ ...step, children: nested.steps }];
-      });
-      return { steps: next, captured };
-    }
-    function insertStepAtTarget(steps, targetParentId, stepToInsert, position) {
-      if (targetParentId == null) {
-        const root = [...(steps || [])];
-        if (position === "top") root.unshift(stepToInsert);
-        else root.push(stepToInsert);
-        return root;
-      }
-      return updateStepRecursive(steps || [], targetParentId, step => ({
-        ...step,
-        children: position === "top" ? [stepToInsert, ...(step.children || [])] : [...(step.children || []), stepToInsert]
-      }));
-    }
+    const updateStepRecursive = taskTree.update;
+    const removeStepRecursive = taskTree.remove;
+    const containsStepId = taskTree.contains;
+    const removeStepAndCapture = taskTree.removeAndCapture;
+    const insertStepAtTarget = taskTree.insert;
     async function moveStepRelativeTo(anchorId, placement) {
       if (!moveState || anchorId === moveState.stepId) return;
       const source = findStepAndParent(project.steps || [], moveState.stepId)?.step;
@@ -2386,54 +843,19 @@
       }).join("")}</div>`;
     }
 
-    function fileUrl(ownerProjectId, fileId) { return `/api/projects/${encodeURIComponent(ownerProjectId)}/files/${encodeURIComponent(fileId)}`; }
-    function formatFileSize(size) {
-      const bytes = Number(size) || 0;
-      if (bytes < 1024) return `${bytes} B`;
-      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    }
-    function fileTypeLabel(file) {
-      const name = String(file.name || "").toLowerCase();
-      if (name.endsWith(".pdf")) return "PDF";
-      if (name.endsWith(".md") || name.endsWith(".markdown")) return "MD";
-      if (name.endsWith(".html") || name.endsWith(".htm")) return "HTML";
-      if (/\.(doc|docx|odt)$/.test(name)) return "DOC";
-      if (/\.(xls|xlsx|csv)$/.test(name)) return "SHEET";
-      if (/\.(ppt|pptx)$/.test(name)) return "SLIDE";
-      if (/\.(png|jpe?g|gif|webp|svg|avif)$/.test(name)) return "IMAGE";
-      return "FILE";
-    }
-    function isImageFile(file) { return /^image\//.test(String(file.content_type || "")) || /\.(png|jpe?g|gif|webp|svg|avif)$/i.test(String(file.name || "")); }
-    function fileIconHtml(file, url, unavailable = false) {
-      if (isImageFile(file) && !unavailable) return `<img class="file-image-preview" src="${escapeHtml(url)}" alt="">`;
-      const extension = (String(file.name || "").split(".").pop() || "file").toUpperCase().slice(0, 5);
-      const label = extension === String(file.name || "").toUpperCase() ? "FILE" : extension;
-      const type = fileTypeLabel(file);
-      const color = type === "PDF" ? "#dc2626" : type === "DOC" ? "#2563eb" : type === "SHEET" ? "#16a34a" : type === "SLIDE" ? "#ea580c" : type === "HTML" ? "#e34f26" : type === "MD" ? "#6b7280" : "#6366f1";
-      return `<svg class="file-type-icon" viewBox="0 0 48 48" role="img" aria-label="${escapeHtml(label)} file"><path fill="${color}" d="M11 4h17l9 9v27a4 4 0 0 1-4 4H11a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4Z"/><path fill="rgba(255,255,255,.28)" d="M28 4v9h9Z"/><text x="24" y="32" text-anchor="middle" fill="white" font-size="8" font-weight="800" font-family="Arial, sans-serif">${escapeHtml(label)}</text></svg>`;
-    }
+    const materials = window.PM.materials;
+    const fileUrl = materials.fileUrl;
+    const formatFileSize = materials.formatSize;
+    const fileTypeLabel = materials.typeLabel;
+    const fileIconHtml = materials.iconHtml;
     async function shareFile(ownerProjectId, fileId, encodedName, encodedContentType) {
       ownerProjectId = decodeURIComponent(ownerProjectId);
       fileId = decodeURIComponent(fileId);
       const name = decodeURIComponent(encodedName);
       const contentType = decodeURIComponent(encodedContentType);
-      const url = new URL(fileUrl(ownerProjectId, fileId), location.origin).href;
       try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Could not load file");
-        const blob = await response.blob();
-        const file = new File([blob], name, { type: contentType || blob.type });
-        if (navigator.canShare?.({ files: [file] })) {
-          await navigator.share({ files: [file], title: name });
-          return;
-        }
-        if (navigator.share) {
-          await navigator.share({ title: name, url });
-          return;
-        }
-        await navigator.clipboard?.writeText(url);
-        notify("File link copied.");
+        const result = await materials.share(fileUrl(ownerProjectId, fileId), name, contentType);
+        if (result === "copied") notify("File link copied.");
       } catch (error) {
         if (error.name !== "AbortError") notify("Could not share this file.");
       }
@@ -2446,15 +868,12 @@
       });
     }
     async function openProjectFile(ownerProjectId, fileId) {
-      const url = fileUrl(ownerProjectId, fileId);
-      if (!window.pmOffline?.offline()) { window.open(url, "_blank"); return; }
       try {
-        const cache = await caches.open(FILE_CACHE_NAME);
-        if (await cache.match(url)) { window.open(url, "_blank"); return; }
+        if (await materials.open(fileUrl(ownerProjectId, fileId), window.pmOffline?.offline())) return;
       } catch { }
       showOfflineFileUnavailable();
     }
-    function fileCacheMarker(ownerProjectId, fileId) { return `pm_file_cached_${ownerProjectId}_${fileId}`; }
+    const fileCacheMarker = materials.cacheMarker;
     function setFileCacheButton(button, cached) {
       if (!button) return;
       button.classList.toggle("is-cached", cached);
@@ -2467,9 +886,8 @@
       if (!("caches" in window)) return;
       const buttons = [...app.querySelectorAll("[data-file-cache-url]")];
       try {
-        const cache = await caches.open(FILE_CACHE_NAME);
         await Promise.all(buttons.map(async button => {
-          const cached = !!(await cache.match(button.dataset.fileCacheUrl));
+          const cached = await materials.cached(button.dataset.fileCacheUrl);
           const marker = button.dataset.fileCacheMarker;
           if (cached) localStorage.setItem(marker, "1"); else localStorage.removeItem(marker);
           setFileCacheButton(button, cached);
@@ -2480,23 +898,19 @@
     async function toggleFileOfflineCache(event, ownerProjectId, fileId) {
       event.preventDefault();
       event.stopPropagation();
-      if (!("caches" in window)) { notify("Offline file storage is unavailable in this browser."); return; }
       const url = fileUrl(ownerProjectId, fileId);
       const marker = fileCacheMarker(ownerProjectId, fileId);
       const button = event.currentTarget;
       try {
-        const cache = await caches.open(FILE_CACHE_NAME);
-        if (await cache.match(url)) {
-          await cache.delete(url);
+        const result = await materials.toggleOfflineCopy(url, window.pmOffline?.offline());
+        if (result === "removed") {
           localStorage.removeItem(marker);
           setFileCacheButton(button, false);
           notify("Offline copy removed.");
           return;
         }
-        if (window.pmOffline?.offline()) { notify("Connect to download this file for offline use."); return; }
-        const response = await fetch(url, { cache: "no-store" });
-        if (!response.ok) throw new Error("Could not download file");
-        await cache.put(url, response.clone());
+        if (result === "offline") { notify("Connect to download this file for offline use."); return; }
+        if (result === "unsupported") { notify("Offline file storage is unavailable in this browser."); return; }
         localStorage.setItem(marker, "1");
         setFileCacheButton(button, true);
         notify("File is available offline.");
@@ -2505,9 +919,7 @@
       }
     }
     function renderFiles() {
-      const ownFiles = (project.files || []).map(file => ({ ...file, ownerProjectId: project.id, ownerProjectName: "" }));
-      const linkedFiles = (project.file_links || []).map(file => ({ ...file, id: file.source_file_id, ownerProjectId: file.source_project_id, ownerProjectName: file.source_project_name, linkId: file.id }));
-      const files = [...ownFiles, ...linkedFiles];
+      const files = materials.list(project);
       if (!files.length) return emptyStateHtml("files", "No files yet", "Upload file", "openUploadFileModal()");
       const offline = !!window.pmOffline?.offline();
       return `<div class="links-grid">${files.map((file, index) => {
@@ -2780,7 +1192,7 @@
       const meta = hero.querySelector(".project-meta-line");
       if (meta) meta.outerHTML = window.pmMeta.line({ deadline: project.deadline, secondsLeft: project.seconds_left, finished });
     }
-    async function deleteProject() { if (!(await confirmSheet({ title: "Delete Project?", message: "This permanently deletes the project, its links, and all tasks.", confirmLabel: "Delete", destructive: true }))) return; if (window.pmOffline?.offline()) window.pmOffline.queueDelete(projectId); else await api(`/api/projects/${projectId}`, { method: "DELETE" }); try { localStorage.removeItem(`pm_project_${projectId}`); const summaries = JSON.parse(localStorage.getItem("pm_project_summaries") || "null"); if (Array.isArray(summaries)) localStorage.setItem("pm_project_summaries", JSON.stringify(summaries.filter(summary => summary.id !== projectId))); } catch { } location.href = "/"; }
+    async function deleteProject() { if (!(await confirmSheet({ title: "Move Project to Recently Deleted?", message: "Its tasks, links, and files can be restored from Recently Deleted.", confirmLabel: "Move", destructive: true }))) return; if (window.pmOffline?.offline()) window.pmOffline.queueDelete(projectId); else await api(`/api/projects/${projectId}`, { method: "DELETE" }); try { localStorage.removeItem(`pm_project_${projectId}`); const summaries = JSON.parse(localStorage.getItem("pm_project_summaries") || "null"); if (Array.isArray(summaries)) localStorage.setItem("pm_project_summaries", JSON.stringify(summaries.filter(summary => summary.id !== projectId))); } catch { } location.href = "/"; }
     function navigationSummary() {
       try {
         const summary = JSON.parse(sessionStorage.getItem("pm_project_loading_summary") || "null");

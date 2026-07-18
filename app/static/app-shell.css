@@ -14,6 +14,8 @@
   --accentSoft: rgba(79, 124, 255, .16);
   --danger: #ff453a;
   --dangerSoft: rgba(255, 69, 58, .13);
+  --dangerSoftAlt: rgba(255, 106, 106, .06);
+  --doneFade: .56;
   --dangerBorder: rgba(255, 69, 58, .28);
   --dangerText: #ff9f9a;
   --successSoft: rgba(48, 209, 88, .14);
@@ -45,6 +47,8 @@ html[data-theme="light"] {
   --accentSoft: rgba(0, 122, 255, .11);
   --danger: #ff3b30;
   --dangerSoft: rgba(255, 59, 48, .1);
+  --dangerSoftAlt: rgba(215, 77, 77, .08);
+  --doneFade: .5;
   --dangerBorder: rgba(255, 59, 48, .24);
   --dangerText: #c9271d;
   --successSoft: rgba(52, 199, 89, .12);
@@ -151,77 +155,6 @@ button:disabled, .btn:disabled { opacity: .45; cursor: default; transform: none;
 body:has(.delete-toolbar.show, .move-toolbar) .page {
   padding-bottom: calc(190px + max(18px, env(safe-area-inset-bottom)));
 }
-
-.landing-page {
-  width: min(920px, calc(100% - 32px));
-  gap: 14px;
-}
-
-.landing-header {
-  min-height: calc(52px - 8px * var(--condense, 0));
-  padding: max(2px, env(safe-area-inset-top)) 3px 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 60;
-}
-
-/* Full-bleed iOS nav-bar blur that fades in once content scrolls beneath */
-.landing-header::before,
-.topbar::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  top: -24px;
-  bottom: 0;
-  left: calc(50% - 50vw);
-  right: calc(50% - 50vw);
-  background: color-mix(in srgb, var(--bgBottom) 62%, transparent);
-  backdrop-filter: blur(22px) saturate(170%);
-  -webkit-backdrop-filter: blur(22px) saturate(170%);
-  border-bottom: 1px solid var(--line);
-  opacity: 0;
-  transition: opacity .25s ease;
-  pointer-events: none;
-}
-
-html.is-scrolled .landing-header::before,
-html.is-scrolled .topbar::before { opacity: 1; }
-
-/* As the hero condenses, the topbar strip fuses with it into one layer */
-.topbar::before {
-  border-bottom-color: color-mix(in srgb, var(--line) calc(100% * (1 - var(--condense, 0))), transparent);
-}
-
-/* Large title scrubs down to a compact nav title, iOS-style */
-.landing-header .title {
-  --titleSize: clamp(2rem, 7vw, 3.25rem);
-  margin: 0;
-  min-width: 0;
-  flex: 1 1 auto;
-  font-size: calc(var(--titleSize) * (1 - var(--condense, 0)) + 1.35rem * var(--condense, 0));
-}
-
-.landing-settings {
-  position: static;
-  width: 42px;
-  height: 42px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--accent);
-}
-
-.project-browser { display: grid; gap: 10px; }
-.project-browser .search-shell, .project-browser .segmented-control { margin-top: 0; }
-.projects-surface { display: contents; }
-.project-browser > .project-list, .projects-surface > .project-list { margin-top: 2px; }
-.segment span { margin-left: 3px; opacity: .65; font-variant-numeric: tabular-nums; }
-
 .layout, .hero, .project-list { gap: 14px; }
 
 .content-section {
@@ -344,117 +277,29 @@ input:focus, textarea:focus {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 13%, transparent);
 }
 
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 60;
-  min-height: 40px;
-  margin-bottom: 6px;
-  padding: env(safe-area-inset-top, 0px) 2px 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  flex-wrap: nowrap;
-}
-
-.topbar .back-link {
-  min-height: 40px;
-  max-width: 58vw;
-  padding: 7px 2px;
-  border: 0;
-  background: transparent;
-  color: var(--accent);
-  font-size: .95rem;
-  font-weight: 570;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.topbar .settings-trigger {
-  width: 40px;
-  height: 40px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--accent);
-}
-
 .settings-trigger svg { width: 20px; height: 20px; }
 
-/* .card.project-hero: must outrank the mobile `.card` padding/radius rules
-   so the scroll-scrubbed values below always win */
-.card.project-hero {
-  --p: var(--condense, 0);
-  --heroPad: 16px;
-  gap: calc(11px * (1 - var(--p)));
-  padding: calc(var(--heroPad) - 7px * var(--p)) calc(var(--heroPad) + (50vw - 50%) * var(--p));
-  position: sticky;
-  top: calc(40px + env(safe-area-inset-top, 0px));
-  z-index: 55;
-  /* Grows edge-to-edge as it condenses; corners and side borders scrub away */
-  margin-inline: calc((50% - 50vw) * var(--p));
-  border-radius: calc(var(--radius) * (1 - var(--p)));
-  border-inline-color: color-mix(in srgb, var(--line) calc(100% * (1 - var(--p))), transparent);
-  border-top-color: color-mix(in srgb, var(--line) calc(100% * (1 - var(--p))), transparent);
-  background: color-mix(in srgb, var(--panelBg) calc(60% * var(--p)), var(--card));
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .035) inset, var(--shadow),
-    0 12px 30px rgba(0, 0, 0, calc(.22 * var(--p)));
+/* Shared detail-page navigation blur; the landing header owns its own variant. */
+.topbar::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -24px;
+  bottom: 0;
+  left: calc(50% - 50vw);
+  right: calc(50% - 50vw);
+  background: color-mix(in srgb, var(--bgBottom) 62%, transparent);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  border-bottom: 1px solid var(--line);
+  border-bottom-color: color-mix(in srgb, var(--line) calc(100% * (1 - var(--condense, 0))), transparent);
+  opacity: 0;
+  transition: opacity .25s ease;
+  pointer-events: none;
 }
-.project-hero .hero-head { align-items: center; gap: 10px; flex-wrap: nowrap; }
-.project-hero .hero-title-wrap { flex: 1; min-width: 0; }
-.project-hero .hero-copy { gap: 0; }
+html.is-scrolled .topbar::before { opacity: 1; }
 
-/* Title and icon scrub between full and nav-bar size with --condense */
-.project-hero .project-title {
-  margin: 0;
-  font-size: calc(clamp(1.35rem, 5vw, 2rem) * (1 - var(--p)) + 1.08rem * var(--p));
-}
-
-.project-hero .hero-icon {
-  --iconSize: 64px;
-  --iconRadius: 20px;
-  width: calc(var(--iconSize) * (1 - var(--p)) + 34px * var(--p));
-  height: calc(var(--iconSize) * (1 - var(--p)) + 34px * var(--p));
-  border-radius: calc(var(--iconRadius) * (1 - var(--p)) + 10px * var(--p));
-  font-size: calc(1.7rem * (1 - var(--p)) + .95rem * var(--p));
-}
-
-/* Description + meta heights are interpolated inline by app-shell.js
-   (content-dependent); CSS just clips the overflow */
-.project-hero .project-description,
-.project-hero .project-meta-line {
-  overflow: hidden;
-}
-
-.project-hero-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: 0 0 auto;
-}
-
-.icon-action {
-  width: 38px;
-  min-height: 38px;
-  padding: 8px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 50%;
-  background: var(--surfaceSoft);
-  color: var(--accent);
-}
-
-.icon-action svg { width: 20px; height: 20px; }
-.icon-action.is-complete { color: var(--successText); background: var(--successSoft); }
-
-.project-description { font-size: .88rem; line-height: 1.4; }
-
-/* Date left, remaining time right — one quiet footnote row, like Reminders */
+/* Shared deadline/status row used on project cards and the project hero. */
 .project-meta-line {
   min-width: 0;
   display: flex;
@@ -478,7 +323,6 @@ input:focus, textarea:focus {
 
 .meta-date svg { flex: 0 0 auto; width: 13px; height: 13px; opacity: .75; }
 
-/* Countdown / status as a tinted iOS capsule */
 .meta-chip {
   flex: 0 0 auto;
   display: inline-flex;

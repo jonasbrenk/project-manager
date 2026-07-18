@@ -55,12 +55,33 @@ class ProjectApiTests(unittest.TestCase):
     def test_cache_and_security_headers(self) -> None:
         api_response = self.client.get("/api/projects?summary=1")
         css_response = self.client.get("/static/app-shell.css")
+        landing_css_response = self.client.get("/static/landing-page.css")
+        project_css_response = self.client.get("/static/project-view.css")
+        core_response = self.client.get("/static/app-core.js")
+        task_tree_response = self.client.get("/static/task-tree.js")
+        materials_response = self.client.get("/static/materials.js")
+        api_client_response = self.client.get("/static/api-client.js")
+        icons_response = self.client.get("/static/icons.js")
 
         self.assertEqual(api_response.headers["Cache-Control"], "no-store")
         self.assertEqual(css_response.headers["Cache-Control"], "no-cache")
+        self.assertEqual(landing_css_response.headers["Cache-Control"], "no-cache")
+        self.assertEqual(project_css_response.headers["Cache-Control"], "no-cache")
+        self.assertEqual(core_response.headers["Cache-Control"], "no-cache")
+        self.assertEqual(task_tree_response.headers["Cache-Control"], "no-cache")
+        self.assertEqual(materials_response.headers["Cache-Control"], "no-cache")
+        self.assertEqual(api_client_response.headers["Cache-Control"], "no-cache")
+        self.assertEqual(icons_response.headers["Cache-Control"], "no-cache")
         self.assertEqual(api_response.headers["X-Content-Type-Options"], "nosniff")
         api_response.close()
         css_response.close()
+        landing_css_response.close()
+        project_css_response.close()
+        core_response.close()
+        task_tree_response.close()
+        materials_response.close()
+        api_client_response.close()
+        icons_response.close()
 
     def test_project_page_is_gzipped_when_supported(self) -> None:
         response = self.client.get("/project?id=test", headers={"Accept-Encoding": "gzip"})
@@ -104,6 +125,14 @@ class ProjectApiTests(unittest.TestCase):
         deleted = self.client.delete(f"/api/projects/{project_id}/files/{file['id']}")
         self.assertEqual(deleted.status_code, 200)
         self.assertEqual(self.client.get(f"/api/projects/{project_id}/files/{file['id']}").status_code, 404)
+
+    def test_task_depth_is_enforced_by_the_api(self) -> None:
+        too_deep = {"title": "One", "children": [{"title": "Two", "children": [{"title": "Three", "children": [{"title": "Four"}]}]}]}
+
+        response = self.client.post("/api/projects", json={"name": "Bounded", "steps": [too_deep]})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("three levels", response.get_json()["error"])
 
 
 if __name__ == "__main__":

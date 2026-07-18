@@ -5,3 +5,6 @@ nohup.out
 **/data/
 __pycache__/
 *.py[cod]
+node_modules/
+.playwright-cli/
+output/playwright/

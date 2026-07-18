@@ -1,9 +1,16 @@
-const SHELL_CACHE = "project-manager-shell-v24";
+const SHELL_CACHE = "project-manager-shell-v29";
 const OFFLINE_API_CACHE = "project-manager-api-v2";
 const FILE_CACHE = "project-manager-files-v1";
 const RUNTIME_ASSET_PATHS = new Set([
   "/static/app-shell.css",
+  "/static/landing-page.css",
+  "/static/project-view.css",
   "/static/app-shell.js",
+  "/static/app-core.js",
+  "/static/task-tree.js",
+  "/static/materials.js",
+  "/static/api-client.js",
+  "/static/icons.js",
   "/static/offline-data.js",
   "/static/iconify-catalog.js",
 ]);
@@ -12,7 +19,14 @@ const SHELL_ASSETS = [
   "/project",
   "/site.webmanifest?v=1",
   "/static/app-shell.css?v=47",
+  "/static/landing-page.css?v=1",
+  "/static/project-view.css?v=1",
   "/static/app-shell.js?v=15",
+  "/static/app-core.js?v=1",
+  "/static/task-tree.js?v=1",
+  "/static/materials.js?v=1",
+  "/static/api-client.js?v=1",
+  "/static/icons.js?v=1",
   "/static/offline-data.js?v=1",
   "/static/iconify-catalog.js?v=1",
   "/static/icon-192.png?v=4",

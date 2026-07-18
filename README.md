@@ -41,12 +41,18 @@ python -m unittest discover tests
 
 ## Project structure
 
+See [ARCHITECT.md](ARCHITECT.md) for ownership boundaries, dependency direction,
+offline policy, and guidance for future features.
+
 ```
 app/
   main.py               Flask app: REST API + page routes
   landing_page.html     Project list view
   project_view.html     Single project view (tasks, links)
   static/app-shell.css  Shared design system
+  static/landing-page.css  Landing-page layout and composition
+  static/project-view.css  Project-view layout and composition
+  static/app-core.js    Shared screen primitives
   data/projects.json    Your data (host-owned, not in Git)
 tests/                  API unit tests
 Dockerfile, compose.yaml, up.sh, down.sh

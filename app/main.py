@@ -24,18 +24,33 @@ RUNTIME_FILES = (
     BASE_DIR / "project_view.html",
     BASE_DIR / "offline-service-worker.js",
     BASE_DIR / "static" / "app-shell.css",
+    BASE_DIR / "static" / "landing-page.css",
+    BASE_DIR / "static" / "project-view.css",
     BASE_DIR / "static" / "app-shell.js",
+    BASE_DIR / "static" / "app-core.js",
+    BASE_DIR / "static" / "task-tree.js",
+    BASE_DIR / "static" / "materials.js",
+    BASE_DIR / "static" / "api-client.js",
+    BASE_DIR / "static" / "icons.js",
     BASE_DIR / "static" / "offline-data.js",
 )
 RUNTIME_ASSETS = {
     "/static/app-shell.css",
+    "/static/landing-page.css",
+    "/static/project-view.css",
     "/static/app-shell.js",
+    "/static/app-core.js",
+    "/static/task-tree.js",
+    "/static/materials.js",
+    "/static/api-client.js",
+    "/static/icons.js",
     "/static/offline-data.js",
     "/static/iconify-catalog.js",
 }
 
 app = Flask(__name__, static_folder=str(BASE_DIR), static_url_path="")
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
+MAX_STEP_DEPTH = 2  # Root task, child, and grandchild: three visible levels.
 
 
 def utc_now_iso() -> str:
@@ -296,6 +311,27 @@ def sanitize_link(link: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def validate_step_tree(steps: Any, depth: int = 0) -> None:
+    """Keep API writes within the same task hierarchy the UI can render."""
+    if not isinstance(steps, list):
+        raise ValueError("steps must be a list")
+    if depth > MAX_STEP_DEPTH:
+        raise ValueError("Tasks can be nested at most three levels deep")
+    for step in steps:
+        if not isinstance(step, dict):
+            raise ValueError("Each task must be an object")
+        children = step.get("children") or []
+        if not isinstance(children, list):
+            raise ValueError("Task children must be a list")
+        validate_step_tree(children, depth + 1)
+
+
+def validate_project_payload(payload: dict[str, Any]) -> None:
+    if not isinstance(payload, dict):
+        raise ValueError("Project payload must be an object")
+    validate_step_tree(payload.get("steps", []))
+
+
 def sanitize_step(step: dict[str, Any]) -> dict[str, Any]:
     children = step.get("children") or []
     deadline = step.get("deadline") or None
@@ -428,6 +464,10 @@ def get_project(project_id: str):
 @app.post("/api/projects")
 def create_project():
     payload = request.get_json(silent=True) or {}
+    try:
+        validate_project_payload(payload)
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
     data = read_data()
     project = sanitize_project(payload)
     data["projects"].append(project)
@@ -438,6 +478,10 @@ def create_project():
 @app.put("/api/projects/<project_id>")
 def update_project(project_id: str):
     payload = request.get_json(silent=True) or {}
+    try:
+        validate_project_payload(payload)
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
     data = read_data()
     project = find_project(data, project_id)
     if not project:
@@ -487,6 +531,10 @@ def apply_offline_changes():
             continue
         project_payload = change.get("project")
         if change.get("op") != "upsert" or not isinstance(project_payload, dict):
+            continue
+        try:
+            validate_project_payload(project_payload)
+        except ValueError:
             continue
         if current:
             updated = sanitize_project(project_payload, current=current, updated_at=changed_at)

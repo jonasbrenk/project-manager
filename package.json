@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "csso": "^5.0.5",
+    "stylelint": "^17.14.0"
+  },
+  "scripts": {
+    "lint:css": "stylelint \"app/static/*.css\"",
+    "audit:css": "node tools/css-audit.mjs"
+  }
+}
