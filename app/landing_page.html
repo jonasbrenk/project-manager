@@ -1042,14 +1042,14 @@ function setProjectFilter(filter) {
     button.classList.toggle("is-active", isActive);
     button.setAttribute("aria-pressed", String(isActive));
   });
-  renderProjects();
+  if (!updateProjectFiltersInPlace()) renderProjects();
 }
 
 function clearProjectSearch() {
   projectSearch.value = "";
   searchClear.hidden = true;
   projectSearch.focus();
-  renderProjects();
+  if (!updateProjectFiltersInPlace()) renderProjects();
 }
 
 function toggleHiddenProjects(event) {
@@ -1162,6 +1162,50 @@ function renderProjects() {
     hSection.hidden = true;
     document.getElementById("hiddenList").innerHTML = "";
   }
+}
+
+function updateProjectFiltersInPlace() {
+  if (deleteMode || visibilityMode || !currentProjects.length || projectList.querySelector(".empty-state")) return false;
+  const rows = [...projectList.querySelectorAll(".swipe-row"), ...document.getElementById("hiddenList").querySelectorAll(".swipe-row")];
+  if (rows.length !== currentProjects.length) return false;
+  const projectsById = new Map(currentProjects.map(project => [project.id, project]));
+
+  const query = projectSearch.value.trim().toLocaleLowerCase();
+  const matchesProject = project => {
+    const matchesSearch = !query || `${project.name || ""} ${project.description || ""}`.toLocaleLowerCase().includes(query);
+    const matchesFilter = activeProjectFilter === "all" || (activeProjectFilter === "finished" ? project.finished : !project.finished);
+    return matchesSearch && matchesFilter;
+  };
+  const hiddenSection = document.getElementById("hiddenSection");
+  let visibleCount = 0;
+  let hiddenCount = 0;
+
+  for (const row of rows) {
+    const href = row.querySelector(".project-card")?.getAttribute("href");
+    const projectId = href ? new URL(href, window.location.origin).searchParams.get("id") : null;
+    const project = projectsById.get(projectId);
+    const matches = !!project && matchesProject(project);
+    row.hidden = !matches;
+    if (!matches) continue;
+    if (row.closest("#hiddenSection")) hiddenCount += 1;
+    else visibleCount += 1;
+  }
+
+  hiddenSection.hidden = hiddenCount === 0;
+  document.getElementById("hiddenCount").textContent = String(hiddenCount);
+  let empty = document.getElementById("projectFilterEmpty");
+  if (!visibleCount) {
+    if (!empty) {
+      empty = document.createElement("div");
+      empty.id = "projectFilterEmpty";
+      empty.className = "empty";
+      projectList.append(empty);
+    }
+    empty.textContent = query || activeProjectFilter !== "all" ? "No matching projects." : "No projects yet";
+  } else {
+    empty?.remove();
+  }
+  return true;
 }
 
 function formatDeletedItemTime(value) {
@@ -1291,7 +1335,7 @@ function renderCachedProjects() {
     window.permanentlyDeleteItem = permanentlyDeleteItem;
     projectSearch.addEventListener("input", () => {
       searchClear.hidden = !projectSearch.value;
-      renderProjects();
+      if (!updateProjectFiltersInPlace()) renderProjects();
     });
     settingsBackdrop?.addEventListener("click", (event) => { if (event.target === settingsBackdrop) closeSettingsModal(); });
     createProjectBackdrop?.addEventListener("click", (event) => { if (event.target === createProjectBackdrop) closeCreateProjectModal(); });

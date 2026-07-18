@@ -680,9 +680,14 @@
       cursor: pointer
     }
 
+    .project-hero-actions .icon-action {
+      transition: color .18s ease, background-color .18s ease, transform .18s ease
+    }
+
     .step-title {
       font-weight: 700;
-      margin-bottom: 6px
+      margin-bottom: 6px;
+      transition: color .18s ease, opacity .18s ease
     }
 
     .step-title.done {
@@ -701,7 +706,8 @@
 
     .step-main {
       min-width: 0;
-      width: 100%
+      width: 100%;
+      transition: opacity .18s ease
     }
 
     .step-sub {
@@ -710,7 +716,8 @@
       gap: 8px;
       color: var(--muted);
       font-size: .9rem;
-      width: 100%
+      width: 100%;
+      transition: opacity .18s ease
     }
 
     .pill {
@@ -1762,7 +1769,7 @@
         { label: "Delete", icon: SWIPE_ICON_DELETE, onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
       ]);
 
-      return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${editDeleteSwipeActions(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card link-card-project swipe-target${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `location.href='${escapeHtml(projectUrl)}'`}">
+      return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${editDeleteSwipeActions(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card link-card-project swipe-target${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" data-delete-key="link:${escapeHtml(link.id)}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `location.href='${escapeHtml(projectUrl)}'`}">
         ${menu}
         <div class="proj-link-icon">${loading ? '<span class="linked-project-skeleton" aria-hidden="true"></span>' : icon}</div>
         <div class="proj-link-body">
@@ -1920,7 +1927,8 @@
       if (selectedDeleteIds.has(key)) selectedDeleteIds.delete(key);
       else selectedDeleteIds.add(key);
       updateDeleteToolbar();
-      render();
+      const target = [...app.querySelectorAll("[data-delete-key]")].find(element => element.dataset.deleteKey === key);
+      target?.classList.toggle("selected-for-delete", selectedDeleteIds.has(key));
     }
     async function confirmDeleteSelected() {
       if (!selectedDeleteIds.size) return;
@@ -2029,14 +2037,25 @@
 
     function toggleContextMenu(menuId, event) {
       event.stopPropagation();
-      openContextMenuId = openContextMenuId === menuId ? null : menuId;
-      render();
+      const nextMenuId = openContextMenuId === menuId ? null : menuId;
+      setContextMenuOpen(openContextMenuId, false);
+      openContextMenuId = nextMenuId;
+      setContextMenuOpen(openContextMenuId, true);
     }
 
     function closeContextMenu() {
       if (!openContextMenuId) return;
+      setContextMenuOpen(openContextMenuId, false);
       openContextMenuId = null;
-      render();
+    }
+
+    function setContextMenuOpen(menuId, isOpen) {
+      if (!menuId) return;
+      const menu = document.getElementById(menuId);
+      const wrapper = menu?.closest(".card-menu-wrap");
+      wrapper?.classList.toggle("open", isOpen);
+      menu?.classList.toggle("show", isOpen);
+      wrapper?.querySelector(".card-menu-trigger")?.setAttribute("aria-expanded", String(isOpen));
     }
 
     async function saveProject(updatedProject) {
@@ -2088,8 +2107,8 @@
         : step.until_deadline
           ? `<div class="project-meta-line"><span class="meta-date">Until project deadline</span></div>`
           : "";
-      return `<div class="swipe-row" style="view-transition-name: s-${String(step.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(swipeActions)}<div class="step-item swipe-target${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
-        <input class="step-check" type="checkbox" ${step.done ? "checked" : ""} onclick="event.stopPropagation()" onchange="toggleStepDone('${step.id}', this.checked)" />
+      return `<div class="swipe-row" style="view-transition-name: s-${String(step.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(swipeActions)}<div class="step-item swipe-target${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-step-id="${escapeHtml(step.id)}" data-delete-key="step:${escapeHtml(step.id)}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
+        <input class="step-check" data-step-id="${escapeHtml(step.id)}" type="checkbox" ${step.done ? "checked" : ""} onclick="event.stopPropagation()" onchange="toggleStepDone('${step.id}', this.checked)" />
         <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title-row"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div></div>${String(step.description || "").trim() ? `<div class="muted">${renderFormattedText(step.description, "", true)}</div>` : ""}
         </div>
       </div>${metadata ? `<div class="step-sub ${step.done ? "done-state" : ""}">${metadata}</div>` : ""}</div></div>`;
@@ -2132,6 +2151,15 @@
       return `<div class="step-tree">${rows.map(row => row.type === "completed" ? renderCompletedSequence(row.rows) : renderStep(row.step, row.depth)).join("")}</div>`;
     }
 
+    function renderTaskTreeInPlace() {
+      const section = app.querySelector(".steps-section");
+      if (!section) return renderPreservingScroll();
+      const hasDoneTasks = hasCompletedSteps(project.steps || []);
+      const stepsMenuOpen = (!!openContextMenuId && openContextMenuId.startsWith("step-menu-")) || !!moveState;
+      section.classList.toggle("has-open-menu", stepsMenuOpen);
+      section.innerHTML = `<div class="section-head"><h2 class="section-title">Tasks</h2>${hasDoneTasks && !moveState && !deleteMode ? `<button class="section-action" type="button" aria-pressed="${hideCompletedSteps}" onclick="toggleCompletedSteps(event)">${hideCompletedSteps ? "Show done" : "Hide done"}</button>` : ""}</div>${renderStepTree(project.steps)}`;
+    }
+
     function renderLinks() {
       const l = [...(project.links || [])].sort((a, b) => {
         const aId = getProjectIdFromLink(a);
@@ -2166,7 +2194,7 @@
           ? rawUrl.replace("PROJECTS/", currentOrigin + "/")
           : rawUrl;
 
-        return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${editDeleteSwipeActions(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card swipe-target${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(processedUrl)}')`}">
+        return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${editDeleteSwipeActions(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card swipe-target${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" data-delete-key="link:${escapeHtml(link.id)}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `window.open('${escapeHtml(processedUrl)}')`}">
           ${buildCardMenu(`link-menu-${index}`, [
             { label: "Edit", icon: SWIPE_ICON_EDIT, onclick: `event.stopPropagation(); openEditLinkModal('${link.id}');` },
             { label: "Delete", icon: SWIPE_ICON_DELETE, onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
@@ -2322,13 +2350,40 @@
       updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, done }));
       project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updated) });
       cacheProjectState(project);
-      renderPreservingScroll();
+      if (hideCompletedSteps) renderTaskTreeInPlace();
+      else updateStepDoneDom(stepId, done);
     }
     async function deleteStep(stepId) { if (!(await confirmSheet({ title: "Delete Task?", message: "Sub-tasks will be deleted too.", confirmLabel: "Delete", destructive: true }))) return; const updated = deepClone(project); updated.steps = removeStepRecursive(updated.steps || [], stepId); await saveProject(updated); }
     async function toggleFinished() {
       project = await api(`/api/projects/${projectId}/finish`, { method: "PATCH", body: JSON.stringify({ finished: !project.finished }) });
       cacheProjectState(project);
-      renderPreservingScroll();
+      updateProjectFinishedDom();
+    }
+
+    function updateStepDoneDom(stepId, done) {
+      const checkbox = [...app.querySelectorAll(".step-check")].find(input => input.dataset.stepId === stepId);
+      const row = checkbox?.closest(".step-item");
+      if (!checkbox || !row) return renderTaskTreeInPlace();
+      checkbox.checked = done;
+      row.querySelector(".step-main")?.classList.toggle("done-state", done);
+      row.querySelector(".step-title")?.classList.toggle("done", done);
+      const step = findStepAndParent(project.steps || [], stepId)?.step;
+      const sub = row.querySelector(".step-sub");
+      sub?.classList.toggle("done-state", done);
+      if (step?.deadline && sub) sub.innerHTML = window.pmMeta.line({ deadline: step.deadline, secondsLeft: done ? null : stepTimeLeft(step.deadline) });
+    }
+
+    function updateProjectFinishedDom() {
+      const hero = app.querySelector(".project-hero");
+      const finishButton = hero?.querySelectorAll(".project-hero-actions .icon-action")[1];
+      if (!hero || !finishButton) return;
+      const finished = !!project.finished;
+      const label = finished ? "Reopen project" : "Mark project finished";
+      finishButton.classList.toggle("is-complete", finished);
+      finishButton.setAttribute("aria-label", label);
+      finishButton.setAttribute("title", label);
+      const meta = hero.querySelector(".project-meta-line");
+      if (meta) meta.outerHTML = window.pmMeta.line({ deadline: project.deadline, secondsLeft: project.seconds_left, finished });
     }
     async function deleteProject() { if (!(await confirmSheet({ title: "Delete Project?", message: "This permanently deletes the project, its links, and all tasks.", confirmLabel: "Delete", destructive: true }))) return; await api(`/api/projects/${projectId}`, { method: "DELETE" }); try { localStorage.removeItem(`pm_project_${projectId}`); const summaries = JSON.parse(localStorage.getItem("pm_project_summaries") || "null"); if (Array.isArray(summaries)) localStorage.setItem("pm_project_summaries", JSON.stringify(summaries.filter(summary => summary.id !== projectId))); } catch { } location.href = "/"; }
     async function loadProject() {
