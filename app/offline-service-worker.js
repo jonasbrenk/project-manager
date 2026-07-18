@@ -1,11 +1,18 @@
-const SHELL_CACHE = "project-manager-shell-v3";
+const SHELL_CACHE = "project-manager-shell-v24";
 const OFFLINE_API_CACHE = "project-manager-api-v2";
+const FILE_CACHE = "project-manager-files-v1";
+const RUNTIME_ASSET_PATHS = new Set([
+  "/static/app-shell.css",
+  "/static/app-shell.js",
+  "/static/offline-data.js",
+  "/static/iconify-catalog.js",
+]);
 const SHELL_ASSETS = [
   "/",
   "/project",
   "/site.webmanifest?v=1",
-  "/static/app-shell.css?v=39",
-  "/static/app-shell.js?v=14",
+  "/static/app-shell.css?v=47",
+  "/static/app-shell.js?v=15",
   "/static/offline-data.js?v=1",
   "/static/iconify-catalog.js?v=1",
   "/static/icon-192.png?v=4",
@@ -29,16 +36,16 @@ self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(keys
-        .filter(key => key.startsWith("project-manager-") && ![SHELL_CACHE, OFFLINE_API_CACHE].includes(key))
+        .filter(key => key.startsWith("project-manager-") && ![SHELL_CACHE, OFFLINE_API_CACHE, FILE_CACHE].includes(key))
         .map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
 
-async function networkFirst(request, cacheName) {
+async function networkFirst(request, cacheName, forceReload = false) {
   const cache = await caches.open(cacheName);
   try {
-    const response = await fetch(request);
+    const response = await fetch(forceReload ? new Request(request, { cache: "reload" }) : request);
     if (response.ok) cache.put(request, response.clone());
     return response;
   } catch {
@@ -51,6 +58,21 @@ async function networkFirst(request, cacheName) {
 self.addEventListener("fetch", event => {
   const { request } = event;
   const url = new URL(request.url);
+
+  // Project icons come from Iconify. Cache each SVG after its first load so
+  // the same project cards and views retain their icons while offline.
+  if (url.origin === "https://api.iconify.design" && request.method === "GET" && url.pathname.endsWith(".svg")) {
+    event.respondWith((async () => {
+      const cache = await caches.open(SHELL_CACHE);
+      const cached = await cache.match(request);
+      if (cached) return cached;
+      const response = await fetch(request);
+      if (response.ok || response.type === "opaque") cache.put(request, response.clone());
+      return response;
+    })());
+    return;
+  }
+
   if (url.origin !== self.location.origin) return;
 
   if (request.method !== "GET") {
@@ -66,6 +88,25 @@ self.addEventListener("fetch", event => {
       const shell = () => cache.match(url.pathname === "/project" ? "/project" : "/");
       if (!self.navigator.onLine) return (await shell()) || Response.error();
       return networkFirst(request, SHELL_CACHE).catch(shell);
+    })());
+    return;
+  }
+
+  if (RUNTIME_ASSET_PATHS.has(url.pathname)) {
+    event.respondWith(networkFirst(request, SHELL_CACHE, true));
+    return;
+  }
+
+  if (/^\/api\/projects\/[^/]+\/files\/[^/]+$/.test(url.pathname)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(FILE_CACHE);
+      const cached = await cache.match(request);
+      if (!self.navigator.onLine && cached) return cached;
+      try {
+        return await fetch(request);
+      } catch {
+        return cached || Response.error();
+      }
     })());
     return;
   }

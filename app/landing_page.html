@@ -246,7 +246,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 .project-card.visibility-selected {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accentSoft) 82%, var(--card));
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 34%, transparent);
+  box-shadow: none;
 }
 .empty { padding: 28px; text-align: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 18px; }
 
@@ -343,20 +343,27 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 
 .visibility-toggle {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 34px;
-  height: 34px;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
   min-height: 0;
   padding: 0;
   display: grid;
   place-items: center;
   line-height: 0;
-  border-radius: 50%;
+  background: transparent;
+  border: 0;
+  color: var(--accent);
+  border-radius: 0;
+  pointer-events: none;
   z-index: 12;
 }
 
-.visibility-toggle svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.visibility-toggle svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.delete-selection-indicator {
+  color: var(--danger);
+}
 
 .delete-toolbar {
   position: fixed; right: 18px; bottom: 18px; left: auto;
@@ -433,7 +440,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 .project-offline-cache svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .project-offline-cache.is-unavailable { color: var(--muted); opacity: .34; filter: grayscale(1); }
-.project-card.is-offline-unavailable { opacity: .58; cursor: not-allowed; pointer-events: none; }
+.project-card.is-offline-unavailable { opacity: .58; cursor: not-allowed; }
 
 .hide-toggle {
   position: absolute; top: 12px; right: 12px;
@@ -537,8 +544,8 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 
  </style>
-  <link rel="stylesheet" href="/static/app-shell.css?v=39">
-  <script src="/static/app-shell.js?v=14"></script>
+  <link rel="stylesheet" href="/static/app-shell.css?v=47">
+  <script src="/static/app-shell.js?v=15"></script>
   <script src="/static/offline-data.js?v=1"></script>
 </head>
 <body>
@@ -1027,7 +1034,12 @@ function toggleProjectSelection(event, id) {
   const selected = selectedProjectIds.has(id);
   const card = event.currentTarget?.closest(".project-card") || event.target.closest(".project-card");
   card?.classList.toggle("selected-for-delete", selected);
+  card?.classList.toggle("has-visibility-toggle", selected);
   card?.setAttribute("aria-pressed", String(selected));
+  const existingIndicator = card?.querySelector(".delete-selection-indicator");
+  if (selected && !existingIndicator) {
+    card?.insertAdjacentHTML("beforeend", `<span class="visibility-toggle delete-selection-indicator" aria-hidden="true">${SWIPE_ICON_DELETE}</span>`);
+  } else if (!selected) existingIndicator?.remove();
   updateDeleteToolbar();
 }
 
@@ -1173,7 +1185,7 @@ function renderProjects() {
     return `
       <div class="swipe-row" style="view-transition-name: p-${String(p.id).replace(/[^a-zA-Z0-9-]/g, "")}">
       ${swipeable ? `<div class="swipe-actions"><button class="swipe-btn swipe-hide" type="button" aria-label="${hiddenIds.has(p.id) ? "Show" : "Hide"}" title="${hiddenIds.has(p.id) ? "Show" : "Hide"}" onclick="swipeToggleHidden(event, '${p.id}')">${hiddenIds.has(p.id) ? SWIPE_ICON_SHOW : SWIPE_ICON_HIDE}<span>${hiddenIds.has(p.id) ? "Show" : "Hide"}</span></button><button class="swipe-btn swipe-delete" type="button" aria-label="Delete" title="Delete" onclick="swipeDelete(event, '${p.id}')">${SWIPE_ICON_DELETE}<span>Delete</span></button></div>` : ""}
-      <${deleteMode || visibilityMode ? "button" : "a"} class="project-card swipe-target${p.finished ? " is-finished" : ""}${showOfflineCache ? " has-offline-cache" : ""}${offlineUnavailable ? " is-offline-unavailable" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" data-project-id="${escapeHtml(p.id)}" ${deleteMode || visibilityMode ? `type="button" aria-pressed="${deleteMode ? selectedProjectIds.has(p.id) : isVisible}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : `togglePendingVisibility(event, '${p.id}')`}"` : `href="/project?id=${encodeURIComponent(p.id)}" aria-disabled="${offlineUnavailable}"`}>
+      <${deleteMode || visibilityMode ? "button" : "a"} class="project-card swipe-target${p.finished ? " is-finished" : ""}${showOfflineCache ? " has-offline-cache" : ""}${visibilityMode || deleteMode && selectedProjectIds.has(p.id) ? " has-visibility-toggle" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${offlineUnavailable ? " is-offline-unavailable" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" data-project-id="${escapeHtml(p.id)}" ${deleteMode || visibilityMode ? `type="button" aria-pressed="${deleteMode ? selectedProjectIds.has(p.id) : isVisible}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : `togglePendingVisibility(event, '${p.id}')`}"` : `href="/project?id=${encodeURIComponent(p.id)}" aria-disabled="${offlineUnavailable}"`}>
         ${showOfflineCache ? `<span class="project-offline-cache" data-project-cache-id="${escapeHtml(p.id)}" role="img" aria-label="Checking offline availability" title="Checking offline availability">${OFFLINE_CACHE_ICON}</span>` : ""}
         <div class="project-icon">
           ${renderIcon(p.icon, "📌", p.name)}
@@ -1189,7 +1201,8 @@ function renderProjects() {
           ${Number(p.task_total) > 0 ? `<div class="project-progress"><div class="project-progress-track"><div class="project-progress-fill" style="width:${Math.round((Number(p.task_done) || 0) / Number(p.task_total) * 100)}%"></div></div><span>${Number(p.task_done) || 0}/${Number(p.task_total)} tasks</span></div>` : ""}
           ${window.pmMeta.line({ deadline: p.deadline, secondsLeft: p.seconds_left, finished: p.finished })}
         </div>
-        ${visibilityMode ? `<span class="btn btn-secondary visibility-toggle" aria-hidden="true">${isVisible ? VISIBILITY_ICON_VISIBLE : VISIBILITY_ICON_HIDDEN}</span>` : ""}
+        ${visibilityMode ? `<span class="visibility-toggle" aria-hidden="true">${isVisible ? VISIBILITY_ICON_VISIBLE : VISIBILITY_ICON_HIDDEN}</span>` : ""}
+        ${deleteMode && selectedProjectIds.has(p.id) ? `<span class="visibility-toggle delete-selection-indicator" aria-hidden="true">${SWIPE_ICON_DELETE}</span>` : ""}
       </${deleteMode || visibilityMode ? "button" : "a"}>
       </div>`;
   };
@@ -1460,12 +1473,24 @@ async function blockUnavailableOfflineProject(event) {
     });
     updateDeleteToolbar();
     renderCachedProjects();
-    window.addEventListener("pageshow", event => {
-      if (!event.persisted) return;
+    function syncReturnedProjectList(reloadData = false) {
+      const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      applyTheme(savedTheme === "light" || savedTheme === "dark"
+        ? savedTheme
+        : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
+      window.pmRefreshConnection?.();
+      if (!reloadData) return;
       renderCachedProjects();
       loadProjects().catch(() => {});
       loadDeletedItems().catch(() => {});
+    }
+    window.addEventListener("pageshow", () => {
+      syncReturnedProjectList(true);
     });
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") syncReturnedProjectList(true);
+    });
+    window.addEventListener("focus", () => syncReturnedProjectList(false));
     loadProjects().catch(() => {
       if (!currentProjects.length) projectList.innerHTML = `<div class="empty">Could not load projects.</div>`;
     });

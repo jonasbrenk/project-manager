@@ -57,7 +57,7 @@ class ProjectApiTests(unittest.TestCase):
         css_response = self.client.get("/static/app-shell.css")
 
         self.assertEqual(api_response.headers["Cache-Control"], "no-store")
-        self.assertIn("max-age=604800", css_response.headers["Cache-Control"])
+        self.assertEqual(css_response.headers["Cache-Control"], "no-cache")
         self.assertEqual(api_response.headers["X-Content-Type-Options"], "nosniff")
         api_response.close()
         css_response.close()

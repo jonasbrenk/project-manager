@@ -655,27 +655,14 @@ input:focus, textarea:focus {
 }
 
 .swipe-row:not(.dragging) .swipe-target { will-change: auto; }
+.links-grid .swipe-row:not(.dragging) .swipe-target { will-change: transform; }
 
 /* Open context menus must escape the row's clipping */
 .swipe-row:has(.card-menu.show) { overflow: visible; z-index: 130; }
 
-/* Selection belongs to the row, not the card inside it. The row owns the
-   actual first/middle/last radius, so this outline cannot be squared off or
-   disappear behind a neighboring row's separator. */
+/* Selection stays on the foreground card so its outline follows press-scale. */
 .swipe-row:has(.selected-for-delete),
 .swipe-row:has(.visibility-selected) { z-index: 3; }
-.swipe-row:has(.selected-for-delete)::after,
-.swipe-row:has(.visibility-selected)::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  box-sizing: border-box;
-  border: 2px solid var(--accent);
-  border-radius: inherit;
-  pointer-events: none;
-}
-.swipe-row:has(.selected-for-delete)::after { border-color: var(--danger); }
 
 /* Rows inside grouped lists: square by default, group corners on the ends */
 .step-tree > .swipe-row, .links-grid > .swipe-row { border-radius: 0; }
@@ -733,12 +720,12 @@ input:focus, textarea:focus {
   opacity: 1;
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 18%, var(--panelBg));
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 58%, transparent);
+  box-shadow: none;
 }
 .project-list .project-card.selected-for-delete {
   border-color: var(--danger);
   background: color-mix(in srgb, var(--danger) 14%, var(--panelBg));
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--danger) 60%, transparent);
+  box-shadow: none;
 }
 
 .project-card:hover, .link-card:hover {
@@ -765,6 +752,16 @@ input:focus, textarea:focus {
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+/* Keep grouped link/file rows on one composited layer. Safari otherwise can
+   re-rasterise the foreground when a swipe returns to zero, briefly exposing
+   a one-pixel seam at the bottom of the row. */
+.links-grid .swipe-target {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .links-grid > * + * { border-top: .5px solid var(--line); }
@@ -1764,15 +1761,26 @@ body:has(.move-toolbar) #floatingActions {
    visible for both tasks and links in every action mode. */
 .links-grid .link-card.selected-for-delete,
 .step-tree .step-item.selected-for-delete {
-  background: color-mix(in srgb, var(--dangerSoft) 74%, var(--panelBg));
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--danger) 38%, transparent);
+  background: color-mix(in srgb, var(--danger) 14%, var(--panelBg));
+  border-color: var(--danger);
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 2px var(--danger);
+  transition: transform .22s var(--spring), background-color .08s ease, border-color .08s ease;
 }
+
+/* Link/file rows are a visually grouped list. While a selected foreground
+   row scales on press, suppress the static group hairlines beside it so only
+   its own red border is visible. */
+.links-grid:has(.selected-for-delete) { border-color: transparent; }
+.links-grid > .swipe-row:has(.selected-for-delete),
+.links-grid > .swipe-row:has(.selected-for-delete) + .swipe-row { border-top-color: transparent; }
 .links-grid .link-card.visibility-selected,
 .links-grid .link-card.is-selected,
 .step-tree .step-item.visibility-selected,
 .step-tree .step-item.is-selected {
   background: color-mix(in srgb, var(--accentSoft) 68%, var(--panelBg));
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 46%, transparent);
+  border-color: var(--accent);
+  box-shadow: none;
 }
 .step-tree .step-item.move-source {
   border: 0;
@@ -1925,6 +1933,23 @@ body:has(.move-toolbar) #floatingActions {
 .confirm-copy { padding: 18px 16px 15px; display: grid; gap: 4px; }
 .confirm-copy strong { font-size: .95rem; letter-spacing: -.01em; }
 .confirm-copy p { margin: 0; color: var(--muted); font-size: .8rem; line-height: 1.4; }
+
+/* iOS can briefly paint a blue text-selection/focus artifact on sheet chrome
+   after a long press or an interrupted tap. Dialog copy and action rows are
+   not editable, so opt them out while leaving actual form fields selectable. */
+.modal-head, .modal-actions, .confirm-copy, .confirm-actions {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: none) {
+  .modal :is(button, .btn):focus-visible,
+  .confirm-alert .confirm-btn:focus-visible {
+    outline: none;
+  }
+}
 
 .confirm-actions {
   display: grid;

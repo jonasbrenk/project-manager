@@ -18,6 +18,21 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 DATA_FILE = DATA_DIR / "projects.json"
 STORAGE_LOCK = RLock()
+RUNTIME_FILES = (
+    BASE_DIR / "main.py",
+    BASE_DIR / "landing_page.html",
+    BASE_DIR / "project_view.html",
+    BASE_DIR / "offline-service-worker.js",
+    BASE_DIR / "static" / "app-shell.css",
+    BASE_DIR / "static" / "app-shell.js",
+    BASE_DIR / "static" / "offline-data.js",
+)
+RUNTIME_ASSETS = {
+    "/static/app-shell.css",
+    "/static/app-shell.js",
+    "/static/offline-data.js",
+    "/static/iconify-catalog.js",
+}
 
 app = Flask(__name__, static_folder=str(BASE_DIR), static_url_path="")
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
@@ -25,6 +40,15 @@ app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def app_version() -> str:
+    """A small deployment fingerprint for clients that have stayed open."""
+    try:
+        stats = [path.stat() for path in RUNTIME_FILES]
+        return f"{max(stat.st_mtime_ns for stat in stats):x}-{sum(stat.st_size for stat in stats):x}"
+    except OSError:
+        return "unknown"
 
 
 def ensure_storage() -> None:
@@ -337,7 +361,11 @@ def set_response_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Referrer-Policy"] = "same-origin"
     response.headers["X-Frame-Options"] = "SAMEORIGIN"
-    if request.path.startswith("/static/"):
+    if request.path == "/api/health":
+        response.headers["X-PM-App-Version"] = app_version()
+    if request.path in RUNTIME_ASSETS:
+        response.headers["Cache-Control"] = "no-cache"
+    elif request.path.startswith("/static/"):
         response.headers["Cache-Control"] = "public, max-age=604800, immutable"
     elif request.path.startswith("/api/"):
         response.headers["Cache-Control"] = "no-store"

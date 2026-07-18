@@ -860,8 +860,56 @@
     .step-item.selected-for-delete {
       border-color: var(--dangerBorder);
       background: color-mix(in srgb, var(--dangerSoft) 70%, var(--card));
-      box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 24%, transparent)
+      box-shadow: none
     }
+
+    .file-unavailable { opacity: .52; cursor: not-allowed; }
+    .file-unavailable .link-subtitle { color: var(--muted); }
+
+    .file-cache-toggle {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      min-height: 36px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+      border-radius: 11px;
+      background: color-mix(in srgb, var(--panelBg) 82%, var(--accent));
+      color: var(--muted);
+      z-index: 4;
+    }
+
+    .file-cache-toggle.is-cached { color: var(--accent); }
+    .file-cache-toggle:hover { background: color-mix(in srgb, var(--panelBg) 68%, var(--accent)); }
+    .file-cache-toggle svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .file-row { padding-right: 98px !important; }
+    .file-row .card-menu-wrap { right: 52px !important; }
+
+    @media (hover: none), (pointer: coarse) {
+      .file-row { padding-right: 56px !important; }
+      .file-row .file-cache-toggle { right: 8px; }
+    }
+
+    .delete-indicator {
+      position: absolute;
+      top: 9px;
+      right: 10px;
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      color: var(--danger);
+      pointer-events: none;
+      z-index: 12;
+    }
+
+    .delete-indicator svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .delete-mode .selected-for-delete .card-menu-wrap { display: none; }
 
     .delete-mode .step-check {
       pointer-events: none
@@ -1495,8 +1543,8 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="/static/app-shell.css?v=39">
-  <script src="/static/app-shell.js?v=14"></script>
+  <link rel="stylesheet" href="/static/app-shell.css?v=47">
+  <script src="/static/app-shell.js?v=15"></script>
   <script src="/static/offline-data.js?v=1"></script>
 
 </head>
@@ -1604,6 +1652,9 @@
     const SWIPE_ICON_SHARE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4M8 8l4-4 4 4M5 14v5h14v-5"/></svg>`;
     const SWIPE_ICON_MOVE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M12 3 9 6M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg>`;
     const SWIPE_ICON_DELETE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`;
+    const FILE_CACHE_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5h10.5a3.5 3.5 0 0 0 .7-6.9A6.3 6.3 0 0 0 6.4 9.4 4.6 4.6 0 0 0 7 18.5Z"/><path d="m9.5 14.1 1.7 1.7 3.5-3.7"/></svg>`;
+    const FILE_NOT_CACHED_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5h10.5a3.5 3.5 0 0 0 .7-6.9A6.3 6.3 0 0 0 6.4 9.4 4.6 4.6 0 0 0 7 18.5Z"/><path d="M12 10.5v5.2m0 0-2.1-2.1m2.1 2.1 2.1-2.1"/></svg>`;
+    const FILE_CACHE_NAME = "project-manager-files-v1";
     window.pmSwipeDisabled = () => deleteMode || !!moveState;
 
     function swipeActionsHtml(actions) {
@@ -1833,13 +1884,15 @@
       const icon = renderIcon(proj?.icon || link.icon || "📌", "📌", proj?.name || link.title);
       const name = escapeHtml(normalizeDisplayText(proj?.name || link.title || "Project link"));
       const subtitle = loading ? "Project" : error ? "Unavailable" : proj?.finished ? "Finished" : proj?.seconds_left != null ? formatTimeLeft(proj.seconds_left) : "Project";
+      const selected = deleteMode && selectedDeleteIds.has(`link:${link.id}`);
       const menu = buildCardMenu(`project-link-menu-${index}`, [
         { label: "Edit", icon: SWIPE_ICON_EDIT, onclick: `event.stopPropagation(); openEditLinkModal('${link.id}');` },
         { label: "Delete", icon: SWIPE_ICON_DELETE, onclick: `event.stopPropagation(); deleteLink('${link.id}');`, danger: true }
       ]);
 
-      return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${editDeleteSwipeActions(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card link-card-project swipe-target${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${deleteMode && selectedDeleteIds.has(`link:${link.id}`) ? " selected-for-delete" : ""}" data-delete-key="link:${escapeHtml(link.id)}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `location.href='${escapeHtml(projectUrl)}'`}">
+      return `<div class="swipe-row" style="view-transition-name: l-${String(link.id).replace(/[^a-zA-Z0-9-]/g, "")}">${editDeleteSwipeActions(`openEditLinkModal('${link.id}');`, `deleteLink('${link.id}');`)}<div class="link-card link-card-project swipe-target${loading ? " proj-link-loading" : ""}${proj?.finished ? " is-finished" : ""}${selected ? " selected-for-delete" : ""}" data-delete-key="link:${escapeHtml(link.id)}" onclick="${deleteMode ? `toggleDeleteSelection(event, 'link:${link.id}')` : `location.href='${escapeHtml(projectUrl)}'`}">
         ${menu}
+        ${selected ? `<span class="delete-indicator" aria-hidden="true">${SWIPE_ICON_DELETE}</span>` : ""}
         <div class="proj-link-icon">${loading ? '<span class="linked-project-skeleton" aria-hidden="true"></span>' : icon}</div>
         <div class="proj-link-body">
           <div class="proj-link-name">${loading ? "Loading…" : name}</div>
@@ -2028,6 +2081,11 @@
       updateDeleteToolbar();
       const target = [...app.querySelectorAll("[data-delete-key]")].find(element => element.dataset.deleteKey === key);
       target?.classList.toggle("selected-for-delete", selectedDeleteIds.has(key));
+      const selected = selectedDeleteIds.has(key);
+      const indicator = target?.querySelector(".delete-indicator");
+      if (selected && !indicator) {
+        target?.insertAdjacentHTML("afterbegin", `<span class="delete-indicator" aria-hidden="true">${SWIPE_ICON_DELETE}</span>`);
+      } else if (!selected) indicator?.remove();
     }
     async function confirmDeleteSelected() {
       if (!selectedDeleteIds.size) return;
@@ -2042,12 +2100,22 @@
       const updated = deepClone(project);
       const linkIds = [...selectedDeleteIds].filter(key => key.startsWith("link:")).map(key => key.slice(5));
       const stepIds = [...selectedDeleteIds].filter(key => key.startsWith("step:")).map(key => key.slice(5));
+      const fileIds = [...selectedDeleteIds].filter(key => key.startsWith("file:")).map(key => key.slice(5));
+      const fileLinkIds = [...selectedDeleteIds].filter(key => key.startsWith("file-link:")).map(key => key.slice(10));
+      const failedFileIds = [];
+      for (const fileId of fileIds) {
+        const response = await fetch(`/api/projects/${projectId}/files/${encodeURIComponent(fileId)}`, { method: "DELETE" });
+        if (!response.ok) failedFileIds.push(fileId);
+      }
       if (linkIds.length) updated.links = (updated.links || []).filter(link => !linkIds.includes(link.id));
       for (const stepId of stepIds) updated.steps = removeStepRecursive(updated.steps || [], stepId);
+      if (fileIds.length) updated.files = (updated.files || []).filter(file => !fileIds.includes(file.id) || failedFileIds.includes(file.id));
+      if (fileLinkIds.length) updated.file_links = (updated.file_links || []).filter(link => !fileLinkIds.includes(link.id));
       deleteMode = false;
       selectedDeleteIds.clear();
       updateDeleteToolbar();
       await saveProject(updated);
+      if (failedFileIds.length) notify("Some files could not be deleted.");
     }
 
     // Icon button + hidden input, meant to sit inline at the left of a name row
@@ -2182,7 +2250,9 @@
     function emptyStateHtml(kind, title, actionLabel, onclick) {
       const icon = kind === "tasks"
         ? `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.2 12 2.4 2.5 5.3-5.2"/></svg>`
-        : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 14.5 5-5M7.2 16.8l-1.1 1.1a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.8 7.2l1.1-1.1a3 3 0 0 1 4.2 4.2l-4 4a3 3 0 0 1-4.2 0"/></svg>`;
+        : kind === "files"
+          ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h7l5 5V20a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 5 20V5a1.5 1.5 0 0 1 1.5-1.5Z"/><path d="M13 3.5V9h5M8.5 13h7M8.5 16.5h5"/></svg>`
+          : `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 14.5 5-5M7.2 16.8l-1.1 1.1a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.8 7.2l1.1-1.1a3 3 0 0 1 4.2 4.2l-4 4a3 3 0 0 1-4.2 0"/></svg>`;
       return `<div class="empty-state"><div class="empty-state-icon">${icon}</div><strong>${escapeHtml(title)}</strong><button class="btn empty-action" type="button" onclick="${onclick}">${escapeHtml(actionLabel)}</button></div>`;
     }
 
@@ -2206,6 +2276,7 @@
       );
       const moveClass = moveState?.stepId === step.id ? " move-source" : moveState?.anchorId === step.id ? " move-target" : "";
       const deleteClass = deleteMode && selectedDeleteIds.has(`step:${step.id}`) ? " selected-for-delete" : "";
+      const deleteIndicator = deleteClass ? `<span class="delete-indicator" aria-hidden="true">${SWIPE_ICON_DELETE}</span>` : "";
       const childCount = (step.children || []).length;
       const childrenOpen = childCount && !collapsedStepIds.has(step.id);
       const clickHandler = deleteMode ? `toggleDeleteSelection(event, 'step:${step.id}')` : moveState ? `selectMoveTarget('${step.id}', event)` : childCount ? `toggleStepCollapse('${step.id}', event)` : "";
@@ -2214,7 +2285,7 @@
         : step.until_deadline
           ? `<div class="project-meta-line"><span class="meta-date">Until project deadline</span></div>`
           : "";
-      return `<div class="swipe-row" style="view-transition-name: s-${String(step.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(swipeActions)}<div class="step-item swipe-target${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-step-id="${escapeHtml(step.id)}" data-delete-key="step:${escapeHtml(step.id)}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}<div class="step-head">
+      return `<div class="swipe-row" style="view-transition-name: s-${String(step.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml(swipeActions)}<div class="step-item swipe-target${moveClass}${deleteClass}${childCount ? " is-collapsible" : ""}${childCount && !childrenOpen ? " is-collapsed" : ""}" data-step-id="${escapeHtml(step.id)}" data-delete-key="step:${escapeHtml(step.id)}" data-depth="${depth}" style="--tree-depth:${Math.min(depth, MAX_STEP_DEPTH)}" ${childCount ? `aria-expanded="${childrenOpen}"` : ""} ${clickHandler ? `onclick="${clickHandler}"` : ""}>${menu}${deleteIndicator}<div class="step-head">
         <input class="step-check" data-step-id="${escapeHtml(step.id)}" type="checkbox" ${step.done ? "checked" : ""} onclick="event.stopPropagation()" onchange="toggleStepDone('${step.id}', this.checked)" />
         <div class="step-main ${step.done ? "done-state" : ""}"><div class="step-title-row"><div class="step-title ${step.done ? "done" : ""}">${escapeHtml(normalizeDisplayText(step.title || "Untitled step"))}</div></div>${String(step.description || "").trim() ? `<div class="muted">${renderFormattedText(step.description, "", true)}</div>` : ""}
         </div>
@@ -2334,8 +2405,8 @@
       return "FILE";
     }
     function isImageFile(file) { return /^image\//.test(String(file.content_type || "")) || /\.(png|jpe?g|gif|webp|svg|avif)$/i.test(String(file.name || "")); }
-    function fileIconHtml(file, url) {
-      if (isImageFile(file)) return `<img class="file-image-preview" src="${escapeHtml(url)}" alt="">`;
+    function fileIconHtml(file, url, unavailable = false) {
+      if (isImageFile(file) && !unavailable) return `<img class="file-image-preview" src="${escapeHtml(url)}" alt="">`;
       const extension = (String(file.name || "").split(".").pop() || "file").toUpperCase().slice(0, 5);
       const label = extension === String(file.name || "").toUpperCase() ? "FILE" : extension;
       const type = fileTypeLabel(file);
@@ -2367,18 +2438,94 @@
         if (error.name !== "AbortError") notify("Could not share this file.");
       }
     }
+    function showOfflineFileUnavailable() {
+      confirmSheet({
+        title: "File unavailable offline",
+        message: "Files are not saved for offline use. Connect to the internet to open this file.",
+        cancelLabel: null
+      });
+    }
+    async function openProjectFile(ownerProjectId, fileId) {
+      const url = fileUrl(ownerProjectId, fileId);
+      if (!window.pmOffline?.offline()) { window.open(url, "_blank"); return; }
+      try {
+        const cache = await caches.open(FILE_CACHE_NAME);
+        if (await cache.match(url)) { window.open(url, "_blank"); return; }
+      } catch { }
+      showOfflineFileUnavailable();
+    }
+    function fileCacheMarker(ownerProjectId, fileId) { return `pm_file_cached_${ownerProjectId}_${fileId}`; }
+    function setFileCacheButton(button, cached) {
+      if (!button) return;
+      button.classList.toggle("is-cached", cached);
+      button.innerHTML = cached ? FILE_CACHE_ICON : FILE_NOT_CACHED_ICON;
+      button.setAttribute("aria-pressed", String(cached));
+      button.setAttribute("aria-label", cached ? "Remove offline copy" : "Make available offline");
+      button.title = cached ? "Available offline — remove copy" : "Make available offline";
+    }
+    async function refreshFileCacheStates() {
+      if (!("caches" in window)) return;
+      const buttons = [...app.querySelectorAll("[data-file-cache-url]")];
+      try {
+        const cache = await caches.open(FILE_CACHE_NAME);
+        await Promise.all(buttons.map(async button => {
+          const cached = !!(await cache.match(button.dataset.fileCacheUrl));
+          const marker = button.dataset.fileCacheMarker;
+          if (cached) localStorage.setItem(marker, "1"); else localStorage.removeItem(marker);
+          setFileCacheButton(button, cached);
+          if (window.pmOffline?.offline()) button.closest(".link-card")?.classList.toggle("file-unavailable", !cached);
+        }));
+      } catch { }
+    }
+    async function toggleFileOfflineCache(event, ownerProjectId, fileId) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!("caches" in window)) { notify("Offline file storage is unavailable in this browser."); return; }
+      const url = fileUrl(ownerProjectId, fileId);
+      const marker = fileCacheMarker(ownerProjectId, fileId);
+      const button = event.currentTarget;
+      try {
+        const cache = await caches.open(FILE_CACHE_NAME);
+        if (await cache.match(url)) {
+          await cache.delete(url);
+          localStorage.removeItem(marker);
+          setFileCacheButton(button, false);
+          notify("Offline copy removed.");
+          return;
+        }
+        if (window.pmOffline?.offline()) { notify("Connect to download this file for offline use."); return; }
+        const response = await fetch(url, { cache: "no-store" });
+        if (!response.ok) throw new Error("Could not download file");
+        await cache.put(url, response.clone());
+        localStorage.setItem(marker, "1");
+        setFileCacheButton(button, true);
+        notify("File is available offline.");
+      } catch {
+        notify("Could not save this file for offline use.");
+      }
+    }
     function renderFiles() {
       const ownFiles = (project.files || []).map(file => ({ ...file, ownerProjectId: project.id, ownerProjectName: "" }));
       const linkedFiles = (project.file_links || []).map(file => ({ ...file, id: file.source_file_id, ownerProjectId: file.source_project_id, ownerProjectName: file.source_project_name, linkId: file.id }));
       const files = [...ownFiles, ...linkedFiles];
-      if (!files.length) return emptyStateHtml("links", "No files yet", "Upload file", "openUploadFileModal()");
+      if (!files.length) return emptyStateHtml("files", "No files yet", "Upload file", "openUploadFileModal()");
+      const offline = !!window.pmOffline?.offline();
       return `<div class="links-grid">${files.map((file, index) => {
         const linked = !!file.linkId;
+        const selectionKey = linked ? `file-link:${file.linkId}` : `file:${file.id}`;
+        const selected = deleteMode && selectedDeleteIds.has(selectionKey);
         const deleteCall = linked ? `deleteFileLink('${file.linkId}')` : `deleteFile('${file.id}')`;
         const url = fileUrl(file.ownerProjectId, file.id);
-        const subtitle = `${fileTypeLabel(file)} · ${formatFileSize(file.size)}${linked && file.ownerProjectName ? ` · ${escapeHtml(file.ownerProjectName)}` : ""}`;
         const shareCall = `shareFile('${encodeURIComponent(file.ownerProjectId)}', '${encodeURIComponent(file.id)}', '${encodeURIComponent(file.name || "Document")}', '${encodeURIComponent(file.content_type || "")}')`;
-        return `<div class="swipe-row" style="view-transition-name: f-${String(file.linkId || file.id).replace(/[^a-zA-Z0-9-]/g, "")}">${swipeActionsHtml([{ label: "Share", className: "swipe-share", icon: SWIPE_ICON_SHARE, onclick: shareCall }, { label: linked ? "Remove" : "Delete", className: "swipe-delete", icon: SWIPE_ICON_DELETE, onclick: deleteCall }])}<div class="link-card swipe-target" onclick="window.open('${escapeHtml(url)}', '_blank')">${buildCardMenu(`file-menu-${index}`, [{ label: "Open", icon: SWIPE_ICON_ADD, onclick: `window.open('${url}', '_blank');` }, { label: "Share", icon: SWIPE_ICON_SHARE, onclick: shareCall }, { label: linked ? "Remove link" : "Delete", icon: SWIPE_ICON_DELETE, onclick: deleteCall, danger: true }])}<div class="link-icon">${fileIconHtml(file, url)}</div><div class="link-main"><div class="link-title">${escapeHtml(file.name || "Document")}</div><div class="link-subtitle">${subtitle}</div></div></div></div>`;
+        const marker = fileCacheMarker(file.ownerProjectId, file.id);
+        const cached = localStorage.getItem(marker) === "1";
+        const offlineUnavailable = offline && !cached;
+        const subtitle = offlineUnavailable ? "Unavailable offline" : `${fileTypeLabel(file)} · ${formatFileSize(file.size)}${linked && file.ownerProjectName ? ` · ${escapeHtml(file.ownerProjectName)}` : ""}`;
+        const cacheButton = deleteMode ? "" : `<button class="file-cache-toggle${cached ? " is-cached" : ""}" type="button" data-file-cache-url="${escapeHtml(url)}" data-file-cache-marker="${escapeHtml(marker)}" onclick="toggleFileOfflineCache(event, '${escapeHtml(file.ownerProjectId)}', '${escapeHtml(file.id)}')" aria-pressed="${cached}" aria-label="${cached ? "Remove offline copy" : "Make available offline"}" title="${cached ? "Available offline — remove copy" : "Make available offline"}">${cached ? FILE_CACHE_ICON : FILE_NOT_CACHED_ICON}</button>`;
+        const actions = offline ? "" : swipeActionsHtml([{ label: "Share", className: "swipe-share", icon: SWIPE_ICON_SHARE, onclick: shareCall }, { label: linked ? "Remove" : "Delete", className: "swipe-delete", icon: SWIPE_ICON_DELETE, onclick: deleteCall }]);
+        const menu = offline ? "" : buildCardMenu(`file-menu-${index}`, [{ label: "Open", icon: SWIPE_ICON_ADD, onclick: `window.open('${url}', '_blank');` }, { label: "Share", icon: SWIPE_ICON_SHARE, onclick: shareCall }, { label: linked ? "Remove link" : "Delete", icon: SWIPE_ICON_DELETE, onclick: deleteCall, danger: true }]);
+        const click = deleteMode ? `toggleDeleteSelection(event, '${selectionKey}')` : `openProjectFile('${escapeHtml(file.ownerProjectId)}', '${escapeHtml(file.id)}')`;
+        return `<div class="swipe-row" style="view-transition-name: f-${String(file.linkId || file.id).replace(/[^a-zA-Z0-9-]/g, "")}">${actions}<div class="link-card file-row swipe-target${offlineUnavailable ? " file-unavailable" : ""}${selected ? " selected-for-delete" : ""}" data-delete-key="${escapeHtml(selectionKey)}" onclick="${click}">${menu}${cacheButton}${selected ? `<span class="delete-indicator" aria-hidden="true">${SWIPE_ICON_DELETE}</span>` : ""}<div class="link-icon">${fileIconHtml(file, url, offlineUnavailable)}</div><div class="link-main"><div class="link-title">${escapeHtml(file.name || "Document")}</div><div class="link-subtitle">${subtitle}</div></div></div></div>`;
       }).join("")}</div>`;
     }
 
@@ -2396,6 +2543,7 @@
       <section data-section="files" class="content-section${collapsedSections.has("files") ? " is-collapsed" : ""}">${sectionHeader("files", "Files")}<div class="section-body">${renderFiles()}</div></section>
       <section data-section="tasks" class="content-section steps-section${stepsMenuOpen ? " has-open-menu" : ""}${collapsedSections.has("tasks") ? " is-collapsed" : ""}" ${moveState ? `onclick="selectMoveTarget(null, event)"` : ""}>${sectionHeader("tasks", "Tasks", hasDoneTasks && !moveState && !deleteMode ? `<button class="section-action" type="button" aria-pressed="${hideCompletedSteps}" onclick="toggleCompletedSteps(event)">${hideCompletedSteps ? "Show done" : "Hide done"}</button>` : "")}<div class="section-body">${renderStepTree(project.steps)}</div></section>`;
       if (window.pmOffline?.offline()) document.querySelectorAll("[data-requires-online]").forEach(button => { button.disabled = true; button.title = "Unavailable while offline"; });
+      refreshFileCacheStates();
       if (moveState) {
         const anchor = moveState.anchorId ? findStepAndParent(project.steps || [], moveState.anchorId)?.step : null;
         const source = findStepAndParent(project.steps || [], moveState.stepId)?.step;
@@ -2710,6 +2858,9 @@
     window.deleteFile = deleteFile;
     window.deleteFileLink = deleteFileLink;
     window.shareFile = shareFile;
+    window.showOfflineFileUnavailable = showOfflineFileUnavailable;
+    window.openProjectFile = openProjectFile;
+    window.toggleFileOfflineCache = toggleFileOfflineCache;
     window.openAddStepModal = openAddStepModal;
     window.openAddSubStepModal = openAddSubStepModal;
     window.toggleStepCollapse = toggleStepCollapse;
