@@ -1,11 +1,11 @@
-const SHELL_CACHE = "project-manager-shell-v2";
+const SHELL_CACHE = "project-manager-shell-v3";
 const OFFLINE_API_CACHE = "project-manager-api-v2";
 const SHELL_ASSETS = [
   "/",
   "/project",
   "/site.webmanifest?v=1",
-  "/static/app-shell.css?v=38",
-  "/static/app-shell.js?v=13",
+  "/static/app-shell.css?v=39",
+  "/static/app-shell.js?v=14",
   "/static/offline-data.js?v=1",
   "/static/iconify-catalog.js?v=1",
   "/static/icon-192.png?v=4",

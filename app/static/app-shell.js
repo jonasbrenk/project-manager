@@ -433,7 +433,7 @@ function pmInitOfflineStatus() {
   let probeTimer = null;
   let probeToken = 0;
 
-  const offlineIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.7 5.2A12.2 12.2 0 0 1 12 5c5.5 0 9.7 4.7 10 7-.6 1.1-1.5 2.2-2.5 3.1M6.3 6.3A13.2 13.2 0 0 0 2 12c.8 1.6 2.1 3 3.7 4.1M9.5 12.2a4 4 0 0 1 5.1.2M12 19h.01"/></svg><span class="sr-only">Offline</span>`;
+  const offlineIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.8a15.5 15.5 0 0 1 5.5-3.2M9.8 4.5A15.7 15.7 0 0 1 22 8.8M4.7 12.5a10.8 10.8 0 0 1 2.1-1.3M10.1 10.2a10.8 10.8 0 0 1 9.2 2.3M8 16.3a5.4 5.4 0 0 1 1.2-.8M12.4 15a5.3 5.3 0 0 1 3.6 1.3M12 20h.01"/><path d="M3 3l18 18"/></svg><span class="sr-only">Offline</span>`;
   const onlineIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.1a12.1 12.1 0 0 1 16 0M6.8 12.1a8 8 0 0 1 10.4 0M9.7 15.2a4 4 0 0 1 4.6 0M12 19.2h.01"/></svg><span class="sr-only">Back online</span>`;
 
   const update = nextOffline => {
