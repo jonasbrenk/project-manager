@@ -433,6 +433,8 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 .project-offline-cache svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .project-offline-cache.is-unavailable { color: var(--muted); opacity: .34; filter: grayscale(1); }
+.project-card.is-offline-unavailable { opacity: .58; cursor: not-allowed; }
+.project-card.is-offline-unavailable::after { content: "Not saved offline"; position: absolute; right: 12px; bottom: 10px; color: var(--muted); font-size: .7rem; font-weight: 650; }
 
 .hide-toggle {
   position: absolute; top: 12px; right: 12px;
@@ -1164,11 +1166,12 @@ function renderProjects() {
   const renderCard = (p) => {
     const isVisible = visibilityMode ? selectedProjectIds.has(p.id) : !hiddenIds.has(p.id);
     const swipeable = !deleteMode && !visibilityMode;
+    const offlineUnavailable = document.documentElement.hasAttribute("data-offline") && !localStorage.getItem(`pm_project_${p.id}`);
     return `
       <div class="swipe-row" style="view-transition-name: p-${String(p.id).replace(/[^a-zA-Z0-9-]/g, "")}">
       ${swipeable ? `<div class="swipe-actions"><button class="swipe-btn swipe-hide" type="button" aria-label="${hiddenIds.has(p.id) ? "Show" : "Hide"}" title="${hiddenIds.has(p.id) ? "Show" : "Hide"}" onclick="swipeToggleHidden(event, '${p.id}')">${hiddenIds.has(p.id) ? SWIPE_ICON_SHOW : SWIPE_ICON_HIDE}<span>${hiddenIds.has(p.id) ? "Show" : "Hide"}</span></button><button class="swipe-btn swipe-delete" type="button" aria-label="Delete" title="Delete" onclick="swipeDelete(event, '${p.id}')">${SWIPE_ICON_DELETE}<span>Delete</span></button></div>` : ""}
-      <${deleteMode || visibilityMode ? "button" : "a"} class="project-card swipe-target${p.finished ? " is-finished" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" data-project-id="${escapeHtml(p.id)}" ${deleteMode || visibilityMode ? `type="button" aria-pressed="${deleteMode ? selectedProjectIds.has(p.id) : isVisible}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : `togglePendingVisibility(event, '${p.id}')`}"` : `href="/project?id=${encodeURIComponent(p.id)}"`}>
-        ${document.documentElement.hasAttribute("data-offline") ? `<span class="project-offline-cache is-unavailable" data-project-cache-id="${escapeHtml(p.id)}" role="img" aria-label="Project is not saved offline" title="Not saved offline">${OFFLINE_CACHE_ICON}</span>` : ""}
+      <${deleteMode || visibilityMode ? "button" : "a"} class="project-card swipe-target${p.finished ? " is-finished" : ""}${offlineUnavailable ? " is-offline-unavailable" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" data-project-id="${escapeHtml(p.id)}" ${deleteMode || visibilityMode ? `type="button" aria-pressed="${deleteMode ? selectedProjectIds.has(p.id) : isVisible}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : `togglePendingVisibility(event, '${p.id}')`}"` : `href="/project?id=${encodeURIComponent(p.id)}" aria-disabled="${offlineUnavailable}"`}>
+        ${document.documentElement.hasAttribute("data-offline") ? `<span class="project-offline-cache${offlineUnavailable ? " is-unavailable" : ""}" data-project-cache-id="${escapeHtml(p.id)}" role="img" aria-label="${offlineUnavailable ? "Project is not saved offline" : "Saved for offline use"}" title="${offlineUnavailable ? "Not saved offline" : "Saved for offline use"}">${OFFLINE_CACHE_ICON}</span>` : ""}
         <div class="project-icon">
           ${renderIcon(p.icon, "📌", p.name)}
         </div>
@@ -1215,11 +1218,14 @@ async function updateOfflineProjectCacheStates() {
   if (!document.documentElement.hasAttribute("data-offline") || !("caches" in window)) return;
   const indicators = [...document.querySelectorAll("[data-project-cache-id]")];
   try {
-    const cache = await caches.open("project-manager-api-v1");
+    const cache = await caches.open("project-manager-api-v2");
     await Promise.all(indicators.map(async indicator => {
       const id = indicator.dataset.projectCacheId;
       const localCopy = localStorage.getItem(`pm_project_${id}`);
       const cached = !!localCopy || !!(await cache.match(`/api/projects/${encodeURIComponent(id)}`));
+      const card = indicator.closest(".project-card");
+      card?.classList.toggle("is-offline-unavailable", !cached);
+      card?.setAttribute("aria-disabled", String(!cached));
       indicator.classList.toggle("is-unavailable", !cached);
       indicator.setAttribute("aria-label", cached ? "Saved for offline use" : "Project is not saved offline");
       indicator.title = cached ? "Saved for offline use" : "Not saved offline";
@@ -1362,6 +1368,15 @@ function rememberProjectNavigation(event) {
   try { sessionStorage.setItem("pm_project_loading_summary", JSON.stringify(project)); } catch { }
 }
 
+function blockUnavailableOfflineProject(event) {
+  if (!document.documentElement.hasAttribute("data-offline")) return;
+  const card = event.target.closest("a.project-card[data-project-id]");
+  if (!card || !card.classList.contains("is-offline-unavailable")) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  confirmSheet({ title: "Project not saved offline", message: "Open this project once while connected to save it on this device.", cancelLabel: null });
+}
+
     projectForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const rawIcon = projectForm.icon.value.trim() || DEFAULT_PROJECT_ICON;
@@ -1419,6 +1434,7 @@ function rememberProjectNavigation(event) {
     settingsBackdrop?.addEventListener("click", (event) => { if (event.target === settingsBackdrop) closeSettingsModal(); });
     createProjectBackdrop?.addEventListener("click", (event) => { if (event.target === createProjectBackdrop) closeCreateProjectModal(); });
     document.addEventListener("click", () => { closeFloatingActions(); closeManagementActions(); });
+    document.addEventListener("click", blockUnavailableOfflineProject, true);
     document.addEventListener("click", rememberProjectNavigation, true);
     window.addEventListener("pmconnectionchange", () => renderProjects());
     document.addEventListener("keydown", (event) => {

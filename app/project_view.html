@@ -2635,8 +2635,14 @@
         const cached = JSON.parse(localStorage.getItem(`pm_project_${projectId}`) || "null");
         if (cached?.id === projectId) { project = cached; render(); }
       } catch { }
+      if (window.pmOffline?.offline()) {
+        if (!project) {
+          loadingState.className = "card";
+          loadingState.textContent = "This project is not saved offline. Connect once to open it.";
+        }
+        return;
+      }
       if (!project) renderProjectLoadingSkeleton(navigationSummary());
-      if (window.pmOffline?.offline()) return;
       try {
         project = await api(`/api/projects/${projectId}`);
         try { localStorage.setItem(`pm_project_${projectId}`, JSON.stringify(project)); } catch { }
