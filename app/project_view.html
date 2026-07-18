@@ -2308,9 +2308,28 @@
     }
     function openStepEditor(stepId) { const found = findStepAndParent(project.steps || [], stepId); if (!found) return; openModal("Edit step", stepFormHtml(found.step, "Save"), async (formData) => { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, title: String(formData.get("title") || "").trim(), description: String(formData.get("description") || "").trim(), deadline: parseDateSafe(formData.get("deadline")) })); await saveProject(updated); }); }
 
-    async function toggleStepDone(stepId, done) { const updated = deepClone(project); updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, done })); await saveProject(updated); }
+    function renderPreservingScroll() {
+      const scroller = document.getElementById("appScroll");
+      const scrollTop = scroller?.scrollTop;
+      render();
+      if (scrollTop == null) return;
+      const restoreScroll = () => { scroller.scrollTop = scrollTop; };
+      restoreScroll();
+      requestAnimationFrame(restoreScroll);
+    }
+    async function toggleStepDone(stepId, done) {
+      const updated = deepClone(project);
+      updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, done }));
+      project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updated) });
+      cacheProjectState(project);
+      renderPreservingScroll();
+    }
     async function deleteStep(stepId) { if (!(await confirmSheet({ title: "Delete Task?", message: "Sub-tasks will be deleted too.", confirmLabel: "Delete", destructive: true }))) return; const updated = deepClone(project); updated.steps = removeStepRecursive(updated.steps || [], stepId); await saveProject(updated); }
-    async function toggleFinished() { project = await api(`/api/projects/${projectId}/finish`, { method: "PATCH", body: JSON.stringify({ finished: !project.finished }) }); cacheProjectState(project); window.pmAnimate(render); }
+    async function toggleFinished() {
+      project = await api(`/api/projects/${projectId}/finish`, { method: "PATCH", body: JSON.stringify({ finished: !project.finished }) });
+      cacheProjectState(project);
+      renderPreservingScroll();
+    }
     async function deleteProject() { if (!(await confirmSheet({ title: "Delete Project?", message: "This permanently deletes the project, its links, and all tasks.", confirmLabel: "Delete", destructive: true }))) return; await api(`/api/projects/${projectId}`, { method: "DELETE" }); try { localStorage.removeItem(`pm_project_${projectId}`); const summaries = JSON.parse(localStorage.getItem("pm_project_summaries") || "null"); if (Array.isArray(summaries)) localStorage.setItem("pm_project_summaries", JSON.stringify(summaries.filter(summary => summary.id !== projectId))); } catch { } location.href = "/"; }
     async function loadProject() {
       if (!projectId) { loadingState.textContent = "No project selected."; return; }
