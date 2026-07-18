@@ -1531,7 +1531,7 @@
     window.pmSwipeDisabled = () => deleteMode || !!moveState;
 
     function swipeActionsHtml(actions) {
-      return `<div class="swipe-actions">${actions.map(action => `<button class="swipe-btn ${action.className}" type="button" onclick="event.stopPropagation(); window.pmSwipeClose?.(); ${action.onclick}">${action.icon}<span>${escapeHtml(action.label)}</span></button>`).join("")}</div>`;
+      return `<div class="swipe-actions${actions.length >= 4 ? " swipe-actions-grid" : ""}">${actions.map(action => `<button class="swipe-btn ${action.className}" type="button" onclick="event.stopPropagation(); window.pmSwipeClose?.(); ${action.onclick}">${action.icon}<span>${escapeHtml(action.label)}</span></button>`).join("")}</div>`;
     }
 
     function editDeleteSwipeActions(editCall, deleteCall) {

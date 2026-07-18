@@ -554,9 +554,7 @@ input:focus, textarea:focus {
 
 .swipe-actions {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0 0 0 auto;
   display: flex;
   z-index: 0;
   opacity: 0;
@@ -574,7 +572,9 @@ input:focus, textarea:focus {
 
 .swipe-btn {
   width: 68px;
-  min-height: 100%;
+  min-height: 0;
+  height: 100%;
+  box-sizing: border-box;
   padding: 7px 4px;
   border: 0;
   color: #fff;
@@ -600,6 +600,27 @@ input:focus, textarea:focus {
 
 .swipe-actions { border-radius: inherit; overflow: hidden; }
 
+/* Four task actions would otherwise need 272px of horizontal space. Keep them
+   within a compact 2×2 tray while the two-action menus retain their larger
+   side-by-side targets. */
+.swipe-actions.swipe-actions-grid {
+  width: 136px;
+  display: grid;
+  grid-template-columns: repeat(2, 68px);
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.swipe-actions-grid .swipe-btn {
+  width: auto;
+  min-height: 0;
+  height: auto;
+  padding: 4px 3px;
+  gap: 2px;
+  font-size: .58rem;
+}
+
+.swipe-actions-grid .swipe-btn svg { width: 16px; height: 16px; }
+
 .swipe-row .swipe-target {
   position: relative;
   z-index: 1;
@@ -608,7 +629,13 @@ input:focus, textarea:focus {
   touch-action: pan-y;
 }
 
-.swipe-row.dragging .swipe-target { transition: border-color .15s, background-color .15s; }
+.swipe-row.dragging .swipe-target {
+  /* `swipe-preparing` deliberately supplies the release animation. Override
+     it while the finger is down so every pointer position maps 1:1 to the
+     foreground; otherwise slow drags chase their own spring and visibly jitter. */
+  transition: none !important;
+  will-change: transform;
+}
 
 /* Every list uses the same swipe composition: a solid foreground tile moves
    over a solid tray. This avoids the one-frame button shimmer caused by
@@ -626,6 +653,8 @@ input:focus, textarea:focus {
   -webkit-backdrop-filter: none;
   transition: transform .3s var(--spring);
 }
+
+.swipe-row:not(.dragging) .swipe-target { will-change: auto; }
 
 /* Open context menus must escape the row's clipping */
 .swipe-row:has(.card-menu.show) { overflow: visible; z-index: 130; }
