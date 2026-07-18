@@ -1,7 +1,5 @@
 .git
 .gitignore
-.codex
-.agents
 .venv
 __pycache__
 *.py[cod]
