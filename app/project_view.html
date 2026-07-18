@@ -1133,6 +1133,26 @@
       color: var(--muted)
     }
 
+    .project-loading-spinner {
+      min-height: 180px;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      gap: 14px;
+    }
+
+    .project-loading-spinner::before {
+      content: "";
+      width: 30px;
+      height: 30px;
+      border: 3px solid var(--line);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: project-loading-spin .75s linear infinite;
+    }
+
+    @keyframes project-loading-spin { to { transform: rotate(360deg); } }
+
     #modalForm {
       display: flex;
       flex-direction: column;
@@ -2620,14 +2640,9 @@
         return summary?.id === projectId ? summary : null;
       } catch { return null; }
     }
-    function renderProjectLoadingSkeleton(summary = null) {
-      const name = escapeHtml(normalizeDisplayText(summary?.name || "Loading project"));
-      const icon = summary ? renderIcon(summary.icon, "📌", summary.name || "project icon") : "<span class=\"skeleton-block skeleton-icon\"></span>";
-      const description = summary?.description ? `<p class=\"project-loading-description\">${escapeHtml(normalizeDisplayText(summary.description))}</p>` : `<span class=\"skeleton-block skeleton-copy\"></span><span class=\"skeleton-block skeleton-copy short\"></span>`;
-      loadingState.className = "project-loading-layout";
-      const linkRow = `<div class=\"link-card project-loading-row\"><span class=\"skeleton-block skeleton-row-icon\"></span><div class=\"project-loading-row-copy\"><span class=\"skeleton-block skeleton-row-title\"></span><span class=\"skeleton-block skeleton-row-subtitle\"></span></div></div>`;
-      const taskRow = `<div class=\"step-item project-loading-row\"><span class=\"skeleton-block skeleton-check\"></span><div class=\"project-loading-row-copy\"><span class=\"skeleton-block skeleton-row-title\"></span><span class=\"skeleton-block skeleton-row-subtitle\"></span></div></div>`;
-      loadingState.innerHTML = `<section class=\"card hero project-hero project-hero-skeleton\" aria-busy=\"true\"><div class=\"hero-head\"><div class=\"hero-title-wrap\"><div class=\"hero-icon\">${icon}</div><div class=\"hero-copy\"><h1 class=\"project-title\">${name}</h1><span class=\"skeleton-block skeleton-meta\"></span></div></div><div class=\"project-hero-actions\"><span class=\"skeleton-block skeleton-action\"></span><span class=\"skeleton-block skeleton-action\"></span></div></div><div class=\"project-loading-copy\">${description}</div></section><section class=\"content-section project-section-skeleton\" aria-hidden=\"true\"><div class=\"section-head\"><h2 class=\"section-title\">Links</h2></div><div class=\"section-body project-loading-rows\">${linkRow}${linkRow}</div></section><section class=\"content-section project-section-skeleton\" aria-hidden=\"true\"><div class=\"section-head\"><h2 class=\"section-title\">Files</h2></div><div class=\"section-body project-loading-rows\">${linkRow}</div></section><section class=\"content-section steps-section project-section-skeleton\" aria-hidden=\"true\"><div class=\"section-head\"><h2 class=\"section-title\">Tasks</h2></div><div class=\"section-body project-loading-rows\">${taskRow}${taskRow}</div></section>`;
+    function renderProjectLoading() {
+      loadingState.className = "card";
+      loadingState.innerHTML = `<div class="project-loading-spinner" role="status" aria-live="polite"><span>Loading project…</span></div>`;
     }
     async function loadProject() {
       if (!projectId) { loadingState.textContent = "No project selected."; return; }
@@ -2642,7 +2657,7 @@
         }
         return;
       }
-      if (!project) renderProjectLoadingSkeleton(navigationSummary());
+      if (!project) renderProjectLoading();
       try {
         project = await api(`/api/projects/${projectId}`);
         try { localStorage.setItem(`pm_project_${projectId}`, JSON.stringify(project)); } catch { }
