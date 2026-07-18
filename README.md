@@ -2,7 +2,7 @@
 
 A self-hosted, mobile-first project manager with an iOS-style interface. Organize projects with deadlines, nested tasks (up to three levels), web links, and cross-references between projects. Light and dark themes follow the system preference.
 
-Built with Flask and vanilla JavaScript — no frontend framework, no database. Data lives in a single JSON file on the host.
+Built with Flask and vanilla JavaScript, no frontend framework, no database. Data lives in a single JSON file on the host.
 
 ## Run locally
 
@@ -18,7 +18,7 @@ Open <http://localhost:5000>. The script builds the image and starts the contain
 ./down.sh
 ```
 
-After changing any code, run `./up.sh` again — the app is baked into the image, so a rebuild is needed for changes to take effect.
+After changing any code, run `./up.sh` again: the app is baked into the image, so a rebuild is needed for changes to take effect.
 
 ### Useful commands
 
@@ -29,7 +29,7 @@ docker compose ps          # container status and health
 
 ## Data
 
-All projects are stored in `app/data/projects.json`, bind-mounted into the container. The file stays on the host — it survives rebuilds and is not committed to Git. Back it up by copying that one file.
+All projects are stored in `app/data/projects.json`, bind-mounted into the container. The file stays on the host: it survives rebuilds and is not committed to Git. Back it up by copying that one file.
 
 ## Tests
 
