@@ -100,6 +100,8 @@ def read_data() -> dict[str, Any]:
         data = json.load(f)
     if not isinstance(data, dict) or not isinstance(data.get("projects"), list):
         raise ValueError("Project data has an invalid structure")
+    if not isinstance(data.get("deleted_items"), list):
+        data["deleted_items"] = []
     return data
 
 
@@ -186,6 +188,74 @@ def summarize_project(project: dict[str, Any]) -> dict[str, Any]:
 
 def find_project(data: dict[str, Any], project_id: str) -> dict[str, Any] | None:
     return next((p for p in data["projects"] if p["id"] == project_id), None)
+
+
+def walk_steps(steps: list[dict[str, Any]], parent_id: str | None = None):
+    for index, step in enumerate(steps):
+        yield step, parent_id, index
+        yield from walk_steps(step.get("children") or [], step.get("id"))
+
+
+def find_step(steps: list[dict[str, Any]], step_id: str) -> dict[str, Any] | None:
+    for step, _, _ in walk_steps(steps):
+        if step.get("id") == step_id:
+            return step
+    return None
+
+
+def add_deleted_item(data: dict[str, Any], item_type: str, item: dict[str, Any], **context: Any) -> None:
+    deleted_items = data.setdefault("deleted_items", [])
+    deleted_items.append({
+        "id": uuid4().hex,
+        "type": item_type,
+        "item": deepcopy(item),
+        "deleted_at": utc_now_iso(),
+        **context,
+    })
+    data["deleted_items"] = deleted_items[-50:]
+
+
+def archive_removed_items(data: dict[str, Any], current: dict[str, Any], updated: dict[str, Any]) -> None:
+    updated_link_ids = {link.get("id") for link in updated.get("links", [])}
+    for index, link in enumerate(current.get("links", [])):
+        if link.get("id") not in updated_link_ids:
+            add_deleted_item(data, "link", link, project_id=current["id"], project_name=current.get("name", "Project"), index=index)
+
+    updated_step_ids = {step.get("id") for step, _, _ in walk_steps(updated.get("steps", []))}
+    for step, parent_id, index in walk_steps(current.get("steps", [])):
+        if step.get("id") in updated_step_ids or parent_id not in updated_step_ids and parent_id is not None:
+            continue
+        add_deleted_item(
+            data,
+            "task",
+            step,
+            project_id=current["id"],
+            project_name=current.get("name", "Project"),
+            parent_id=parent_id,
+            index=index,
+        )
+
+
+def deleted_item_summary(record: dict[str, Any]) -> dict[str, Any]:
+    item = record.get("item") or {}
+    item_type = record.get("type")
+    if item_type == "project":
+        title = item.get("name", "Untitled Project")
+        icon = item.get("icon", "📌")
+    elif item_type == "link":
+        title = item.get("title", "Untitled Link")
+        icon = item.get("icon", "🔗")
+    else:
+        title = item.get("title", "Untitled Task")
+        icon = "✓"
+    return {
+        "id": record.get("id"),
+        "type": item_type,
+        "title": title,
+        "icon": icon,
+        "project_name": record.get("project_name"),
+        "deleted_at": record.get("deleted_at"),
+    }
 
 
 def sanitize_link(link: dict[str, Any]) -> dict[str, Any]:
@@ -289,6 +359,7 @@ def update_project(project_id: str):
         return jsonify({"error": "Project not found"}), 404
 
     updated = sanitize_project(payload, current=project)
+    archive_removed_items(data, project, updated)
     index = data["projects"].index(project)
     data["projects"][index] = updated
     write_data(data)
@@ -316,7 +387,71 @@ def delete_project(project_id: str):
     if not project:
         return jsonify({"error": "Project not found"}), 404
 
+    add_deleted_item(data, "project", project, index=data["projects"].index(project))
     data["projects"] = [p for p in data["projects"] if p["id"] != project_id]
+    write_data(data)
+    return jsonify({"ok": True})
+
+
+@app.get("/api/deleted-items")
+def get_deleted_items():
+    data = read_data()
+    items = sorted(data["deleted_items"], key=lambda record: record.get("deleted_at", ""), reverse=True)
+    return jsonify([deleted_item_summary(item) for item in items])
+
+
+@app.post("/api/deleted-items/<deleted_id>/restore")
+def restore_deleted_item(deleted_id: str):
+    data = read_data()
+    record = next((item for item in data["deleted_items"] if item.get("id") == deleted_id), None)
+    if not record:
+        return jsonify({"error": "Deleted item not found"}), 404
+
+    item = deepcopy(record.get("item") or {})
+    item_type = record.get("type")
+    destination: list[dict[str, Any]] | None = None
+
+    if item_type == "project":
+        if find_project(data, item.get("id", "")):
+            return jsonify({"error": "A project with this identity already exists"}), 409
+        destination = data["projects"]
+    else:
+        project = find_project(data, record.get("project_id", ""))
+        if not project:
+            return jsonify({"error": "The original project no longer exists"}), 409
+        if item_type == "link":
+            if any(link.get("id") == item.get("id") for link in project.get("links", [])):
+                return jsonify({"error": "This link already exists"}), 409
+            destination = project.setdefault("links", [])
+        elif item_type == "task":
+            if find_step(project.get("steps", []), item.get("id", "")):
+                return jsonify({"error": "This task already exists"}), 409
+            parent_id = record.get("parent_id")
+            if parent_id:
+                parent = find_step(project.get("steps", []), parent_id)
+                if not parent:
+                    return jsonify({"error": "The original parent task no longer exists"}), 409
+                destination = parent.setdefault("children", [])
+            else:
+                destination = project.setdefault("steps", [])
+        else:
+            return jsonify({"error": "Unsupported deleted item"}), 400
+
+        project["updated_at"] = utc_now_iso()
+
+    insert_at = max(0, min(int(record.get("index", len(destination))), len(destination)))
+    destination.insert(insert_at, item)
+    data["deleted_items"] = [entry for entry in data["deleted_items"] if entry.get("id") != deleted_id]
+    write_data(data)
+    return jsonify({"ok": True})
+
+
+@app.delete("/api/deleted-items/<deleted_id>")
+def permanently_delete_item(deleted_id: str):
+    data = read_data()
+    if not any(item.get("id") == deleted_id for item in data["deleted_items"]):
+        return jsonify({"error": "Deleted item not found"}), 404
+    data["deleted_items"] = [item for item in data["deleted_items"] if item.get("id") != deleted_id]
     write_data(data)
     return jsonify({"ok": True})
 

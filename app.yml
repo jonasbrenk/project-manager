@@ -1,0 +1,15 @@
+name: Project Manager
+description: Personal project planning workspace
+icon: app/static/icon-192.png
+port: 5000
+host: 127.0.0.1
+commands:
+  start: ./up.sh
+  stop: ./down.sh
+open:
+  path: /
+  protocol: http
+health:
+  path: /
+  expected_status: 200
+  startup_timeout_seconds: 45

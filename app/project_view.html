@@ -775,7 +775,7 @@
       right: 18px;
       left: 18px;
       bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-      z-index: 130;
+      z-index: 135;
 
       display: flex;
       gap: 8px;
@@ -1479,18 +1479,20 @@
 
   <script>
     const DEFAULT_STANDARD_ICONS = [
-      { label: "Folder", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png", removable: false },
-      { label: "Document", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c4.png", removable: false },
-      { label: "Graduation", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f393.png", removable: false },
-      { label: "Rocket", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f680.png", removable: false },
-      { label: "Code", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4bb.png", removable: false },
-      { label: "Chart", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4ca.png", removable: false },
-      { label: "Link", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f517.png", removable: false },
-      { label: "Palette", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f3a8.png", removable: false },
-      { label: "Calendar", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c5.png", removable: false },
-      { label: "Target", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f3af.png", removable: false }
+      { label: "Folder", value: "https://api.iconify.design/lucide/folder.svg", removable: false },
+      { label: "Document", value: "https://api.iconify.design/lucide/file-text.svg", removable: false },
+      { label: "Education", value: "https://api.iconify.design/lucide/graduation-cap.svg", removable: false },
+      { label: "Launch", value: "https://api.iconify.design/lucide/rocket.svg", removable: false },
+      { label: "Code", value: "https://api.iconify.design/lucide/code-2.svg", removable: false },
+      { label: "Analytics", value: "https://api.iconify.design/lucide/chart-no-axes-column-increasing.svg", removable: false },
+      { label: "Link", value: "https://api.iconify.design/lucide/link.svg", removable: false },
+      { label: "Design", value: "https://api.iconify.design/lucide/palette.svg", removable: false },
+      { label: "Calendar", value: "https://api.iconify.design/lucide/calendar-days.svg", removable: false },
+      { label: "Goal", value: "https://api.iconify.design/lucide/crosshair.svg", removable: false }
     ];
+    const LEGACY_STANDARD_ICON_VALUES = new Set(["1f4c1", "1f4c4", "1f393", "1f680", "1f4bb", "1f4ca", "1f517", "1f3a8", "1f4c5", "1f3af"].map(code => `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${code}.png`));
     const STANDARD_ICONS_STORAGE_KEY = "project_manager_standard_icons";
+    const DEFAULT_PROJECT_ICON = "/static/icon-placeholder.svg";
     const THEME_STORAGE_KEY = "pm_theme_mode";
     let STANDARD_ICONS = loadStandardIcons();
     const projectId = new URLSearchParams(location.search).get("id");
@@ -1549,12 +1551,12 @@
       return Math.random().toString(36).slice(2) + Date.now().toString(36);
     }
 
-    function loadStandardIcons() { try { const saved = JSON.parse(localStorage.getItem(STANDARD_ICONS_STORAGE_KEY) || "null"); if (Array.isArray(saved) && saved.length) return saved; } catch { } return [...DEFAULT_STANDARD_ICONS]; }
+    function loadStandardIcons() { try { const saved = JSON.parse(localStorage.getItem(STANDARD_ICONS_STORAGE_KEY) || "null"); if (Array.isArray(saved) && saved.length) return [...DEFAULT_STANDARD_ICONS, ...saved.filter(icon => !LEGACY_STANDARD_ICON_VALUES.has(String(icon?.value || "").trim()) && !DEFAULT_STANDARD_ICONS.some(defaultIcon => defaultIcon.value === icon?.value))]; } catch { } return [...DEFAULT_STANDARD_ICONS]; }
     function saveStandardIcons() { localStorage.setItem(STANDARD_ICONS_STORAGE_KEY, JSON.stringify(STANDARD_ICONS)); }
     function addToStandardIcons(iconValue, label = "Custom") { const value = String(iconValue || "").trim(); if (!value) return; if (STANDARD_ICONS.some(icon => String(icon.value).trim() === value)) return; STANDARD_ICONS.unshift({ label: String(label || "Custom").trim() || "Custom", value, removable: true }); saveStandardIcons(); }
     function escapeHtml(value = "") { return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;"); }
     function normalizeDisplayText(value = "") { return String(value).replaceAll("-->", "→"); }
-    function isImageUrl(value = "") { const v = String(value).trim(); return /^https?:\/\//i.test(v) && /\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(v); }
+    function isImageUrl(value = "") { const v = String(value).trim(); return /^(?:https?:\/\/|\/static\/).+\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(v); }
     function formatLinkDestination(value = "") { try { return new URL(String(value), window.location.origin).hostname.replace(/^www\./i, "") || "Link"; } catch { return String(value).replace(/^https?:\/\//i, "").split("/")[0] || "Link"; } }
     function renderIcon(icon, fallback = "📌", alt = "icon") { const value = String(icon || "").trim(); return isImageUrl(value) ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(alt)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;" />` : escapeHtml(value || fallback); }
     function notify(message) {
@@ -1798,7 +1800,9 @@
     function canPlaceStepAt(source, targetParentId) { const parentDepth = targetParentId == null ? -1 : getStepDepth(project.steps || [], targetParentId); return parentDepth != null && parentDepth + 1 + getSubtreeDepth(source) <= MAX_STEP_DEPTH; }
     function toggleStepCollapse(stepId, event) { event?.stopPropagation(); if (collapsedStepIds.has(stepId)) collapsedStepIds.delete(stepId); else collapsedStepIds.add(stepId); window.pmAnimate(render); }
     function hasCompletedSteps(steps) { return (steps || []).some(step => step.done || hasCompletedSteps(step.children || [])); }
-    function renderTaskVisibilityChange() { window.pmAnimate(render); }
+    // View-transition snapshots live above sticky content in WebKit. A direct
+    // render keeps the persistent header as the topmost layer while rows change.
+    function renderTaskVisibilityChange() { render(); }
     function toggleCompletedSteps(event) { event?.stopPropagation(); hideCompletedSteps = !hideCompletedSteps; localStorage.setItem("pm_hide_completed_steps", hideCompletedSteps ? "1" : "0"); renderTaskVisibilityChange(); }
     function showCompletedSteps(event) { event?.stopPropagation(); if (!hideCompletedSteps) return; hideCompletedSteps = false; localStorage.setItem("pm_hide_completed_steps", "0"); renderTaskVisibilityChange(); }
     function updateStepRecursive(steps, targetId, updater) { return (steps || []).map(step => step.id === targetId ? updater(step) : ({ ...step, children: updateStepRecursive(step.children || [], targetId, updater) })); }
@@ -1829,17 +1833,46 @@
         children: position === "top" ? [stepToInsert, ...(step.children || [])] : [...(step.children || []), stepToInsert]
       }));
     }
-    function beginMoveStep(stepId) { moveState = { stepId, targetParentId: null }; openContextMenuId = null; render(); }
+    async function moveStepRelativeTo(anchorId, placement) {
+      if (!moveState || anchorId === moveState.stepId) return;
+      const source = findStepAndParent(project.steps || [], moveState.stepId)?.step;
+      const anchor = findStepAndParent(project.steps || [], anchorId);
+      if (!source || !anchor || containsStepId(source.children || [], anchorId)) return;
+      const parentId = anchor.parent?.id ?? null;
+      if (!canPlaceStepAt(source, parentId)) { notify("That move would exceed the three-level task structure."); return; }
+      const updated = deepClone(project);
+      const removed = removeStepAndCapture(updated.steps || [], moveState.stepId);
+      const destination = findStepAndParent(removed.steps, anchorId);
+      if (!removed.captured || !destination) return cancelMoveStep();
+      destination.collection.splice(destination.index + (placement === "after" ? 1 : 0), 0, removed.captured);
+      moveState = null;
+      await saveProject({ ...updated, steps: removed.steps });
+    }
+    const moveStepBefore = anchorId => moveStepRelativeTo(anchorId, "before");
+    const moveStepAfter = anchorId => moveStepRelativeTo(anchorId, "after");
+    async function moveStepInto(anchorId) {
+      if (!moveState) return;
+      const source = findStepAndParent(project.steps || [], moveState.stepId)?.step;
+      if (!source || anchorId === source.id || containsStepId(source.children || [], anchorId) || !canPlaceStepAt(source, anchorId)) return;
+      const updated = deepClone(project);
+      const removed = removeStepAndCapture(updated.steps || [], moveState.stepId);
+      if (!removed.captured) return cancelMoveStep();
+      updated.steps = insertStepAtTarget(removed.steps, anchorId, removed.captured, "bottom");
+      moveState = null;
+      await saveProject(updated);
+    }
+    function beginMoveStep(stepId) { moveState = { stepId, anchorId: null }; openContextMenuId = null; render(); }
     function cancelMoveStep() { if (!moveState) return; moveState = null; render(); }
-    function selectMoveTarget(targetParentId, event) {
+    function selectMoveTarget(anchorId, event) {
       if (!moveState) return;
       event?.stopPropagation();
-      if (targetParentId === moveState.stepId) return;
+      if (anchorId === moveState.stepId) return;
       const source = findStepAndParent(project.steps || [], moveState.stepId)?.step;
       if (!source) return;
-      if (targetParentId && containsStepId(source.children || [], targetParentId)) return;
-      if (!canPlaceStepAt(source, targetParentId)) { notify("Tasks can be nested up to three levels."); return; }
-      moveState = { ...moveState, targetParentId };
+      if (anchorId && containsStepId(source.children || [], anchorId)) return;
+      const anchor = anchorId ? findStepAndParent(project.steps || [], anchorId) : null;
+      if (anchor && !canPlaceStepAt(source, anchor.parent?.id ?? null)) { notify("That move would exceed the three-level task structure."); return; }
+      moveState = { ...moveState, anchorId };
       render();
     }
     async function confirmMoveStep(position) {
@@ -1847,8 +1880,8 @@
       const updated = deepClone(project);
       const removed = removeStepAndCapture(updated.steps || [], moveState.stepId);
       if (!removed.captured) return cancelMoveStep();
-      if (!canPlaceStepAt(removed.captured, moveState.targetParentId)) { notify("That move would exceed the three-level task structure."); return; }
-      updated.steps = insertStepAtTarget(removed.steps, moveState.targetParentId, removed.captured, position);
+      if (!canPlaceStepAt(removed.captured, null)) { notify("That move would exceed the three-level task structure."); return; }
+      updated.steps = insertStepAtTarget(removed.steps, null, removed.captured, position);
       moveState = null;
       await saveProject(updated);
     }
@@ -1911,7 +1944,7 @@
     }
 
     // Icon button + hidden input, meant to sit inline at the left of a name row
-    function buildIconButton(targetInputId, fallback = "📌", value = "") {
+    function buildIconButton(targetInputId, fallback = DEFAULT_PROJECT_ICON, value = "") {
       return `<button class="icon-picker-button" type="button" onclick='openIconPickerModal(${JSON.stringify(targetInputId)})' aria-label="Choose icon"><span class="icon-picker-preview" id="${escapeHtml(`${targetInputId}Preview`)}">${renderIcon(value, fallback, "icon preview")}</span><span class="icon-picker-edit" aria-hidden="true">＋</span></button><input type="hidden" id="${escapeHtml(targetInputId)}" name="icon" data-icon-fallback="${escapeHtml(fallback)}" data-icon-preview="${escapeHtml(`${targetInputId}Preview`)}" value="${escapeHtml(value)}" />`;
     }
 
@@ -1921,7 +1954,7 @@
       const previewId = input.dataset.iconPreview;
       const preview = previewId ? document.getElementById(previewId) : null;
       if (!preview) return;
-      preview.innerHTML = renderIcon(input.value, input.dataset.iconFallback || "📌", "icon preview");
+      preview.innerHTML = renderIcon(input.value, input.dataset.iconFallback || DEFAULT_PROJECT_ICON, "icon preview");
     }
 
     function initializeIconInputPreviews() {
@@ -1937,7 +1970,7 @@
 
     function openIconPickerModal(targetInputId) {
       const input = document.getElementById(targetInputId);
-      const fallback = input?.dataset.iconFallback || "📌";
+      const fallback = input?.dataset.iconFallback || DEFAULT_PROJECT_ICON;
       const currentValue = String(input?.value || "").trim();
       iconPickerBody.innerHTML = `<div class="icon-search-row"><input id="iconSearchInput" type="search" inputmode="search" autocomplete="off" placeholder="Search open-source icons" aria-label="Search open-source icons"></div><div id="iconSearchStatus" class="icon-search-status">Suggestions</div><div id="iconPickerGrid" class="icon-picker-grid">${standardIconChoicesHtml(targetInputId, fallback, currentValue)}</div><details class="icon-custom-details"><summary>Use emoji or image URL</summary><div class="icon-custom-row"><input id="iconPickerCustomInput" value="${escapeHtml(currentValue)}" placeholder="Emoji or image URL" aria-label="Custom icon value"><button class="btn btn-primary" type="button" onclick='applyCustomIcon(${JSON.stringify(targetInputId)})'>Use</button></div></details><a class="icon-source-note" href="https://iconify.design" target="_blank" rel="noreferrer">Open-source icons via Iconify</a>`;
       iconPickerBackdrop.classList.add("show");
@@ -2045,7 +2078,7 @@
         { label: "Move", className: "swipe-move", icon: SWIPE_ICON_MOVE, onclick: `beginMoveStep('${step.id}');` },
         { label: "Delete", className: "swipe-delete", icon: SWIPE_ICON_DELETE, onclick: `deleteStep('${step.id}');` }
       );
-      const moveClass = moveState?.stepId === step.id ? " move-source" : moveState?.targetParentId === step.id ? " move-target" : "";
+      const moveClass = moveState?.stepId === step.id ? " move-source" : moveState?.anchorId === step.id ? " move-target" : "";
       const deleteClass = deleteMode && selectedDeleteIds.has(`step:${step.id}`) ? " selected-for-delete" : "";
       const childCount = (step.children || []).length;
       const childrenOpen = childCount && !collapsedStepIds.has(step.id);
@@ -2158,8 +2191,15 @@
       app.className = `layout${deleteMode ? " delete-mode" : ""}`;
       app.innerHTML = `<section class="card hero project-hero"><div class="hero-head"><div class="hero-title-wrap"><div class="hero-icon">${renderIcon(project.icon, "📌", project.name || "project icon")}</div><div class="hero-copy"><h1 class="project-title">${escapeHtml(normalizeDisplayText(project.name || "Untitled Project"))}</h1></div></div><div class="project-hero-actions"><button class="icon-action" type="button" onclick="openProjectEditor()" aria-label="Edit project" title="Edit project"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button class="icon-action${project.finished ? " is-complete" : ""}" type="button" onclick="toggleFinished()" aria-label="${project.finished ? "Reopen project" : "Mark project finished"}" title="${project.finished ? "Reopen project" : "Mark project finished"}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16.5 9"/></svg></button></div></div>${project.description ? `<div class="project-description muted">${renderFormattedText(project.description)}</div>` : ""}${window.pmMeta.line({ deadline: project.deadline, secondsLeft: project.seconds_left, finished: project.finished })}</section>
       <section class="content-section${linksMenuOpen ? " has-open-menu" : ""}"><div class="section-head"><h2 class="section-title">Links</h2></div>${renderLinks()}</section>
-      <section class="content-section steps-section${stepsMenuOpen ? " has-open-menu" : ""}${moveState && moveState.targetParentId == null ? " move-target" : ""}" ${moveState ? `onclick="selectMoveTarget(null, event)"` : ""}><div class="section-head"><h2 class="section-title">Tasks</h2>${hasDoneTasks && !moveState && !deleteMode ? `<button class="section-action" type="button" aria-pressed="${hideCompletedSteps}" onclick="toggleCompletedSteps(event)">${hideCompletedSteps ? "Show done" : "Hide done"}</button>` : ""}</div>${renderStepTree(project.steps)}</section>`;
-      if (moveState) app.innerHTML += `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('top')">Insert at start</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('bottom')">Insert at end</button></div>`;
+      <section class="content-section steps-section${stepsMenuOpen ? " has-open-menu" : ""}" ${moveState ? `onclick="selectMoveTarget(null, event)"` : ""}><div class="section-head"><h2 class="section-title">Tasks</h2>${hasDoneTasks && !moveState && !deleteMode ? `<button class="section-action" type="button" aria-pressed="${hideCompletedSteps}" onclick="toggleCompletedSteps(event)">${hideCompletedSteps ? "Show done" : "Hide done"}</button>` : ""}</div>${renderStepTree(project.steps)}</section>`;
+      if (moveState) {
+        const anchor = moveState.anchorId ? findStepAndParent(project.steps || [], moveState.anchorId)?.step : null;
+        const source = findStepAndParent(project.steps || [], moveState.stepId)?.step;
+        const canMoveIntoAnchor = !!anchor && !!source && canPlaceStepAt(source, anchor.id);
+        app.innerHTML += anchor
+          ? `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button>${canMoveIntoAnchor ? `<button class="btn btn-primary" type="button" onclick="moveStepInto('${anchor.id}')">Child</button>` : ""}<button class="btn btn-primary" type="button" onclick="moveStepBefore('${anchor.id}')">Before</button><button class="btn btn-primary" type="button" onclick="moveStepAfter('${anchor.id}')">After</button></div>`
+          : `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('top')">Move to start</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('bottom')">Move to end</button></div>`;
+      }
 
       // Fetch any uncached linked project data and re-render when ready
       if (hasUncachedProjectLinks()) hydrateProjectLinks();
@@ -2168,8 +2208,8 @@
     // --- Link modals ---
 
     function openProjectEditor() {
-      openModal("Edit project", `<div class="form-grid"><div class="field full"><div class="name-icon-row">${buildIconButton("projectIconInput", "📌", project.icon || "📌")}<input name="name" value="${escapeHtml(project.name || "")}" placeholder="Project name" aria-label="Project name" required /></div></div><div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0, 16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="modal-actions"><div class="modal-action-group"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div></div><div class="editor-danger"><button class="editor-danger-button" type="button" onclick="deleteProject()">Delete project…</button></div>`, async (formData) => {
-        const updated = deepClone(project); updated.name = String(formData.get("name") || "").trim(); updated.icon = String(formData.get("icon") || "").trim() || "📌"; updated.description = String(formData.get("description") || "").trim();
+      openModal("Edit project", `<div class="form-grid"><div class="field full"><div class="name-icon-row">${buildIconButton("projectIconInput", DEFAULT_PROJECT_ICON, project.icon || DEFAULT_PROJECT_ICON)}<input name="name" value="${escapeHtml(project.name || "")}" placeholder="Project name" aria-label="Project name" required /></div></div><div class="field full"><label>Deadline</label><input name="deadline" type="datetime-local" value="${project.deadline ? new Date(project.deadline).toISOString().slice(0, 16) : ""}" /></div><div class="field full"><label>Description</label><textarea name="description">${escapeHtml(project.description || "")}</textarea></div></div><div class="modal-actions"><div class="modal-action-group"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit">Save</button></div></div><div class="editor-danger"><button class="editor-danger-button" type="button" onclick="deleteProject()">Delete project…</button></div>`, async (formData) => {
+        const updated = deepClone(project); updated.name = String(formData.get("name") || "").trim(); updated.icon = String(formData.get("icon") || "").trim() || DEFAULT_PROJECT_ICON; updated.description = String(formData.get("description") || "").trim();
         updated.deadline = parseDateSafe(formData.get("deadline")); addToStandardIcons(updated.icon, updated.name || "Project"); await saveProject(updated);
       });
     }
@@ -2336,6 +2376,9 @@
     window.selectMoveTarget = selectMoveTarget;
     window.cancelMoveStep = cancelMoveStep;
     window.confirmMoveStep = confirmMoveStep;
+    window.moveStepBefore = moveStepBefore;
+    window.moveStepAfter = moveStepAfter;
+    window.moveStepInto = moveStepInto;
     window.toggleFloatingActions = toggleFloatingActions;
     window.toggleManagementActions = toggleManagementActions;
     window.openAddLinkFromMenu = openAddLinkFromMenu;

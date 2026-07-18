@@ -321,9 +321,19 @@ input, textarea {
   background: var(--surfaceSoft);
   padding: 13px 14px;
   font-size: 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  background-clip: padding-box;
 }
 
-input[type="checkbox"] { min-height: 24px; min-width: 24px; accent-color: var(--accent); }
+input[type="checkbox"] {
+  min-height: 24px;
+  min-width: 24px;
+  accent-color: var(--accent);
+  appearance: auto;
+  -webkit-appearance: auto;
+}
 
 textarea { min-height: 112px; }
 
@@ -539,6 +549,7 @@ input:focus, textarea:focus {
   position: relative;
   border-radius: 18px;
   overflow: hidden;
+  isolation: isolate;
 }
 
 .swipe-actions {
@@ -548,12 +559,18 @@ input:focus, textarea:focus {
   bottom: 0;
   display: flex;
   z-index: 0;
-  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
   background: var(--panelBg);
 }
 
-.swipe-row.dragging .swipe-actions,
-.swipe-row.swipe-open .swipe-actions { visibility: visible; }
+/* The tray becomes visible only after the foreground has received its first
+   transform frame; otherwise WebKit briefly paints it on top. */
+.swipe-row.swipe-actions-visible .swipe-actions,
+.swipe-row.swipe-open .swipe-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 .swipe-btn {
   width: 68px;
@@ -586,13 +603,50 @@ input:focus, textarea:focus {
 .swipe-row .swipe-target {
   position: relative;
   z-index: 1;
+  border-radius: inherit;
   transition: transform .3s var(--spring), border-color .15s, background-color .15s;
+  touch-action: pan-y;
 }
 
 .swipe-row.dragging .swipe-target { transition: border-color .15s, background-color .15s; }
 
+/* Every list uses the same swipe composition: a solid foreground tile moves
+   over a solid tray. This avoids the one-frame button shimmer caused by
+   translucent grouped rows while a drag is claimed. */
+.swipe-row:is(.dragging, .swipe-open) .swipe-target {
+  opacity: 1;
+  background: var(--panelBg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.swipe-row.swipe-preparing .swipe-target {
+  opacity: 1;
+  background: var(--panelBg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: transform .3s var(--spring);
+}
+
 /* Open context menus must escape the row's clipping */
 .swipe-row:has(.card-menu.show) { overflow: visible; z-index: 130; }
+
+/* Selection belongs to the row, not the card inside it. The row owns the
+   actual first/middle/last radius, so this outline cannot be squared off or
+   disappear behind a neighboring row's separator. */
+.swipe-row:has(.selected-for-delete),
+.swipe-row:has(.visibility-selected) { z-index: 3; }
+.swipe-row:has(.selected-for-delete)::after,
+.swipe-row:has(.visibility-selected)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  border: 2px solid var(--accent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.swipe-row:has(.selected-for-delete)::after { border-color: var(--danger); }
 
 /* Rows inside grouped lists: square by default, group corners on the ends */
 .step-tree > .swipe-row, .links-grid > .swipe-row { border-radius: 0; }
@@ -600,10 +654,14 @@ input:focus, textarea:focus {
 .step-tree > .swipe-row:last-child, .links-grid > .swipe-row:last-child { border-radius: 0 0 15px 15px; }
 .step-tree > .swipe-row:only-child, .links-grid > .swipe-row:only-child { border-radius: 15px; }
 
-/* Translucent group rows get an opaque backing while actions are behind */
-:is(.step-tree, .links-grid) > .swipe-row:is(.dragging, .swipe-open) .swipe-target {
-  background: color-mix(in srgb, var(--card2) 60%, var(--panelBg));
-}
+/* Actions only meet the exposed right edge; never round their hidden left edge. */
+.swipe-row .swipe-actions { border-radius: 0; }
+.step-tree > .swipe-row:first-child .swipe-actions,
+.links-grid > .swipe-row:first-child .swipe-actions { border-radius: 0 15px 0 0; }
+.step-tree > .swipe-row:last-child .swipe-actions,
+.links-grid > .swipe-row:last-child .swipe-actions { border-radius: 0 0 15px 0; }
+.step-tree > .swipe-row:only-child .swipe-actions,
+.links-grid > .swipe-row:only-child .swipe-actions { border-radius: 0 15px 15px 0; }
 
 /* Swipe owns the complete action set on touch. Three-dot menus exist only for
    pointer devices where swipe is not the primary interaction. */
@@ -632,6 +690,26 @@ input:focus, textarea:focus {
 .project-card.selected-for-delete,
 .project-card.visibility-selected {
   background: color-mix(in srgb, var(--accent) 18%, var(--panelBg));
+}
+
+/* Homepage cards are standalone rounded tiles, unlike grouped task/link rows.
+   Keep the action tray rounded as one matching tile and make the moving card
+   a solid surface so actions can never bleed through it. */
+.project-list > .swipe-row { border-radius: 18px; }
+.project-list > .swipe-row .swipe-actions { border-radius: 18px; }
+/* The row clips external shadows, so selection must use an inset treatment.
+   These selectors also beat the card's finished/hover styles. */
+.project-list .project-card.selected-for-delete,
+.project-list .project-card.visibility-selected {
+  opacity: 1;
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, var(--panelBg));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 58%, transparent);
+}
+.project-list .project-card.selected-for-delete {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 14%, var(--panelBg));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--danger) 60%, transparent);
 }
 
 .project-card:hover, .link-card:hover {
@@ -956,6 +1034,50 @@ input:focus, textarea:focus {
   margin: 8px 1px 1px;
 }
 
+.last-deleted-section { margin-top: 18px; }
+
+.last-deleted-list {
+  margin: 8px 1px 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panelBg);
+}
+
+.last-deleted-item {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 62px;
+  padding: 10px 12px;
+}
+
+.last-deleted-item + .last-deleted-item { border-top: 1px solid var(--line); }
+
+.last-deleted-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 11px;
+  background: var(--surfaceSoft);
+  color: var(--muted);
+}
+
+.last-deleted-icon img { width: 100%; height: 100%; object-fit: cover; }
+.last-deleted-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+
+.last-deleted-copy { min-width: 0; display: grid; gap: 2px; }
+.last-deleted-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .88rem; }
+.last-deleted-copy span { overflow: hidden; color: var(--muted); text-overflow: ellipsis; white-space: nowrap; font-size: .74rem; }
+.last-deleted-actions { display: flex; align-items: center; gap: 4px; }
+.last-deleted-restore { min-height: 34px; padding: 0 11px; font-size: .76rem; }
+.last-deleted-remove { width: 34px; height: 34px; display: grid; place-items: center; border: 0; border-radius: 10px; background: transparent; color: var(--muted); }
+.last-deleted-remove:hover { color: var(--danger); background: var(--dangerSoft); }
+.last-deleted-remove svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
 .segment {
   min-height: 34px;
   border: 0;
@@ -1221,6 +1343,13 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   transform: scale(.94);
 }
 
+/* Move controls own the bottom edge while a destination is being chosen. */
+body:has(.move-toolbar) #floatingActions {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .modal-backdrop.show, .settings-backdrop.show, .icon-picker.show {
   display: flex;
   opacity: 1;
@@ -1303,6 +1432,17 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   border-radius: 0;
   background: transparent;
   box-shadow: none;
+}
+
+/* Grouped forms deliberately have no field borders. Keep focus inside that
+   rounded row instead of letting WebKit draw a square ring around it. */
+:is(#modalForm, #projectForm) .field > input:focus,
+:is(#modalForm, #projectForm) .name-icon-row > input:focus,
+:is(#modalForm, #projectForm) .field > textarea:focus {
+  border: 0;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 72%, transparent);
+  outline: none;
 }
 
 /* Icon button inline at the left of the name input — no separate icon row */
@@ -1425,6 +1565,8 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   font-weight: 560;
 }
 
+.icon-picker-grid { margin-bottom: 14px; }
+
 .icon-custom-details {
   padding-top: 8px;
   border-top: 1px solid var(--line);
@@ -1466,6 +1608,7 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 8px;
+  margin-bottom: 14px;
   padding: 0;
   overflow: visible;
 }
@@ -1587,6 +1730,56 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
 .step-item.selected-for-delete { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--danger) 30%, transparent); }
 .step-item.move-source { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 32%, transparent); }
 .step-item.move-target { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--successText) 26%, transparent); }
+
+/* These rules come after the grouped-list backgrounds, so selection remains
+   visible for both tasks and links in every action mode. */
+.links-grid .link-card.selected-for-delete,
+.step-tree .step-item.selected-for-delete {
+  background: color-mix(in srgb, var(--dangerSoft) 74%, var(--panelBg));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--danger) 38%, transparent);
+}
+.links-grid .link-card.visibility-selected,
+.links-grid .link-card.is-selected,
+.step-tree .step-item.visibility-selected,
+.step-tree .step-item.is-selected {
+  background: color-mix(in srgb, var(--accentSoft) 68%, var(--panelBg));
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 46%, transparent);
+}
+.step-tree .step-item.move-source {
+  border: 0;
+  background: color-mix(in srgb, #5856d6 20%, var(--panelBg));
+  box-shadow: none;
+}
+.step-tree .step-item.move-target {
+  border: 0;
+  background: color-mix(in srgb, var(--accentSoft) 52%, var(--panelBg));
+  box-shadow: none;
+}
+
+/* A selected move destination uses the same blue outline as every other
+   standard selection state. */
+.swipe-row:has(.move-source),
+.swipe-row:has(.move-target) { z-index: 3; }
+.swipe-row:has(.move-source)::after,
+.swipe-row:has(.move-target)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  border: 2px solid var(--accent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.swipe-row:has(.move-source)::after { border-color: #5856d6; }
+
+
+.steps-section.move-target {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 
 .step-title-row {
   display: flex;
@@ -1765,6 +1958,14 @@ body:has(.modal-backdrop.show, .settings-backdrop.show, .icon-picker.show) .floa
   .modal-actions { align-items: stretch; flex-direction: column-reverse; }
   .modal-action-group { width: 100%; margin-left: 0; }
   .modal-action-group .btn { flex: 1; }
+
+  .modal, .modal-panel {
+    max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom)));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  :is(#modalForm, #projectForm) { max-height: none; }
 
   .card { border-radius: 18px; padding: 15px; }
   .hero-card { padding-top: 18px; }

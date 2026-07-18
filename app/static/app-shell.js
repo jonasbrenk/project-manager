@@ -88,10 +88,10 @@ function pmInitScroll() {
   const scroller = document.getElementById("appScroll");
   if (!scroller) return;
   const root = document.documentElement;
-  const RANGE = 56;
   let ticking = false;
   let dirty = true;
   const fullHeights = new Map();
+  const collapseRanges = new Map();
 
   const headers = () => scroller.querySelectorAll(".project-hero, .landing-header");
   const collapsibles = () => scroller.querySelectorAll(".project-hero .project-description, .project-hero .project-meta-line");
@@ -99,23 +99,33 @@ function pmInitScroll() {
   // Measure each header's expanded (p = 0) height so it can be reserved.
   function measure() {
     fullHeights.clear();
+    collapseRanges.clear();
     const list = [...headers()];
     for (const h of list) h.style.setProperty("--condense", "0");
     for (const el of collapsibles()) el.style.maxHeight = "";
     for (const h of list) {
       fullHeights.set(h, h.offsetHeight);
+    }
+    for (const h of list) h.style.setProperty("--condense", "1");
+    for (const el of collapsibles()) el.style.maxHeight = "0px";
+    for (const h of list) {
+      // Match each pixel of collapse to one pixel of scroll. A fixed range
+      // made long descriptions collapse ahead of the content beneath them.
+      collapseRanges.set(h, Math.max(1, fullHeights.get(h) - h.offsetHeight));
       h.style.removeProperty("--condense");
     }
+    for (const el of collapsibles()) el.style.maxHeight = "";
     dirty = false;
   }
 
   function update() {
     ticking = false;
+    if (dirty) measure();
     const y = scroller.scrollTop;
     root.classList.toggle("is-scrolled", y > 2);
-    const p = Math.min(1, Math.max(0, y / RANGE));
+    const range = Math.max(1, ...collapseRanges.values());
+    const p = Math.min(1, Math.max(0, y / range));
     root.style.setProperty("--condense", p.toFixed(4));
-    if (dirty) measure();
     for (const el of collapsibles()) {
       el.style.maxHeight = `${el.scrollHeight * (1 - p)}px`;
       el.style.opacity = Math.max(0, 1 - p * 1.4).toFixed(3);
@@ -260,6 +270,7 @@ function pmInitSwipe() {
   let offset = 0;
   let width = 0;
   let active = false;
+  let direction = null;
   let openRow = null;
   let suppressClick = false;
 
@@ -274,6 +285,8 @@ function pmInitSwipe() {
     if (!openRow) return;
     const t = target(openRow);
     if (t) t.style.transform = "";
+    openRow.classList.remove("swipe-preparing");
+    openRow.classList.remove("swipe-actions-visible");
     openRow.classList.remove("swipe-open");
     openRow = null;
   }
@@ -286,25 +299,39 @@ function pmInitSwipe() {
     if (openRow && r !== openRow) close();
     row = r && !disabled() ? r : null;
     if (!row) return;
+    // Make the foreground solid before actions are ever allowed to paint.
+    row.classList.add("swipe-preparing");
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
     offset = 0;
     active = false;
+    direction = null;
     width = row.querySelector(".swipe-actions")?.offsetWidth || 0;
   }, { passive: true });
 
   document.addEventListener("touchmove", e => {
     if (!row) return;
     const dx = e.touches[0].clientX - startX;
-    const dy = Math.abs(e.touches[0].clientY - startY);
-    if (!active && width && Math.abs(dx) > 12 && Math.abs(dx) > dy * 1.4) active = true;
+    const dy = e.touches[0].clientY - startY;
+    if (!direction && Math.max(Math.abs(dx), Math.abs(dy)) > 10) {
+      direction = Math.abs(dx) > Math.abs(dy) * 1.2 ? "horizontal" : "vertical";
+    }
+    if (direction !== "horizontal" || !width) return;
+    if (!active && Math.abs(dx) > 12) active = true;
     if (!active) return;
+    e.preventDefault();
     const base = row === openRow ? -width : 0;
     offset = Math.min(0, Math.max(-width - 24, base + dx));
-    row.classList.add("dragging");
     const t = target(row);
     if (t) t.style.transform = `translateX(${offset}px)`;
-  }, { passive: true });
+    row.classList.add("dragging");
+    if (Math.abs(offset) > 2) {
+      const activeRow = row;
+      requestAnimationFrame(() => {
+        if (activeRow === row || activeRow === openRow) activeRow.classList.add("swipe-actions-visible");
+      });
+    }
+  }, { passive: false });
 
   document.addEventListener("touchend", () => {
     if (!row) return;
@@ -317,19 +344,27 @@ function pmInitSwipe() {
         openRow = row;
       } else {
         if (t) t.style.transform = "";
+        row.classList.remove("swipe-preparing");
+        row.classList.remove("swipe-actions-visible");
         row.classList.remove("swipe-open");
         if (openRow === row) openRow = null;
       }
       suppressClick = true;
-    }
+    } else row.classList.remove("swipe-preparing");
     row = null;
     active = false;
+    direction = null;
   }, { passive: true });
 
   document.addEventListener("touchcancel", () => {
-    if (row) row.classList.remove("dragging");
+    if (row) {
+      row.classList.remove("dragging");
+      row.classList.remove("swipe-preparing");
+      row.classList.remove("swipe-actions-visible");
+    }
     row = null;
     active = false;
+    direction = null;
   }, { passive: true });
 
   document.addEventListener("click", e => {
@@ -347,16 +382,12 @@ function pmInitSwipe() {
   }, true);
 }
 
-/* Native-feeling sheet focus: focus the first useful field, keep keyboard
-   navigation inside the active sheet, and return focus to its trigger. */
-window.pmSheetOpened = (sheet, preferredSelector = "") => {
+/* Sheets open without forcing a field into focus. On mobile, programmatic
+   focus opens the keyboard and lets WebKit paint a distracting native ring.
+   Keep the return target for accessibility; users focus a field by tapping it. */
+window.pmSheetOpened = sheet => {
   if (!sheet) return;
   sheet._pmReturnFocus = document.activeElement;
-  requestAnimationFrame(() => {
-    const preferred = preferredSelector ? sheet.querySelector(preferredSelector) : null;
-    const fallback = sheet.querySelector('input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), button:not([disabled]), [href]');
-    (preferred || fallback)?.focus({ preventScroll: true });
-  });
 };
 
 window.pmSheetClosed = sheet => {

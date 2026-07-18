@@ -559,6 +559,15 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
             </div>
           </div>
         </section>
+        <section class="hidden-section last-deleted-section" id="lastDeletedSection" hidden aria-live="polite">
+          <button class="hidden-summary" type="button" onclick="toggleLastDeleted(event)" aria-expanded="false" aria-controls="lastDeletedDisclosure">
+            <span>Last deleted</span><span id="lastDeletedCount" class="hidden-count">0</span>
+            <svg class="hidden-chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m7.5 4.5 5 5-5 5"/></svg>
+          </button>
+          <div class="hidden-disclosure" id="lastDeletedDisclosure" aria-hidden="true" inert>
+            <div class="hidden-disclosure-clip"><div id="lastDeletedList" class="last-deleted-list"></div></div>
+          </div>
+        </section>
       </div>
     </section>
   </main>
@@ -576,7 +585,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
       </div>
       <form id="projectForm">
         <div class="form-grid">
-          <div class="field span-4"><div class="name-icon-row"><button class="icon-picker-button" type="button" onclick="openIconPicker('icon','📌')" aria-label="Choose icon"><span class="icon-picker-preview" id="iconPreview">📌</span><span class="icon-picker-edit" aria-hidden="true">＋</span></button><input id="name" name="name" placeholder="Project name" required /><input type="hidden" id="icon" name="icon" data-icon-fallback="📌" data-icon-preview="iconPreview" /></div></div>
+          <div class="field span-4"><div class="name-icon-row"><button class="icon-picker-button" type="button" onclick="openIconPicker('icon', DEFAULT_PROJECT_ICON)" aria-label="Choose icon"><span class="icon-picker-preview" id="iconPreview"><img src="/static/icon-placeholder.svg" alt="" /></span><span class="icon-picker-edit" aria-hidden="true">＋</span></button><input id="name" name="name" placeholder="Project name" required /><input type="hidden" id="icon" name="icon" data-icon-fallback="/static/icon-placeholder.svg" data-icon-preview="iconPreview" /></div></div>
           <div class="field span-2"><label for="deadline">Deadline</label><input id="deadline" name="deadline" type="datetime-local" /></div>
           <div class="field span-4"><label for="description">Description</label><textarea id="description" name="description" placeholder="Short project description"></textarea></div>
         </div>
@@ -598,18 +607,20 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 
   <script>
     const DEFAULT_STANDARD_ICONS = [
-      { label: "Folder", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c1.png", removable: false },
-      { label: "Document", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c4.png", removable: false },
-      { label: "Graduation", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f393.png", removable: false },
-      { label: "Rocket", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f680.png", removable: false },
-      { label: "Code", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4bb.png", removable: false },
-      { label: "Chart", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4ca.png", removable: false },
-      { label: "Link", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f517.png", removable: false },
-      { label: "Palette", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f3a8.png", removable: false },
-      { label: "Calendar", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4c5.png", removable: false },
-      { label: "Target", value: "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f3af.png", removable: false }
+      { label: "Folder", value: "https://api.iconify.design/lucide/folder.svg", removable: false },
+      { label: "Document", value: "https://api.iconify.design/lucide/file-text.svg", removable: false },
+      { label: "Education", value: "https://api.iconify.design/lucide/graduation-cap.svg", removable: false },
+      { label: "Launch", value: "https://api.iconify.design/lucide/rocket.svg", removable: false },
+      { label: "Code", value: "https://api.iconify.design/lucide/code-2.svg", removable: false },
+      { label: "Analytics", value: "https://api.iconify.design/lucide/chart-no-axes-column-increasing.svg", removable: false },
+      { label: "Link", value: "https://api.iconify.design/lucide/link.svg", removable: false },
+      { label: "Design", value: "https://api.iconify.design/lucide/palette.svg", removable: false },
+      { label: "Calendar", value: "https://api.iconify.design/lucide/calendar-days.svg", removable: false },
+      { label: "Goal", value: "https://api.iconify.design/lucide/crosshair.svg", removable: false }
     ];
+    const LEGACY_STANDARD_ICON_VALUES = new Set(["1f4c1", "1f4c4", "1f393", "1f680", "1f4bb", "1f4ca", "1f517", "1f3a8", "1f4c5", "1f3af"].map(code => `https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/${code}.png`));
     const STANDARD_ICONS_STORAGE_KEY = "project_manager_standard_icons";
+    const DEFAULT_PROJECT_ICON = "/static/icon-placeholder.svg";
     const THEME_STORAGE_KEY = "pm_theme_mode";
     let STANDARD_ICONS = loadStandardIcons();
     const projectList = document.getElementById("projectList");
@@ -631,6 +642,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     const projectSearch = document.getElementById("projectSearch");
     const searchClear = document.getElementById("searchClear");
     let currentProjects = [];
+    let deletedItems = [];
     let activeProjectFilter = "all";
     let deleteMode = false;
     let visibilityMode = false;
@@ -646,10 +658,8 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 
         if (Array.isArray(saved) && saved.length) {
           const defaultValues = new Set(DEFAULT_STANDARD_ICONS.map(icon => String(icon.value).trim()));
-
-          return saved.map(icon => {
+          const customIcons = saved.filter(icon => !LEGACY_STANDARD_ICON_VALUES.has(String(icon?.value || "").trim())).map(icon => {
             const value = String(icon?.value || "").trim();
-
             return {
               label: String(icon?.label || "Custom").trim() || "Custom",
               value,
@@ -658,6 +668,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
                 : !defaultValues.has(value)
             };
           });
+          return [...DEFAULT_STANDARD_ICONS, ...customIcons.filter(icon => !defaultValues.has(icon.value))];
         }
       } catch {}
 
@@ -673,8 +684,8 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     }
     function escapeHtml(value = "") { return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
     function normalizeDisplayText(value = "") { return String(value).replaceAll("-->", "→"); }
-    function isImageUrl(value = "") { const v = String(value).trim(); return /^https?:\/\//i.test(v) && /\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(v); }
-    function renderIcon(icon, fallback = "📌", alt = "icon") { const value = String(icon || "").trim(); return isImageUrl(value) ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(alt)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;" />` : escapeHtml(value || fallback); }
+    function isImageUrl(value = "") { const v = String(value).trim(); return /^(?:https?:\/\/|\/static\/).+\.(png|jpe?g|gif|webp|svg|avif)(\?.*)?$/i.test(v); }
+    function renderIcon(icon, fallback = DEFAULT_PROJECT_ICON, alt = "icon") { const value = String(icon || fallback).trim(); return isImageUrl(value) ? `<img src="${escapeHtml(value)}" alt="${escapeHtml(alt)}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block;" />` : escapeHtml(value || fallback); }
     function clampIndent(level) { return Math.max(0, Math.min(3, Number(level) || 0)); }
     function renderFormattedText(value, fallback = "", compact = false) {
       const source = String(value || "").replace(/\r\n?/g, "\n");
@@ -801,7 +812,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
       `;
     }
 
-    function openIconPicker(targetInputId, fallback = "📌") {
+    function openIconPicker(targetInputId, fallback = DEFAULT_PROJECT_ICON) {
       closeIconPicker();
       document.body.insertAdjacentHTML("beforeend", buildIconPickerHtml(targetInputId, fallback));
       wireIconPicker(targetInputId);
@@ -1002,6 +1013,7 @@ async function confirmDeleteSelected() {
   await Promise.all([...selectedProjectIds].map(id => fetch(`/api/projects/${id}`, { method: "DELETE" })));
   cancelActionMode();
   await loadProjects(true);
+  await loadDeletedItems();
 }
 
 function togglePendingVisibility(event, id) {
@@ -1053,6 +1065,19 @@ function toggleHiddenProjects(event) {
   disclosure.toggleAttribute("inert", !isOpen);
 }
 
+function toggleLastDeleted(event) {
+  event?.preventDefault();
+  const section = document.getElementById("lastDeletedSection");
+  const disclosure = document.getElementById("lastDeletedDisclosure");
+  const summary = section?.querySelector(".hidden-summary");
+  if (!section || !disclosure || !summary) return;
+
+  const isOpen = section.classList.toggle("is-open");
+  summary.setAttribute("aria-expanded", String(isOpen));
+  disclosure.setAttribute("aria-hidden", String(!isOpen));
+  disclosure.toggleAttribute("inert", !isOpen);
+}
+
 // --- Swipe actions (engine lives in app-shell.js) ---
 const SWIPE_ICON_HIDE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A16.7 16.7 0 0 0 2 12s3 7 10 7a9.9 9.9 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`;
 const SWIPE_ICON_SHOW = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
@@ -1078,6 +1103,7 @@ async function swipeDelete(event, id) {
   if (!confirmed) return;
   await fetch(`/api/projects/${id}`, { method: "DELETE" });
   await loadProjects(true);
+  await loadDeletedItems();
 }
 
 window.swipeToggleHidden = swipeToggleHidden;
@@ -1138,6 +1164,57 @@ function renderProjects() {
   }
 }
 
+function formatDeletedItemTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Recently";
+  return new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(date);
+}
+
+function renderDeletedItems() {
+  const section = document.getElementById("lastDeletedSection");
+  const list = document.getElementById("lastDeletedList");
+  if (!deletedItems.length) {
+    section.hidden = true;
+    list.innerHTML = "";
+    return;
+  }
+  section.hidden = false;
+  document.getElementById("lastDeletedCount").textContent = String(deletedItems.length);
+  list.innerHTML = deletedItems.map(item => {
+    const type = item.type === "project" ? "Project" : item.type === "link" ? "Link" : "Task";
+    const context = item.project_name ? ` · ${escapeHtml(normalizeDisplayText(item.project_name))}` : "";
+    return `<article class="last-deleted-item">
+      <div class="last-deleted-icon">${item.type === "task" ? `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4.2 4.2L19 6.5"/></svg>` : renderIcon(item.icon, item.type === "link" ? "🔗" : "📌", item.title)}</div>
+      <div class="last-deleted-copy"><strong>${escapeHtml(normalizeDisplayText(item.title))}</strong><span>${type}${context} · ${formatDeletedItemTime(item.deleted_at)}</span></div>
+      <div class="last-deleted-actions"><button class="btn btn-secondary last-deleted-restore" type="button" onclick="restoreDeletedItem('${item.id}')">Restore</button><button class="last-deleted-remove" type="button" onclick="permanentlyDeleteItem('${item.id}')" aria-label="Delete ${escapeHtml(normalizeDisplayText(item.title))} permanently"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div>
+    </article>`;
+  }).join("");
+}
+
+async function loadDeletedItems() {
+  const res = await fetch("/api/deleted-items", { headers: { "Accept": "application/json" } });
+  if (!res.ok) return;
+  deletedItems = await res.json();
+  renderDeletedItems();
+}
+
+async function restoreDeletedItem(id) {
+  const res = await fetch(`/api/deleted-items/${id}/restore`, { method: "POST" });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    await confirmSheet({ title: "Could Not Restore", message: body.error || "The original location is no longer available.", cancelLabel: null });
+    return;
+  }
+  await Promise.all([loadProjects(true), loadDeletedItems()]);
+}
+
+async function permanentlyDeleteItem(id) {
+  const confirmed = await confirmSheet({ title: "Delete Permanently?", message: "This cannot be undone.", confirmLabel: "Delete", destructive: true });
+  if (!confirmed) return;
+  const res = await fetch(`/api/deleted-items/${id}`, { method: "DELETE" });
+  if (res.ok) await loadDeletedItems();
+}
+
 async function loadProjects(animate = false) {
   const requestSequence = ++projectsRequestSequence;
   const res = await fetch("/api/projects?summary=1", { headers: { "Accept": "application/json" } });
@@ -1172,7 +1249,7 @@ function renderCachedProjects() {
 
     projectForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const rawIcon = projectForm.icon.value.trim() || "📌";
+      const rawIcon = projectForm.icon.value.trim() || DEFAULT_PROJECT_ICON;
       addToStandardIcons(rawIcon, projectForm.name.value.trim() || "Project");
       const payload = {
         name: projectForm.name.value.trim(),
@@ -1209,6 +1286,9 @@ function renderCachedProjects() {
     window.setProjectFilter = setProjectFilter;
     window.clearProjectSearch = clearProjectSearch;
     window.toggleHiddenProjects = toggleHiddenProjects;
+    window.toggleLastDeleted = toggleLastDeleted;
+    window.restoreDeletedItem = restoreDeletedItem;
+    window.permanentlyDeleteItem = permanentlyDeleteItem;
     projectSearch.addEventListener("input", () => {
       searchClear.hidden = !projectSearch.value;
       renderProjects();
@@ -1229,10 +1309,12 @@ function renderCachedProjects() {
       if (!event.persisted) return;
       renderCachedProjects();
       loadProjects().catch(() => {});
+      loadDeletedItems().catch(() => {});
     });
     loadProjects().catch(() => {
       if (!currentProjects.length) projectList.innerHTML = `<div class="empty">Could not load projects.</div>`;
     });
+    loadDeletedItems().catch(() => {});
   </script>
 </body>
 </html>
