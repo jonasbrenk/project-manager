@@ -433,7 +433,7 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 .project-offline-cache svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .project-offline-cache.is-unavailable { color: var(--muted); opacity: .34; filter: grayscale(1); }
-.project-card.is-offline-unavailable { opacity: .58; cursor: not-allowed; }
+.project-card.is-offline-unavailable { opacity: .58; cursor: not-allowed; pointer-events: none; }
 .project-card.is-offline-unavailable::after { content: "Not saved offline"; position: absolute; right: 12px; bottom: 10px; color: var(--muted); font-size: .7rem; font-weight: 650; }
 
 .hide-toggle {
@@ -1166,7 +1166,7 @@ function renderProjects() {
   const renderCard = (p) => {
     const isVisible = visibilityMode ? selectedProjectIds.has(p.id) : !hiddenIds.has(p.id);
     const swipeable = !deleteMode && !visibilityMode;
-    const offlineUnavailable = document.documentElement.hasAttribute("data-offline") && !localStorage.getItem(`pm_project_${p.id}`);
+    const offlineUnavailable = (document.documentElement.hasAttribute("data-offline") || !navigator.onLine) && !localStorage.getItem(`pm_project_${p.id}`);
     return `
       <div class="swipe-row" style="view-transition-name: p-${String(p.id).replace(/[^a-zA-Z0-9-]/g, "")}">
       ${swipeable ? `<div class="swipe-actions"><button class="swipe-btn swipe-hide" type="button" aria-label="${hiddenIds.has(p.id) ? "Show" : "Hide"}" title="${hiddenIds.has(p.id) ? "Show" : "Hide"}" onclick="swipeToggleHidden(event, '${p.id}')">${hiddenIds.has(p.id) ? SWIPE_ICON_SHOW : SWIPE_ICON_HIDE}<span>${hiddenIds.has(p.id) ? "Show" : "Hide"}</span></button><button class="swipe-btn swipe-delete" type="button" aria-label="Delete" title="Delete" onclick="swipeDelete(event, '${p.id}')">${SWIPE_ICON_DELETE}<span>Delete</span></button></div>` : ""}
@@ -1368,13 +1368,23 @@ function rememberProjectNavigation(event) {
   try { sessionStorage.setItem("pm_project_loading_summary", JSON.stringify(project)); } catch { }
 }
 
-function blockUnavailableOfflineProject(event) {
-  if (!document.documentElement.hasAttribute("data-offline")) return;
+async function blockUnavailableOfflineProject(event) {
+  if (!document.documentElement.hasAttribute("data-offline") && navigator.onLine) return;
   const card = event.target.closest("a.project-card[data-project-id]");
-  if (!card || !card.classList.contains("is-offline-unavailable")) return;
+  if (!card) return;
   event.preventDefault();
   event.stopImmediatePropagation();
-  confirmSheet({ title: "Project not saved offline", message: "Open this project once while connected to save it on this device.", cancelLabel: null });
+  const id = card.dataset.projectId;
+  let cached = !!localStorage.getItem(`pm_project_${id}`);
+  if (!cached && "caches" in window) {
+    const cacheNames = ["project-manager-api-v2", "project-manager-api-v1"];
+    for (const name of cacheNames) {
+      const cache = await caches.open(name);
+      if (await cache.match(`/api/projects/${encodeURIComponent(id)}`)) { cached = true; break; }
+    }
+  }
+  if (cached) location.href = card.href;
+  else confirmSheet({ title: "Project not saved offline", message: "Open this project once while connected to save it on this device.", cancelLabel: null });
 }
 
     projectForm.addEventListener("submit", async (event) => {

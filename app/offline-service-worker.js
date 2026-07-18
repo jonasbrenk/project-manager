@@ -61,10 +61,12 @@ self.addEventListener("fetch", event => {
   }
 
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request, SHELL_CACHE).catch(async () => {
+    event.respondWith((async () => {
       const cache = await caches.open(SHELL_CACHE);
-      return cache.match(url.pathname === "/project" ? "/project" : "/");
-    }));
+      const shell = () => cache.match(url.pathname === "/project" ? "/project" : "/");
+      if (!self.navigator.onLine) return (await shell()) || Response.error();
+      return networkFirst(request, SHELL_CACHE).catch(shell);
+    })());
     return;
   }
 
