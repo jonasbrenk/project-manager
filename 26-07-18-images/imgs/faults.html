@@ -1,0 +1,156 @@
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+
+<h1><span class="s1"><b>UI Bug Report</b></span></h1>
+
+<h2><span class="s1"><h2><span class="s1"><h2><span class="s1"><h2><span class="s1"><h2><span class="s1"><b>UI-01 – </b></span></h2><b><code>Show Done</code></b></span></h2><b> / </b></span></h2><b><code>Hide Done</code></b></span></h2><b> überlagert Header</b></span></h2>
+
+<p class="p3"><b>Aktion:</b></span><span class="s2"> </span><code>Show Done</code><span class="s2"> oder </span><code>Hide Done</code><span class="s2"> ausführen.</p>
+
+<p class="p4"><b>Fehler:</b></span><span class="s2"> Während der Animation schiebt sich Content kurz über die Headerzeile.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Der Header bleibt jederzeit über dem Content. Kein Element darf ihn während der Animation überdecken.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Layering und Clipping der Animation korrigieren.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>UI-02 – Compress-Header klappt zu früh ein</b></span></h2>
+
+<p class="p4"><b>Aktion:</b></span><span class="s2"> In der Ansicht nach oben scrollen.</p>
+
+<p class="p4"><b>Fehler:</b></span><span class="s2"> Der obere Header komprimiert schneller als der </span><code>Links</code><span class="s2">-Header und der Content hochscrollen. Dadurch entsteht ein zu großer Gap.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Header, </span><code>Links</code><span class="s2">-Header und Content bewegen sich synchron 1:1.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Compress-Fortschritt direkt an den Scroll-Fortschritt koppeln. Keine vorauseilende Animation.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>UI-03 – Swipe-Element wird transparent</b></span></h2>
+
+<p class="p4"><b>Aktion:</b></span><span class="s2"> Ein Element horizontal swipen.</p>
+
+<p class="p4"><b>Fehler:</b></span><span class="s2"> Das Element wird teilweise durchsichtig. Die Swipe-Aktionen sind bereits dahinter sichtbar.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Das Element bleibt vollständig deckend. Aktionen sind nur im freigelegten Bereich sichtbar.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Transparenz während des Swipes entfernen.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>UI-04 – Swipe und Scrollen konkurrieren</b></span></h2>
+
+<p class="p4"><b>Aktion:</b></span><span class="s2"> Ein Element leicht diagonal swipen.</p>
+
+<p class="p4"><b>Fehler:</b></span><span class="s2"> Die Liste scrollt gleichzeitig vertikal. Die Bewegung wirkt zitterig und unruhig.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Horizontale Swipe-Geste und vertikales Scrollen werden klar getrennt.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Direction Lock und sinnvolle Gesture-Thresholds verwenden.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>UI-05 – Falscher Border Radius bei oberster Swipe Action</b></span></h2>
+
+<p class="p4"><b>Aktion:</b></span><span class="s2"> Swipe Actions beim obersten Element öffnen.</p>
+
+<p class="p4"><b>Fehler:</b></span><span class="s2"> Die linke Seite ist abgerundet und wirkt dadurch falsch.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Die Swipe Action schließt bündig ab.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Linken Border Radius beim obersten Element entfernen.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>UI-06 – Move-Popup kollidiert mit Plus-Button</b></span></h2>
+
+<p class="p4"><b>Aktion:</b></span><span class="s2"> Move-Funktion öffnen.</p>
+
+<p class="p4"><b>Fehler:</b></span><span class="s2"> Das Popup liegt hinter oder zu nah am Plus-Button.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Das Popup ist vollständig sichtbar und wird nicht überlagert.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Popup höher priorisieren und abhängig vom verfügbaren Platz positionieren.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>UI-07 – Move-Funktion zu eingeschränkt</b></span></h2>
+
+<p class="p4"><b>Aktion:</b></span><span class="s2"> Element in eine Liste verschieben.</p>
+
+<p class="p3"><b>Fehler:</b></span><span class="s2"> Es gibt nur </span><code>Insert at Start</code><span class="s2"> und </span><code>Insert at End</code><span class="s2">.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Eine konkrete Position innerhalb der Liste muss wählbar sein.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Einfügen vor/nach einem Element oder Drag-and-Drop ermöglichen.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>UI-08 – Auswahl-Highlights inkonsistent</b></span></h2>
+
+<p class="p4"><b>Aktion:</b></span><span class="s2"> Elemente für Löschen, Hide, Show oder Project View auswählen.</p>
+
+<p class="p4"><b>Fehler:</b></span><span class="s2"> Highlights erscheinen teilweise, fehlen oder verschwinden.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Jedes ausgewählte Element wird sofort und stabil markiert.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Einheitliche Auswahlzustände für alle Ansichten und Elementtypen.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>UI-09 – Links ohne Auswahl-Highlight</b></span></h2>
+
+<p class="p4"><b>Aktion:</b></span><span class="s2"> Link im Auswahl- oder Löschmodus auswählen.</p>
+
+<p class="p4"><b>Fehler:</b></span><span class="s2"> Der Link erhält keine sichtbare Markierung.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Links werden genauso klar markiert wie Tasks und Projekte.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Auswahlzustand auf die gesamte Link-Zeile anwenden.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>UI-10 – Mobile Inputs zeigen eckigen Rahmen</b></span></h2>
+
+<p class="p4"><b>Aktion:</b></span><span class="s2"> Auf Mobile ein Projekt oder einen Task erstellen oder bearbeiten.</p>
+
+<p class="p4"><b>Fehler:</b></span><span class="s2"> Inputs erhalten einen unerwünschten rechteckigen Rahmen bzw. ein halbes Highlight.</p>
+
+<p class="p4"><b>Soll:</b></span><span class="s2"> Nur der definierte abgerundete Input- und Fokuszustand ist sichtbar.</p>
+
+<p class="p4"><b>Fix-Anforderung:</b></span><span class="s2"> Native Mobile-Input-Styles überschreiben und konsistenten Fokuszustand verwenden.</p>
+
+<p class="p1"><b>Screenshot:</b></span><span class="s2"> </span><code>[Link]</code></p>
+
+<hr>
+
+<h2><span class="s1"><b>Priorität</b></span></h2>
+
+<p class="p5"><b>Hoch:</b></span><span class="s2"> UI-01, UI-02, UI-04, UI-06, UI-08, UI-09<br>
+</span><span class="s1"><b>Mittel:</b></span><span class="s2"> UI-03, UI-07, UI-10<br>
+</span><span class="s1"><b>Niedrig:</b></span><span class="s2"> UI-05</p>
+
+</body>
+</html>

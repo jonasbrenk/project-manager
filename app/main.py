@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import math
+import mimetypes
 import os
+import gzip
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
@@ -10,7 +12,7 @@ from threading import RLock
 from typing import Any
 from uuid import uuid4
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_file, send_from_directory
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -18,7 +20,7 @@ DATA_FILE = DATA_DIR / "projects.json"
 STORAGE_LOCK = RLock()
 
 app = Flask(__name__, static_folder=str(BASE_DIR), static_url_path="")
-app.config["MAX_CONTENT_LENGTH"] = 2 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
 
 
 def utc_now_iso() -> str:
@@ -28,6 +30,7 @@ def utc_now_iso() -> str:
 def ensure_storage() -> None:
     with STORAGE_LOCK:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
+        (DATA_DIR / "uploads").mkdir(exist_ok=True)
         if DATA_FILE.exists():
             return
 
@@ -102,6 +105,8 @@ def read_data() -> dict[str, Any]:
         raise ValueError("Project data has an invalid structure")
     if not isinstance(data.get("deleted_items"), list):
         data["deleted_items"] = []
+    if not isinstance(data.get("offline_change_log"), list):
+        data["offline_change_log"] = []
     return data
 
 
@@ -281,8 +286,34 @@ def sanitize_step(step: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def sanitize_project(payload: dict[str, Any], current: dict[str, Any] | None = None) -> dict[str, Any]:
-    now = utc_now_iso()
+def sanitize_file(file: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": str(file.get("id") or uuid4().hex),
+        "name": Path(str(file.get("name") or "Document")).name or "Document",
+        "content_type": str(file.get("content_type") or "application/octet-stream"),
+        "size": max(0, int(file.get("size") or 0)),
+        "uploaded_at": str(file.get("uploaded_at") or utc_now_iso()),
+    }
+
+
+def sanitize_file_link(link: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": str(link.get("id") or uuid4().hex),
+        "source_project_id": str(link.get("source_project_id") or ""),
+        "source_file_id": str(link.get("source_file_id") or ""),
+        "source_project_name": str(link.get("source_project_name") or ""),
+        "name": Path(str(link.get("name") or "Document")).name or "Document",
+        "content_type": str(link.get("content_type") or "application/octet-stream"),
+        "size": max(0, int(link.get("size") or 0)),
+    }
+
+
+def upload_path(project_id: str, file_id: str) -> Path:
+    return DATA_DIR / "uploads" / project_id / file_id
+
+
+def sanitize_project(payload: dict[str, Any], current: dict[str, Any] | None = None, updated_at: str | None = None) -> dict[str, Any]:
+    now = updated_at or utc_now_iso()
     created_at = current.get("created_at") if current else now
 
     return {
@@ -293,6 +324,8 @@ def sanitize_project(payload: dict[str, Any], current: dict[str, Any] | None = N
         "finished": bool(payload.get("finished", False)),
         "icon": str(payload.get("icon", "📌")).strip() or "📌",
         "links": [sanitize_link(link) for link in payload.get("links", [])],
+        "files": [sanitize_file(file) for file in payload.get("files", current.get("files", []) if current else [])],
+        "file_links": [sanitize_file_link(link) for link in payload.get("file_links", current.get("file_links", []) if current else [])],
         "steps": [sanitize_step(step) for step in payload.get("steps", [])],
         "created_at": created_at,
         "updated_at": now,
@@ -310,6 +343,25 @@ def set_response_headers(response):
         response.headers["Cache-Control"] = "no-store"
     else:
         response.headers["Cache-Control"] = "no-cache"
+
+    # The two app screens contain their UI shell inline. Compressing text
+    # responses avoids sending that repeated markup over a slow connection;
+    # browsers transparently decode it before parsing.
+    accepts_gzip = "gzip" in request.headers.get("Accept-Encoding", "").lower()
+    content_type = response.mimetype or ""
+    compressible = content_type.startswith("text/") or content_type in {"application/javascript", "application/json", "image/svg+xml"}
+    if (
+        accepts_gzip
+        and compressible
+        and "Content-Encoding" not in response.headers
+    ):
+        response.direct_passthrough = False
+        payload = response.get_data()
+        compressed = gzip.compress(payload, compresslevel=5)
+        if len(compressed) < len(payload):
+            response.set_data(compressed)
+            response.headers["Content-Encoding"] = "gzip"
+            response.headers["Vary"] = "Accept-Encoding"
     return response
 
 
@@ -329,6 +381,11 @@ def get_projects():
     project_builder = summarize_project if request.args.get("summary") == "1" else enrich_project
     projects = sorted((project_builder(p) for p in data["projects"]), key=sort_key)
     return jsonify(projects)
+
+
+@app.get("/api/health")
+def api_health():
+    return "", 204
 
 
 @app.get("/api/projects/<project_id>")
@@ -364,6 +421,116 @@ def update_project(project_id: str):
     data["projects"][index] = updated
     write_data(data)
     return jsonify(enrich_project(updated))
+
+
+@app.post("/api/offline-changes")
+def apply_offline_changes():
+    """Apply independently queued local snapshots, newest timestamp wins."""
+    payload = request.get_json(silent=True) or {}
+    changes = payload.get("changes")
+    if not isinstance(changes, list):
+        return jsonify({"error": "changes must be a list"}), 400
+    data = read_data()
+    accepted: list[str] = []
+    for change in changes[-100:]:
+        if not isinstance(change, dict):
+            continue
+        change_id, project_id = str(change.get("id", "")), str(change.get("project_id", ""))
+        changed_at = str(change.get("changed_at", ""))
+        if not change_id or not project_id or not parse_deadline(changed_at):
+            continue
+        data["offline_change_log"].append({
+            "id": change_id,
+            "project_id": project_id,
+            "op": str(change.get("op", "")),
+            "changed_at": changed_at,
+        })
+        current = find_project(data, project_id)
+        current_time = parse_deadline(str(current.get("updated_at", ""))) if current else None
+        change_time = parse_deadline(changed_at)
+        if current_time and change_time and change_time < current_time:
+            accepted.append(change_id)
+            continue
+        if change.get("op") == "delete":
+            if current:
+                add_deleted_item(data, "project", current, index=data["projects"].index(current))
+                data["projects"] = [project for project in data["projects"] if project.get("id") != project_id]
+            accepted.append(change_id)
+            continue
+        project_payload = change.get("project")
+        if change.get("op") != "upsert" or not isinstance(project_payload, dict):
+            continue
+        if current:
+            updated = sanitize_project(project_payload, current=current, updated_at=changed_at)
+            archive_removed_items(data, current, updated)
+            data["projects"][data["projects"].index(current)] = updated
+        else:
+            updated = sanitize_project(project_payload, updated_at=changed_at)
+            updated["id"] = project_id
+            data["projects"].append(updated)
+        accepted.append(change_id)
+    data["offline_change_log"] = data["offline_change_log"][-500:]
+    write_data(data)
+    return jsonify({"accepted": accepted})
+
+
+@app.post("/api/projects/<project_id>/files")
+def upload_project_file(project_id: str):
+    data = read_data()
+    project = find_project(data, project_id)
+    uploaded = request.files.get("file")
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+    if not uploaded or not uploaded.filename:
+        return jsonify({"error": "Choose a file to upload"}), 400
+
+    file_id = uuid4().hex
+    name = Path(uploaded.filename).name or "Document"
+    destination = upload_path(project_id, file_id)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    uploaded.save(destination)
+    metadata = {
+        "id": file_id,
+        "name": name,
+        "content_type": uploaded.mimetype or mimetypes.guess_type(name)[0] or "application/octet-stream",
+        "size": destination.stat().st_size,
+        "uploaded_at": utc_now_iso(),
+    }
+    project.setdefault("files", []).append(metadata)
+    project["updated_at"] = utc_now_iso()
+    write_data(data)
+    return jsonify(metadata), 201
+
+
+@app.get("/api/projects/<project_id>/files/<file_id>")
+def open_project_file(project_id: str, file_id: str):
+    data = read_data()
+    project = find_project(data, project_id)
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+    metadata = next((file for file in project.get("files", []) if file.get("id") == file_id), None)
+    path = upload_path(project_id, file_id)
+    if not metadata or not path.is_file():
+        return jsonify({"error": "File not found"}), 404
+    return send_file(path, mimetype=metadata.get("content_type"), as_attachment=False, download_name=metadata.get("name"))
+
+
+@app.delete("/api/projects/<project_id>/files/<file_id>")
+def delete_project_file(project_id: str, file_id: str):
+    data = read_data()
+    project = find_project(data, project_id)
+    if not project:
+        return jsonify({"error": "Project not found"}), 404
+    files = project.get("files", [])
+    if not any(file.get("id") == file_id for file in files):
+        return jsonify({"error": "File not found"}), 404
+    project["files"] = [file for file in files if file.get("id") != file_id]
+    path = upload_path(project_id, file_id)
+    if path.exists():
+        path.unlink()
+    project["updated_at"] = utc_now_iso()
+    write_data(data)
+    return jsonify({"ok": True})
 
 
 @app.patch("/api/projects/<project_id>/finish")

@@ -200,6 +200,8 @@ html.is-scrolled .topbar::before { opacity: 1; }
 .landing-header .title {
   --titleSize: clamp(2rem, 7vw, 3.25rem);
   margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
   font-size: calc(var(--titleSize) * (1 - var(--condense, 0)) + 1.35rem * var(--condense, 0));
 }
 
@@ -555,6 +557,7 @@ input:focus, textarea:focus {
 .swipe-actions {
   position: absolute;
   inset: 0 0 0 auto;
+  width: 96px;
   display: flex;
   z-index: 0;
   opacity: 0;
@@ -571,19 +574,15 @@ input:focus, textarea:focus {
 }
 
 .swipe-btn {
-  width: 68px;
+  width: 48px;
   min-height: 0;
   height: 100%;
   box-sizing: border-box;
-  padding: 7px 4px;
+  padding: 3px;
   border: 0;
   color: #fff;
   font: inherit;
-  font-size: .64rem;
-  font-weight: 620;
-  letter-spacing: 0;
   display: grid;
-  gap: 5px;
   place-content: center;
   justify-items: center;
   border-radius: 0;
@@ -591,22 +590,23 @@ input:focus, textarea:focus {
 }
 
 .swipe-btn:active { transform: none; filter: brightness(.9); }
-.swipe-btn svg { width: 18px; height: 18px; display: block; }
+.swipe-btn svg { width: 19px; height: 19px; display: block; }
+.swipe-btn span { display: none; }
 .swipe-btn.swipe-edit { background: #007aff; }
 .swipe-btn.swipe-add { background: #30a46c; }
 .swipe-btn.swipe-move { background: #5856d6; }
+.swipe-btn.swipe-share { background: #5856d6; }
 .swipe-btn.swipe-hide { background: #8e8e93; }
 .swipe-btn.swipe-delete { background: var(--danger); }
 
 .swipe-actions { border-radius: inherit; overflow: hidden; }
 
-/* Four task actions would otherwise need 272px of horizontal space. Keep them
-   within a compact 2×2 tray while the two-action menus retain their larger
-   side-by-side targets. */
+/* Four actions stay inside even the shortest one-line task: compact icon-only
+   buttons in a 2×2 tray, rather than a wide horizontal strip. */
 .swipe-actions.swipe-actions-grid {
-  width: 136px;
+  width: 112px;
   display: grid;
-  grid-template-columns: repeat(2, 68px);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: repeat(2, minmax(0, 1fr));
 }
 
@@ -614,12 +614,12 @@ input:focus, textarea:focus {
   width: auto;
   min-height: 0;
   height: auto;
-  padding: 4px 3px;
-  gap: 2px;
-  font-size: .58rem;
+  min-width: 0;
+  padding: 2px;
+  overflow: hidden;
 }
 
-.swipe-actions-grid .swipe-btn svg { width: 16px; height: 16px; }
+.swipe-actions-grid .swipe-btn svg { width: 17px; height: 17px; }
 
 .swipe-row .swipe-target {
   position: relative;
@@ -1876,6 +1876,25 @@ body:has(.move-toolbar) #floatingActions {
   animation: toast-in .24s var(--spring) both;
 }
 
+.connection-status {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--surfaceSoft);
+  color: var(--muted);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
+  animation: connection-status-in .2s var(--spring) both;
+}
+.connection-status[hidden] { display: none; }
+.connection-status svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.connection-status.is-offline { color: var(--warning); border-color: color-mix(in srgb, var(--warning) 48%, var(--line)); }
+.connection-status.is-online { color: var(--successText); border-color: color-mix(in srgb, var(--successText) 48%, var(--line)); }
+@keyframes connection-status-in { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
+
 .confirm-backdrop {
   position: fixed;
   inset: 0;
@@ -1944,6 +1963,64 @@ body:has(.move-toolbar) #floatingActions {
   overflow: hidden;
   position: relative;
 }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.project-list-loading { pointer-events: none; }
+.project-card-skeleton,
+.project-loading-layout .project-hero-skeleton,
+.project-section-skeleton {
+  overflow: hidden;
+  position: relative;
+}
+.project-card-skeleton::after,
+.project-loading-layout .project-hero-skeleton::after,
+.project-section-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text) 7%, transparent), transparent);
+  animation: shimmer 1.25s infinite;
+}
+.project-card-skeleton { pointer-events: none; }
+.skeleton-block {
+  display: block;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 9%, transparent);
+}
+.skeleton-icon { width: 50px; height: 50px; border-radius: 15px; flex: 0 0 auto; }
+.skeleton-title { width: min(65%, 240px); height: 17px; }
+.skeleton-copy { width: 92%; height: 11px; }
+.skeleton-copy.short { width: 58%; }
+.skeleton-meta { width: 108px; height: 12px; margin-top: 4px; }
+.project-card-skeleton { align-items: flex-start; }
+.project-card-skeleton .project-card-body { gap: 10px; width: 100%; }
+.project-loading-layout { display: grid; gap: 16px; }
+.project-loading-layout[hidden] { display: none; }
+.project-loading-layout .project-hero-skeleton { display: grid; gap: 14px; }
+.project-loading-layout .hero-icon { overflow: hidden; }
+.project-loading-copy { display: grid; gap: 9px; max-width: 620px; }
+.project-loading-description { margin: 0; color: var(--muted); line-height: 1.45; }
+.skeleton-action { width: 38px; height: 38px; border-radius: 50%; }
+.project-section-skeleton .section-body { display: grid; }
+.project-loading-rows { gap: 8px; }
+.project-loading-row { min-height: 64px; pointer-events: none; }
+.project-loading-row-copy { display: grid; align-content: center; gap: 9px; flex: 1; min-width: 0; }
+.skeleton-row-icon { width: 42px; height: 42px; border-radius: 13px; flex: 0 0 auto; }
+.skeleton-check { width: 21px; height: 21px; border-radius: 7px; flex: 0 0 auto; }
+.skeleton-row-title { width: min(58%, 210px); height: 14px; }
+.skeleton-row-subtitle { width: min(38%, 138px); height: 11px; }
 
 .loading-skeleton::after {
   content: "";

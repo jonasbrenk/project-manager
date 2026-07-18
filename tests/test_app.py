@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import tempfile
 import unittest
+import gzip
+from io import BytesIO
 from pathlib import Path
 
 import app.main as project_app
@@ -59,6 +61,49 @@ class ProjectApiTests(unittest.TestCase):
         self.assertEqual(api_response.headers["X-Content-Type-Options"], "nosniff")
         api_response.close()
         css_response.close()
+
+    def test_project_page_is_gzipped_when_supported(self) -> None:
+        response = self.client.get("/project?id=test", headers={"Accept-Encoding": "gzip"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Encoding"], "gzip")
+        self.assertIn(b"Project View", gzip.decompress(response.data))
+        response.close()
+
+    def test_offline_service_worker_is_available(self) -> None:
+        response = self.client.get("/offline-service-worker.js")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"OFFLINE_API_CACHE", response.data)
+        response.close()
+
+    def test_health_endpoint_is_no_content(self) -> None:
+        response = self.client.get("/api/health")
+
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(response.data, b"")
+        self.assertEqual(response.headers["Cache-Control"], "no-store")
+
+    def test_project_file_upload_open_and_delete(self) -> None:
+        created = self.client.post("/api/projects", json={"name": "Files", "links": [], "steps": []})
+        project_id = created.get_json()["id"]
+        uploaded = self.client.post(
+            f"/api/projects/{project_id}/files",
+            data={"file": (BytesIO(b"# Notes"), "notes.md")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(uploaded.status_code, 201)
+        file = uploaded.get_json()
+        self.assertEqual(file["name"], "notes.md")
+
+        opened = self.client.get(f"/api/projects/{project_id}/files/{file['id']}")
+        self.assertEqual(opened.status_code, 200)
+        self.assertEqual(opened.data, b"# Notes")
+        opened.close()
+
+        deleted = self.client.delete(f"/api/projects/{project_id}/files/{file['id']}")
+        self.assertEqual(deleted.status_code, 200)
+        self.assertEqual(self.client.get(f"/api/projects/{project_id}/files/{file['id']}").status_code, 404)
 
 
 if __name__ == "__main__":

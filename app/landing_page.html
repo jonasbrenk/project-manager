@@ -345,11 +345,18 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 8px 12px;
-  font-size: .72rem;
-  border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  min-height: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  line-height: 0;
+  border-radius: 50%;
   z-index: 12;
 }
+
+.visibility-toggle svg { display: block; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 
 .delete-toolbar {
   position: fixed; right: 18px; bottom: 18px; left: auto;
@@ -411,6 +418,21 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 
 .project-card { position: relative; } /* Needed for absolute positioning */
+.project-offline-cache {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--panelBg) 82%, var(--accent));
+  color: var(--accent);
+}
+.project-offline-cache svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.project-offline-cache.is-unavailable { color: var(--muted); opacity: .34; filter: grayscale(1); }
 
 .hide-toggle {
   position: absolute; top: 12px; right: 12px;
@@ -514,8 +536,9 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 }
 
  </style>
-  <link rel="stylesheet" href="/static/app-shell.css?v=33">
-  <script src="/static/app-shell.js?v=10"></script>
+  <link rel="stylesheet" href="/static/app-shell.css?v=38">
+  <script src="/static/app-shell.js?v=13"></script>
+  <script src="/static/offline-data.js?v=1"></script>
 </head>
 <body>
   <div class="app-scroll" id="appScroll">
@@ -547,7 +570,11 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
         <button class="segment" type="button" data-filter="finished" aria-pressed="false" onclick="setProjectFilter('finished')">Finished <span id="doneCount">0</span></button>
       </div>
       <div class="projects-surface">
-        <div id="projectList" class="project-list" aria-live="polite"><div class="empty loading-skeleton">Loading projects…</div></div>
+        <div id="projectList" class="project-list project-list-loading" aria-live="polite" aria-busy="true">
+          <div class="project-card project-card-skeleton" aria-hidden="true"><div class="skeleton-block skeleton-icon"></div><div class="project-card-body"><div class="skeleton-block skeleton-title"></div><div class="skeleton-block skeleton-copy"></div><div class="skeleton-block skeleton-copy short"></div><div class="skeleton-block skeleton-meta"></div></div></div>
+          <div class="project-card project-card-skeleton" aria-hidden="true"><div class="skeleton-block skeleton-icon"></div><div class="project-card-body"><div class="skeleton-block skeleton-title"></div><div class="skeleton-block skeleton-copy"></div><div class="skeleton-block skeleton-copy short"></div><div class="skeleton-block skeleton-meta"></div></div></div>
+          <span class="sr-only">Loading projects…</span>
+        </div>
         <section class="hidden-section" id="hiddenSection" hidden>
           <button class="hidden-summary" type="button" onclick="toggleHiddenProjects(event)" aria-expanded="false" aria-controls="hiddenDisclosure">
             <span>Hidden</span><span id="hiddenCount" class="hidden-count">0</span>
@@ -996,8 +1023,11 @@ function toggleProjectSelection(event, id) {
   event.stopPropagation();
   if (selectedProjectIds.has(id)) selectedProjectIds.delete(id);
   else selectedProjectIds.add(id);
+  const selected = selectedProjectIds.has(id);
+  const card = event.currentTarget?.closest(".project-card") || event.target.closest(".project-card");
+  card?.classList.toggle("selected-for-delete", selected);
+  card?.setAttribute("aria-pressed", String(selected));
   updateDeleteToolbar();
-  renderProjects();
 }
 
 async function confirmDeleteSelected() {
@@ -1010,10 +1040,15 @@ async function confirmDeleteSelected() {
     destructive: true
   });
   if (!confirmed) return;
-  await Promise.all([...selectedProjectIds].map(id => fetch(`/api/projects/${id}`, { method: "DELETE" })));
+  const ids = [...selectedProjectIds];
+  if (window.pmOffline?.offline()) {
+    ids.forEach(id => window.pmOffline.queueDelete(id));
+    currentProjects = currentProjects.filter(project => !ids.includes(project.id));
+    localStorage.setItem("pm_project_summaries", JSON.stringify(currentProjects));
+  } else await Promise.all(ids.map(id => fetch(`/api/projects/${id}`, { method: "DELETE" })));
   cancelActionMode();
-  await loadProjects(true);
-  await loadDeletedItems();
+  if (window.pmOffline?.offline()) renderProjects();
+  else { await loadProjects(true); await loadDeletedItems(); }
 }
 
 function togglePendingVisibility(event, id) {
@@ -1022,8 +1057,13 @@ function togglePendingVisibility(event, id) {
   event.stopPropagation();
   if (selectedProjectIds.has(id)) selectedProjectIds.delete(id);
   else selectedProjectIds.add(id);
+  const visible = selectedProjectIds.has(id);
+  const card = event.currentTarget?.closest(".project-card") || event.target.closest(".project-card");
+  card?.classList.toggle("visibility-selected", visible);
+  card?.setAttribute("aria-pressed", String(visible));
+  const toggle = card?.querySelector(".visibility-toggle");
+  if (toggle) toggle.innerHTML = visible ? VISIBILITY_ICON_VISIBLE : VISIBILITY_ICON_HIDDEN;
   updateDeleteToolbar();
-  renderProjects();
 }
 
 function confirmVisibilityChanges() {
@@ -1082,6 +1122,9 @@ function toggleLastDeleted(event) {
 const SWIPE_ICON_HIDE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A16.7 16.7 0 0 0 2 12s3 7 10 7a9.9 9.9 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`;
 const SWIPE_ICON_SHOW = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
 const SWIPE_ICON_DELETE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`;
+const VISIBILITY_ICON_VISIBLE = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const VISIBILITY_ICON_HIDDEN = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A16.7 16.7 0 0 0 2 12s3 7 10 7a9.9 9.9 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`;
+const OFFLINE_CACHE_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5.5h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2Z"/><path d="M7 9h10M8 14l2.3 2.2L16.5 10"/></svg>`;
 
 window.pmSwipeDisabled = () => deleteMode || visibilityMode;
 
@@ -1111,6 +1154,8 @@ window.swipeDelete = swipeDelete;
 
 function renderProjects() {
   window.pmSwipeClose?.();
+  projectList.classList.remove("project-list-loading");
+  projectList.removeAttribute("aria-busy");
   const projects = currentProjects;
   allCount.textContent = projects.length;
   doneCount.textContent = projects.filter(p => p.finished).length;
@@ -1121,8 +1166,9 @@ function renderProjects() {
     const swipeable = !deleteMode && !visibilityMode;
     return `
       <div class="swipe-row" style="view-transition-name: p-${String(p.id).replace(/[^a-zA-Z0-9-]/g, "")}">
-      ${swipeable ? `<div class="swipe-actions"><button class="swipe-btn swipe-hide" type="button" onclick="swipeToggleHidden(event, '${p.id}')">${hiddenIds.has(p.id) ? SWIPE_ICON_SHOW : SWIPE_ICON_HIDE}<span>${hiddenIds.has(p.id) ? "Show" : "Hide"}</span></button><button class="swipe-btn swipe-delete" type="button" onclick="swipeDelete(event, '${p.id}')">${SWIPE_ICON_DELETE}<span>Delete</span></button></div>` : ""}
-      <${deleteMode || visibilityMode ? "button" : "a"} class="project-card swipe-target${p.finished ? " is-finished" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" ${deleteMode || visibilityMode ? `type="button" aria-pressed="${deleteMode ? selectedProjectIds.has(p.id) : isVisible}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : `togglePendingVisibility(event, '${p.id}')`}"` : `href="/project?id=${encodeURIComponent(p.id)}"`}>
+      ${swipeable ? `<div class="swipe-actions"><button class="swipe-btn swipe-hide" type="button" aria-label="${hiddenIds.has(p.id) ? "Show" : "Hide"}" title="${hiddenIds.has(p.id) ? "Show" : "Hide"}" onclick="swipeToggleHidden(event, '${p.id}')">${hiddenIds.has(p.id) ? SWIPE_ICON_SHOW : SWIPE_ICON_HIDE}<span>${hiddenIds.has(p.id) ? "Show" : "Hide"}</span></button><button class="swipe-btn swipe-delete" type="button" aria-label="Delete" title="Delete" onclick="swipeDelete(event, '${p.id}')">${SWIPE_ICON_DELETE}<span>Delete</span></button></div>` : ""}
+      <${deleteMode || visibilityMode ? "button" : "a"} class="project-card swipe-target${p.finished ? " is-finished" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" data-project-id="${escapeHtml(p.id)}" ${deleteMode || visibilityMode ? `type="button" aria-pressed="${deleteMode ? selectedProjectIds.has(p.id) : isVisible}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : `togglePendingVisibility(event, '${p.id}')`}"` : `href="/project?id=${encodeURIComponent(p.id)}"`}>
+        ${document.documentElement.hasAttribute("data-offline") ? `<span class="project-offline-cache is-unavailable" data-project-cache-id="${escapeHtml(p.id)}" role="img" aria-label="Project is not saved offline" title="Not saved offline">${OFFLINE_CACHE_ICON}</span>` : ""}
         <div class="project-icon">
           ${renderIcon(p.icon, "📌", p.name)}
         </div>
@@ -1137,7 +1183,7 @@ function renderProjects() {
           ${Number(p.task_total) > 0 ? `<div class="project-progress"><div class="project-progress-track"><div class="project-progress-fill" style="width:${Math.round((Number(p.task_done) || 0) / Number(p.task_total) * 100)}%"></div></div><span>${Number(p.task_done) || 0}/${Number(p.task_total)} tasks</span></div>` : ""}
           ${window.pmMeta.line({ deadline: p.deadline, secondsLeft: p.seconds_left, finished: p.finished })}
         </div>
-        ${visibilityMode ? `<span class="btn btn-secondary visibility-toggle">${isVisible ? "Visible" : "Hidden"}</span>` : ""}
+        ${visibilityMode ? `<span class="btn btn-secondary visibility-toggle" aria-hidden="true">${isVisible ? VISIBILITY_ICON_VISIBLE : VISIBILITY_ICON_HIDDEN}</span>` : ""}
       </${deleteMode || visibilityMode ? "button" : "a"}>
       </div>`;
   };
@@ -1162,6 +1208,23 @@ function renderProjects() {
     hSection.hidden = true;
     document.getElementById("hiddenList").innerHTML = "";
   }
+  updateOfflineProjectCacheStates();
+}
+
+async function updateOfflineProjectCacheStates() {
+  if (!document.documentElement.hasAttribute("data-offline") || !("caches" in window)) return;
+  const indicators = [...document.querySelectorAll("[data-project-cache-id]")];
+  try {
+    const cache = await caches.open("project-manager-api-v1");
+    await Promise.all(indicators.map(async indicator => {
+      const id = indicator.dataset.projectCacheId;
+      const localCopy = localStorage.getItem(`pm_project_${id}`);
+      const cached = !!localCopy || !!(await cache.match(`/api/projects/${encodeURIComponent(id)}`));
+      indicator.classList.toggle("is-unavailable", !cached);
+      indicator.setAttribute("aria-label", cached ? "Saved for offline use" : "Project is not saved offline");
+      indicator.title = cached ? "Saved for offline use" : "Not saved offline";
+    }));
+  } catch { }
 }
 
 function updateProjectFiltersInPlace() {
@@ -1291,6 +1354,14 @@ function renderCachedProjects() {
   }
 }
 
+function rememberProjectNavigation(event) {
+  const card = event.target.closest('a.project-card[data-project-id]');
+  if (!card || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const project = currentProjects.find(item => item.id === card.dataset.projectId);
+  if (!project) return;
+  try { sessionStorage.setItem("pm_project_loading_summary", JSON.stringify(project)); } catch { }
+}
+
     projectForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const rawIcon = projectForm.icon.value.trim() || DEFAULT_PROJECT_ICON;
@@ -1304,6 +1375,14 @@ function renderCachedProjects() {
         links: [],
         steps: []
       };
+      if (window.pmOffline?.offline()) {
+        const created = window.pmOffline.queueProject({ ...payload, id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`, created_at: new Date().toISOString(), files: [], file_links: [] });
+        currentProjects.unshift(created);
+        localStorage.setItem("pm_project_summaries", JSON.stringify(currentProjects));
+        closeCreateProjectModal();
+        renderProjects();
+        return;
+      }
       const res = await fetch("/api/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       if (!res.ok) { confirmSheet({ title: "Could Not Create Project", message: "Please check your connection and try again.", cancelLabel: null }); return; }
       closeCreateProjectModal();
@@ -1340,6 +1419,8 @@ function renderCachedProjects() {
     settingsBackdrop?.addEventListener("click", (event) => { if (event.target === settingsBackdrop) closeSettingsModal(); });
     createProjectBackdrop?.addEventListener("click", (event) => { if (event.target === createProjectBackdrop) closeCreateProjectModal(); });
     document.addEventListener("click", () => { closeFloatingActions(); closeManagementActions(); });
+    document.addEventListener("click", rememberProjectNavigation, true);
+    window.addEventListener("pmconnectionchange", () => renderProjects());
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") return;
       closeSettingsModal();

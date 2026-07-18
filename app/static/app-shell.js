@@ -415,6 +415,74 @@ function pmInit() {
   pmInitEdgeBack();
   pmInitSheetDismiss();
   pmInitSwipe();
+  pmInitOfflineStatus();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/offline-service-worker.js").catch(() => {});
+  }
+}
+
+function pmInitOfflineStatus() {
+  const status = document.createElement("span");
+  status.className = "connection-status";
+  status.setAttribute("role", "status");
+  status.setAttribute("aria-live", "polite");
+  (document.querySelector(".nav-actions") || document.body).prepend(status);
+  let offline = !navigator.onLine;
+  let wasOffline = offline;
+  let restoredTimer = null;
+  let probeTimer = null;
+  let probeToken = 0;
+
+  const offlineIcon = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.7 5.2A12.2 12.2 0 0 1 12 5c5.5 0 9.7 4.7 10 7-.6 1.1-1.5 2.2-2.5 3.1M6.3 6.3A13.2 13.2 0 0 0 2 12c.8 1.6 2.1 3 3.7 4.1M9.5 12.2a4 4 0 0 1 5.1.2M12 19h.01"/></svg><span class="sr-only">Offline</span>`;
+  const onlineIcon = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.1a12.1 12.1 0 0 1 16 0M6.8 12.1a8 8 0 0 1 10.4 0M9.7 15.2a4 4 0 0 1 4.6 0M12 19.2h.01"/></svg><span class="sr-only">Back online</span>`;
+
+  const update = nextOffline => {
+    const changed = offline !== nextOffline;
+    offline = nextOffline;
+    document.documentElement.toggleAttribute("data-offline", offline);
+    clearTimeout(restoredTimer);
+    if (offline) {
+      status.hidden = false;
+      status.className = "connection-status is-offline";
+      status.innerHTML = offlineIcon;
+      wasOffline = true;
+    } else if (wasOffline) {
+      status.hidden = false;
+      status.className = "connection-status is-online";
+      status.innerHTML = onlineIcon;
+      wasOffline = false;
+      restoredTimer = setTimeout(() => { status.hidden = true; }, 1800);
+    } else status.hidden = true;
+    if (changed) window.dispatchEvent(new CustomEvent("pmconnectionchange", { detail: { offline } }));
+  };
+
+  const probe = async () => {
+    const token = ++probeToken;
+    clearTimeout(probeTimer);
+    if (!navigator.onLine) {
+      update(true);
+      probeTimer = setTimeout(probe, 6000);
+      return;
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3500);
+    try {
+      const response = await fetch("/api/health", { cache: "no-store", signal: controller.signal });
+      if (token !== probeToken) return;
+      update(!response.ok);
+    } catch {
+      if (token !== probeToken) return;
+      update(true);
+    } finally {
+      clearTimeout(timeout);
+      if (token !== probeToken) return;
+      probeTimer = setTimeout(probe, offline ? 6000 : 45000);
+    }
+  };
+  window.addEventListener("online", probe);
+  window.addEventListener("offline", () => probe());
+  update(offline);
+  probe();
 }
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", pmInit);
