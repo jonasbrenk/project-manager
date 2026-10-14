@@ -1544,8 +1544,8 @@
     }
   </style>
   <link rel="stylesheet" href="/static/app-shell.css?v=47">
-  <script src="/static/app-shell.js?v=15"></script>
-  <script src="/static/offline-data.js?v=1"></script>
+  <script src="/static/app-shell.js?v=16"></script>
+  <script src="/static/pm-store.js?v=1"></script>
 
 </head>
 
@@ -1562,9 +1562,9 @@
     <div id="floatingActionsMenu" class="floating-actions-menu">
       <button class="menu-item" type="button" onclick="openAddStepFromMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.2 12 2.4 2.5 5.3-5.2"/></svg><span>New task</span></button>
       <button class="menu-item" type="button" onclick="openAddLinkFromMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.5 14.5 5-5M7.2 16.8l-1.1 1.1a3 3 0 0 1-4.2-4.2l4-4a3 3 0 0 1 4.2 0M16.8 7.2l1.1-1.1a3 3 0 0 1 4.2 4.2l-4 4a3 3 0 0 1-4.2 0"/></svg><span>New link</span></button>
-      <button class="menu-item" type="button" data-requires-online onclick="openAddProjectLinkFromMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h6l1.8 2H20v11H4Z"/><path d="M12 13h5M14.5 10.5v5"/></svg><span>Link project</span></button>
+      <button class="menu-item" type="button" onclick="openAddProjectLinkFromMenu()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h6l1.8 2H20v11H4Z"/><path d="M12 13h5M14.5 10.5v5"/></svg><span>Link project</span></button>
       <button class="menu-item" type="button" data-requires-online onclick="openUploadFileModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M8 8l4-4 4 4M5 14v5h14v-5"/></svg><span>Upload file</span></button>
-      <button class="menu-item" type="button" data-requires-online onclick="openLinkProjectFileModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h7l3 3v13H7Z"/><path d="M14 4v4h4M10 14h4M12 12v4"/></svg><span>Link project file</span></button>
+      <button class="menu-item" type="button" onclick="openLinkProjectFileModal()"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h7l3 3v13H7Z"/><path d="M14 4v4h4M10 14h4M12 12v4"/></svg><span>Link project file</span></button>
     </div>
     <button class="floating-trigger" type="button" onclick="toggleFloatingActions(event)" aria-label="Project actions" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
   </div>
@@ -1713,8 +1713,7 @@
         if (referrer.origin !== location.origin || referrer.pathname !== "/project") return;
         const fromId = new URLSearchParams(referrer.search).get("id");
         if (!fromId || fromId === projectId) return;
-        const summaries = JSON.parse(localStorage.getItem("pm_project_summaries") || "[]");
-        const name = summaries.find(summary => summary.id === fromId)?.name;
+        const name = window.pmStore.get(fromId)?.name;
         back.textContent = `‹ ${name || "Back"}`;
         back.href = referrer.pathname + referrer.search;
       } catch { }
@@ -1813,28 +1812,11 @@
     function stepTimeLeft(deadline) { if (!deadline) return null; const dt = new Date(deadline); if (Number.isNaN(dt.getTime())) return null; return Math.floor((dt.getTime() - Date.now()) / 1000); }
     function deepClone(value) { return JSON.parse(JSON.stringify(value)); }
     function countTaskProgress(steps) { return (steps || []).reduce((total, step) => { const nested = countTaskProgress(step.children || []); return { total: total.total + 1 + nested.total, done: total.done + Number(!!step.done) + nested.done }; }, { total: 0, done: 0 }); }
-    function cacheProjectState(value) {
-      try {
-        localStorage.setItem(`pm_project_${projectId}`, JSON.stringify(value));
-        const summaries = JSON.parse(localStorage.getItem("pm_project_summaries") || "null");
-        if (!Array.isArray(summaries)) return;
-        const index = summaries.findIndex(summary => summary.id === value.id);
-        if (index < 0) return;
-        const taskProgress = countTaskProgress(value.steps || []);
-        summaries[index] = { ...summaries[index], id: value.id, name: value.name, deadline: value.deadline, description: value.description, finished: !!value.finished, icon: value.icon, seconds_left: value.seconds_left, task_total: taskProgress.total, task_done: taskProgress.done, updated_at: value.updated_at };
-        localStorage.setItem("pm_project_summaries", JSON.stringify(summaries));
-      } catch { }
-    }
+    const isOffline = () => document.documentElement.hasAttribute("data-offline") || !navigator.onLine;
     function parseDateSafe(val) { const str = String(val || "").trim(); if (!str) return null; const dt = new Date(str); return Number.isNaN(dt.getTime()) ? null : dt.toISOString(); }
     function buildCardMenu(menuId, actions) {
       const isOpen = openContextMenuId === menuId;
       return `<div class="card-menu-wrap${isOpen ? " open" : ""}"><button class="card-menu-trigger" type="button" onclick='toggleContextMenu(${JSON.stringify(menuId)}, event)' aria-label="More actions" aria-expanded="${isOpen}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.65"/><circle cx="12" cy="12" r="1.65"/><circle cx="19" cy="12" r="1.65"/></svg></button><div class="card-menu${isOpen ? " show" : ""}" id="${escapeHtml(menuId)}">${actions.map(action => `<button class="card-menu-item${action.danger ? " danger" : ""}" type="button" onclick="event.stopPropagation(); closeContextMenu(); ${action.onclick}">${action.icon || ""}<span>${escapeHtml(action.label)}</span></button>`).join("")}</div></div>`;
-    }
-
-    async function api(url, options = {}) {
-      const res = await fetch(url, { headers: { "Content-Type": "application/json" }, ...options });
-      if (!res.ok) throw new Error(await res.text() || "Request failed");
-      return res.headers.get("content-type")?.includes("application/json") ? res.json() : null;
     }
 
     // --- Project link helpers ---
@@ -1851,30 +1833,12 @@
       } catch { return null; }
     }
 
-    async function fetchLinkedProject(id) {
-      if (id in projectCache) return projectCache[id];
-      try {
-        projectCache[id] = await api(`/api/projects/${id}`);
-      } catch {
-        projectCache[id] = null;
-      }
-      return projectCache[id];
+    function linkedProjectIds() {
+      return new Set((project?.links || []).map(l => getProjectIdFromLink(l)).filter(Boolean));
     }
 
-    function hasUncachedProjectLinks() {
-      return (project.links || []).some(l => {
-        const pid = getProjectIdFromLink(l);
-        return pid && !(pid in projectCache);
-      });
-    }
-
-    async function hydrateProjectLinks() {
-      const ids = [...new Set(
-        (project.links || []).map(l => getProjectIdFromLink(l)).filter(Boolean)
-      )].filter(id => !(id in projectCache));
-      if (!ids.length) return;
-      await Promise.all(ids.map(id => fetchLinkedProject(id)));
-      render(); // re-render with now-cached data; won't loop because all are cached
+    function refreshLinkedProjects() {
+      for (const id of linkedProjectIds()) projectCache[id] = window.pmStore.get(id);
     }
 
     function renderProjectLinkCard(link, index, proj) {
@@ -2102,20 +2066,14 @@
       const stepIds = [...selectedDeleteIds].filter(key => key.startsWith("step:")).map(key => key.slice(5));
       const fileIds = [...selectedDeleteIds].filter(key => key.startsWith("file:")).map(key => key.slice(5));
       const fileLinkIds = [...selectedDeleteIds].filter(key => key.startsWith("file-link:")).map(key => key.slice(10));
-      const failedFileIds = [];
-      for (const fileId of fileIds) {
-        const response = await fetch(`/api/projects/${projectId}/files/${encodeURIComponent(fileId)}`, { method: "DELETE" });
-        if (!response.ok) failedFileIds.push(fileId);
-      }
       if (linkIds.length) updated.links = (updated.links || []).filter(link => !linkIds.includes(link.id));
       for (const stepId of stepIds) updated.steps = removeStepRecursive(updated.steps || [], stepId);
-      if (fileIds.length) updated.files = (updated.files || []).filter(file => !fileIds.includes(file.id) || failedFileIds.includes(file.id));
+      if (fileIds.length) updated.files = (updated.files || []).filter(file => !fileIds.includes(file.id));
       if (fileLinkIds.length) updated.file_links = (updated.file_links || []).filter(link => !fileLinkIds.includes(link.id));
       deleteMode = false;
       selectedDeleteIds.clear();
       updateDeleteToolbar();
       await saveProject(updated);
-      if (failedFileIds.length) notify("Some files could not be deleted.");
     }
 
     // Icon button + hidden input, meant to sit inline at the left of a name row
@@ -2225,24 +2183,20 @@
       wrapper?.querySelector(".card-menu-trigger")?.setAttribute("aria-expanded", String(isOpen));
     }
 
-    async function saveProject(updatedProject) {
-      if (window.pmOffline?.offline()) {
-        project = window.pmOffline.queueProject(updatedProject);
-        cacheProjectState(project);
-        window.pmAnimate(render);
-        closeModal();
-        notify("Saved on this device. It will sync when online.");
-        return;
-      }
+    // Saves locally and returns at once; pm-store syncs in the background.
+    function storeProject(updatedProject) {
       try {
-        project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updatedProject) });
-        cacheProjectState(project);
-        window.pmAnimate(render);
-        closeModal();
-      } catch (error) {
-        notify("Could not save changes. Please try again.");
-        throw error;
+        project = window.pmStore.save(updatedProject);
+        return true;
+      } catch {
+        notify("Could not save: this device is out of storage space.");
+        return false;
       }
+    }
+    async function saveProject(updatedProject) {
+      if (!storeProject(updatedProject)) return;
+      window.pmAnimate(render);
+      closeModal();
     }
 
     // --- Render ---
@@ -2447,7 +2401,7 @@
     }
     async function openProjectFile(ownerProjectId, fileId) {
       const url = fileUrl(ownerProjectId, fileId);
-      if (!window.pmOffline?.offline()) { window.open(url, "_blank"); return; }
+      if (!isOffline()) { window.open(url, "_blank"); return; }
       try {
         const cache = await caches.open(FILE_CACHE_NAME);
         if (await cache.match(url)) { window.open(url, "_blank"); return; }
@@ -2473,8 +2427,16 @@
           const marker = button.dataset.fileCacheMarker;
           if (cached) localStorage.setItem(marker, "1"); else localStorage.removeItem(marker);
           setFileCacheButton(button, cached);
-          if (window.pmOffline?.offline()) button.closest(".link-card")?.classList.toggle("file-unavailable", !cached);
+          if (isOffline()) button.closest(".link-card")?.classList.toggle("file-unavailable", !cached);
         }));
+      } catch { }
+    }
+    async function keepUploadedFileOffline(ownerProjectId, file, blob) {
+      if (!("caches" in window) || !(blob instanceof Blob)) return;
+      try {
+        const cache = await caches.open(FILE_CACHE_NAME);
+        await cache.put(fileUrl(ownerProjectId, file.id), new Response(blob, { headers: { "Content-Type": file.content_type || blob.type || "application/octet-stream" } }));
+        localStorage.setItem(fileCacheMarker(ownerProjectId, file.id), "1");
       } catch { }
     }
     async function toggleFileOfflineCache(event, ownerProjectId, fileId) {
@@ -2493,7 +2455,7 @@
           notify("Offline copy removed.");
           return;
         }
-        if (window.pmOffline?.offline()) { notify("Connect to download this file for offline use."); return; }
+        if (isOffline()) { notify("Connect to download this file for offline use."); return; }
         const response = await fetch(url, { cache: "no-store" });
         if (!response.ok) throw new Error("Could not download file");
         await cache.put(url, response.clone());
@@ -2509,7 +2471,7 @@
       const linkedFiles = (project.file_links || []).map(file => ({ ...file, id: file.source_file_id, ownerProjectId: file.source_project_id, ownerProjectName: file.source_project_name, linkId: file.id }));
       const files = [...ownFiles, ...linkedFiles];
       if (!files.length) return emptyStateHtml("files", "No files yet", "Upload file", "openUploadFileModal()");
-      const offline = !!window.pmOffline?.offline();
+      const offline = isOffline();
       return `<div class="links-grid">${files.map((file, index) => {
         const linked = !!file.linkId;
         const selectionKey = linked ? `file-link:${file.linkId}` : `file:${file.id}`;
@@ -2522,16 +2484,25 @@
         const offlineUnavailable = offline && !cached;
         const subtitle = offlineUnavailable ? "Unavailable offline" : `${fileTypeLabel(file)} · ${formatFileSize(file.size)}${linked && file.ownerProjectName ? ` · ${escapeHtml(file.ownerProjectName)}` : ""}`;
         const cacheButton = deleteMode ? "" : `<button class="file-cache-toggle${cached ? " is-cached" : ""}" type="button" data-file-cache-url="${escapeHtml(url)}" data-file-cache-marker="${escapeHtml(marker)}" onclick="toggleFileOfflineCache(event, '${escapeHtml(file.ownerProjectId)}', '${escapeHtml(file.id)}')" aria-pressed="${cached}" aria-label="${cached ? "Remove offline copy" : "Make available offline"}" title="${cached ? "Available offline — remove copy" : "Make available offline"}">${cached ? FILE_CACHE_ICON : FILE_NOT_CACHED_ICON}</button>`;
-        const actions = offline ? "" : swipeActionsHtml([{ label: "Share", className: "swipe-share", icon: SWIPE_ICON_SHARE, onclick: shareCall }, { label: linked ? "Remove" : "Delete", className: "swipe-delete", icon: SWIPE_ICON_DELETE, onclick: deleteCall }]);
-        const menu = offline ? "" : buildCardMenu(`file-menu-${index}`, [{ label: "Open", icon: SWIPE_ICON_ADD, onclick: `window.open('${url}', '_blank');` }, { label: "Share", icon: SWIPE_ICON_SHARE, onclick: shareCall }, { label: linked ? "Remove link" : "Delete", icon: SWIPE_ICON_DELETE, onclick: deleteCall, danger: true }]);
+        const actions = swipeActionsHtml([{ label: "Share", className: "swipe-share", icon: SWIPE_ICON_SHARE, onclick: shareCall }, { label: linked ? "Remove" : "Delete", className: "swipe-delete", icon: SWIPE_ICON_DELETE, onclick: deleteCall }]);
+        const menu = buildCardMenu(`file-menu-${index}`, [{ label: "Open", icon: SWIPE_ICON_ADD, onclick: `openProjectFile('${escapeHtml(file.ownerProjectId)}', '${escapeHtml(file.id)}');` }, { label: "Share", icon: SWIPE_ICON_SHARE, onclick: shareCall }, { label: linked ? "Remove link" : "Delete", icon: SWIPE_ICON_DELETE, onclick: deleteCall, danger: true }]);
         const click = deleteMode ? `toggleDeleteSelection(event, '${selectionKey}')` : `openProjectFile('${escapeHtml(file.ownerProjectId)}', '${escapeHtml(file.id)}')`;
         return `<div class="swipe-row" style="view-transition-name: f-${String(file.linkId || file.id).replace(/[^a-zA-Z0-9-]/g, "")}">${actions}<div class="link-card file-row swipe-target${offlineUnavailable ? " file-unavailable" : ""}${selected ? " selected-for-delete" : ""}" data-delete-key="${escapeHtml(selectionKey)}" onclick="${click}">${menu}${cacheButton}${selected ? `<span class="delete-indicator" aria-hidden="true">${SWIPE_ICON_DELETE}</span>` : ""}<div class="link-icon">${fileIconHtml(file, url, offlineUnavailable)}</div><div class="link-main"><div class="link-title">${escapeHtml(file.name || "Document")}</div><div class="link-subtitle">${subtitle}</div></div></div></div>`;
       }).join("")}</div>`;
     }
 
+    function updateOnlineOnlyActions() {
+      const offline = isOffline();
+      document.querySelectorAll("[data-requires-online]").forEach(button => {
+        button.disabled = offline;
+        button.title = offline ? "Unavailable while offline" : "";
+      });
+    }
+
     function render() {
       if (!project) return;
       window.pmSwipeClose?.();
+      refreshLinkedProjects();
       const hasDoneTasks = hasCompletedSteps(project.steps || []);
       const linksMenuOpen = !!openContextMenuId && (openContextMenuId.startsWith("link-menu-") || openContextMenuId.startsWith("project-link-menu-"));
       const stepsMenuOpen = (!!openContextMenuId && openContextMenuId.startsWith("step-menu-")) || !!moveState;
@@ -2542,7 +2513,7 @@
       <section data-section="links" class="content-section${linksMenuOpen ? " has-open-menu" : ""}${collapsedSections.has("links") ? " is-collapsed" : ""}">${sectionHeader("links", "Links")}<div class="section-body">${renderLinks()}</div></section>
       <section data-section="files" class="content-section${collapsedSections.has("files") ? " is-collapsed" : ""}">${sectionHeader("files", "Files")}<div class="section-body">${renderFiles()}</div></section>
       <section data-section="tasks" class="content-section steps-section${stepsMenuOpen ? " has-open-menu" : ""}${collapsedSections.has("tasks") ? " is-collapsed" : ""}" ${moveState ? `onclick="selectMoveTarget(null, event)"` : ""}>${sectionHeader("tasks", "Tasks", hasDoneTasks && !moveState && !deleteMode ? `<button class="section-action" type="button" aria-pressed="${hideCompletedSteps}" onclick="toggleCompletedSteps(event)">${hideCompletedSteps ? "Show done" : "Hide done"}</button>` : "")}<div class="section-body">${renderStepTree(project.steps)}</div></section>`;
-      if (window.pmOffline?.offline()) document.querySelectorAll("[data-requires-online]").forEach(button => { button.disabled = true; button.title = "Unavailable while offline"; });
+      updateOnlineOnlyActions();
       refreshFileCacheStates();
       if (moveState) {
         const anchor = moveState.anchorId ? findStepAndParent(project.steps || [], moveState.anchorId)?.step : null;
@@ -2552,9 +2523,6 @@
           ? `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button>${canMoveIntoAnchor ? `<button class="btn btn-primary" type="button" onclick="moveStepInto('${anchor.id}')">Child</button>` : ""}<button class="btn btn-primary" type="button" onclick="moveStepBefore('${anchor.id}')">Before</button><button class="btn btn-primary" type="button" onclick="moveStepAfter('${anchor.id}')">After</button></div>`
           : `<div class="move-toolbar"><button class="btn btn-secondary" type="button" onclick="cancelMoveStep()">Cancel</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('top')">Move to start</button><button class="btn btn-primary" type="button" onclick="confirmMoveStep('bottom')">Move to end</button></div>`;
       }
-
-      // Fetch any uncached linked project data and re-render when ready
-      if (hasUncachedProjectLinks()) hydrateProjectLinks();
     }
 
     // --- Link modals ---
@@ -2586,16 +2554,8 @@
     // --- Project link picker ---
 
     async function openAddProjectLinkModal() {
-      if (window.pmOffline?.offline()) { notify("Linking another project requires a connection."); return; }
-      openModal("Link a project", `<div style="text-align:center;padding:28px;color:var(--muted)">Loading projects…</div>`, async () => { });
-
-      let all;
-      try {
-        all = await api("/api/projects");
-      } catch {
-        modalForm.innerHTML = `<div style="color:var(--danger);padding:16px 4px;">Failed to load projects.</div><div class="inline-actions" style="margin-top:12px;justify-content:flex-end;"><button class="btn btn-secondary" type="button" onclick="closeModal()">Close</button></div>`;
-        return;
-      }
+      openModal("Link a project", "", async () => { });
+      const all = window.pmStore.list();
 
       // Exclude this project and ones already linked
       const alreadyLinked = new Set(
@@ -2644,14 +2604,23 @@
     }
 
     async function openUploadFileModal() {
-      if (window.pmOffline?.offline()) { notify("File uploads require a connection."); return; }
+      if (isOffline()) { notify("File uploads need a connection to the server."); return; }
       closeFloatingActions();
       openModal("Upload file", `<div class="form-grid"><div class="field full"><label>File</label><input name="file" type="file" required /></div></div><div class="modal-actions"><div class="modal-action-group"><button class="btn btn-secondary" type="button" onclick="closeModal()">Cancel</button><button class="btn btn-primary" type="submit" data-loading-label="Uploading…">Upload</button></div></div>`, async formData => {
-        const response = await fetch(`/api/projects/${projectId}/files`, { method: "POST", body: formData });
+        const upload = formData.get("file");
+        let response;
+        try {
+          response = await fetch(`/api/projects/${projectId}/files`, { method: "POST", body: formData });
+        } catch {
+          notify("Upload failed: the server is not reachable.");
+          throw new Error("Upload failed");
+        }
         if (!response.ok) throw new Error(await response.text() || "Could not upload file");
         const file = await response.json();
-        project.files = [...(project.files || []), file];
-        cacheProjectState(project);
+        await keepUploadedFileOffline(projectId, file, upload);
+        const updated = deepClone(project);
+        updated.files = [...(updated.files || []).filter(existing => existing.id !== file.id), file];
+        storeProject(updated);
         closeModal();
         render();
       });
@@ -2659,16 +2628,9 @@
 
     let filePickerFiles = [];
     async function openLinkProjectFileModal() {
-      if (window.pmOffline?.offline()) { notify("Linking a project file requires a connection."); return; }
       closeFloatingActions();
-      openModal("Link a project file", `<div style="text-align:center;padding:28px;color:var(--muted)">Loading files…</div>`, async () => {});
-      try {
-        const projects = await api("/api/projects");
-        filePickerFiles = projects.filter(source => source.id !== projectId).flatMap(source => (source.files || []).map(file => ({ ...file, sourceProjectId: source.id, sourceProjectName: source.name })));
-      } catch {
-        modalForm.innerHTML = `<div class="empty">Could not load project files.</div>`;
-        return;
-      }
+      openModal("Link a project file", "", async () => {});
+      filePickerFiles = window.pmStore.list().filter(source => source.id !== projectId).flatMap(source => (source.files || []).map(file => ({ ...file, sourceProjectId: source.id, sourceProjectName: source.name })));
       if (!filePickerFiles.length) {
         modalForm.innerHTML = `<div class="empty">No project files are available.</div>`;
         return;
@@ -2687,12 +2649,9 @@
 
     async function deleteFile(fileId) {
       if (!(await confirmSheet({ title: "Delete File?", message: "This permanently removes the uploaded file.", confirmLabel: "Delete", destructive: true }))) return;
-      const response = await fetch(`/api/projects/${projectId}/files/${fileId}`, { method: "DELETE" });
-      if (!response.ok) { notify("Could not delete the file."); return; }
-      project.files = (project.files || []).filter(file => file.id !== fileId);
-      cacheProjectState(project);
-      render();
-      notify("File deleted.");
+      const updated = deepClone(project);
+      updated.files = (updated.files || []).filter(file => file.id !== fileId);
+      await saveProject(updated);
     }
     async function deleteFileLink(linkId) {
       const updated = deepClone(project);
@@ -2731,28 +2690,13 @@
     async function toggleStepDone(stepId, done) {
       const updated = deepClone(project);
       updated.steps = updateStepRecursive(updated.steps || [], stepId, step => ({ ...step, done }));
-      if (window.pmOffline?.offline()) {
-        project = window.pmOffline.queueProject(updated);
-        cacheProjectState(project);
-        if (hideCompletedSteps) renderTaskTreeInPlace(); else updateStepDoneDom(stepId, done);
-        return;
-      }
-      project = await api(`/api/projects/${projectId}`, { method: "PUT", body: JSON.stringify(updated) });
-      cacheProjectState(project);
+      if (!storeProject(updated)) return renderTaskTreeInPlace();
       if (hideCompletedSteps) renderTaskTreeInPlace();
       else updateStepDoneDom(stepId, done);
     }
     async function deleteStep(stepId) { if (!(await confirmSheet({ title: "Delete Task?", message: "Sub-tasks will be deleted too.", confirmLabel: "Delete", destructive: true }))) return; const updated = deepClone(project); updated.steps = removeStepRecursive(updated.steps || [], stepId); await saveProject(updated); }
     async function toggleFinished() {
-      if (window.pmOffline?.offline()) {
-        project = window.pmOffline.queueProject({ ...project, finished: !project.finished });
-        cacheProjectState(project);
-        updateProjectFinishedDom();
-        return;
-      }
-      project = await api(`/api/projects/${projectId}/finish`, { method: "PATCH", body: JSON.stringify({ finished: !project.finished }) });
-      cacheProjectState(project);
-      updateProjectFinishedDom();
+      if (storeProject({ ...project, finished: !project.finished })) updateProjectFinishedDom();
     }
 
     function updateStepDoneDom(stepId, done) {
@@ -2780,41 +2724,64 @@
       const meta = hero.querySelector(".project-meta-line");
       if (meta) meta.outerHTML = window.pmMeta.line({ deadline: project.deadline, secondsLeft: project.seconds_left, finished });
     }
-    async function deleteProject() { if (!(await confirmSheet({ title: "Delete Project?", message: "This permanently deletes the project, its links, and all tasks.", confirmLabel: "Delete", destructive: true }))) return; if (window.pmOffline?.offline()) window.pmOffline.queueDelete(projectId); else await api(`/api/projects/${projectId}`, { method: "DELETE" }); try { localStorage.removeItem(`pm_project_${projectId}`); const summaries = JSON.parse(localStorage.getItem("pm_project_summaries") || "null"); if (Array.isArray(summaries)) localStorage.setItem("pm_project_summaries", JSON.stringify(summaries.filter(summary => summary.id !== projectId))); } catch { } location.href = "/"; }
-    function navigationSummary() {
-      try {
-        const summary = JSON.parse(sessionStorage.getItem("pm_project_loading_summary") || "null");
-        sessionStorage.removeItem("pm_project_loading_summary");
-        return summary?.id === projectId ? summary : null;
-      } catch { return null; }
-    }
+    async function deleteProject() { if (!(await confirmSheet({ title: "Delete Project?", message: "This permanently deletes the project, its links, and all tasks.", confirmLabel: "Delete", destructive: true }))) return; window.pmStore.remove(projectId); location.href = "/"; }
     function renderProjectLoading() {
       loadingState.className = "card";
       loadingState.innerHTML = `<div class="project-loading-spinner" role="status" aria-live="polite"><span>Loading project…</span></div>`;
     }
+    function showProjectMissing(message) {
+      project = null;
+      app.hidden = true;
+      app.innerHTML = "";
+      loadingState.hidden = false;
+      loadingState.className = "card";
+      loadingState.textContent = message;
+    }
+
     async function loadProject() {
       if (!projectId) { loadingState.textContent = "No project selected."; return; }
-      try {
-        const cached = JSON.parse(localStorage.getItem(`pm_project_${projectId}`) || "null");
-        if (cached?.id === projectId) { project = cached; render(); }
-      } catch { }
-      if (window.pmOffline?.offline()) {
-        if (!project) {
-          loadingState.className = "card";
-          loadingState.textContent = "This project is not saved offline. Connect once to open it.";
-        }
+      project = window.pmStore.get(projectId);
+      if (project) { render(); return; }
+      renderProjectLoading();
+      const synced = await window.pmStore.sync();
+      project = window.pmStore.get(projectId);
+      if (project) render();
+      else if (synced || window.pmStore.hasSynced()) showProjectMissing("This project no longer exists.");
+      else showProjectMissing("Could not reach the server. Connect once to set up this device.");
+    }
+
+    // Changes synced from other devices or tabs. The data is taken over at
+    // once, so edits always build on it; redrawing waits until no sheet,
+    // menu or selection is open so nothing moves under the user's finger.
+    let remoteRenderPending = false;
+    const isInteracting = () => modalBackdrop.classList.contains("show") || iconPickerBackdrop.classList.contains("show")
+      || !!moveState || deleteMode || !!openContextMenuId || !!document.getElementById("confirmSheet")
+      || !!document.querySelector(".floating-actions-menu.show");
+    function renderRemoteChanges() {
+      if (!remoteRenderPending) return;
+      if (isInteracting()) { setTimeout(renderRemoteChanges, 800); return; }
+      remoteRenderPending = false;
+      if (project) renderPreservingScroll();
+    }
+    window.pmStore.onChange(({ ids }) => {
+      if (!ids.includes(projectId) && !ids.some(id => linkedProjectIds().has(id))) return;
+      const latest = window.pmStore.get(projectId);
+      if (!latest) {
+        if (project) showProjectMissing("This project was deleted on another device.");
         return;
       }
-      if (!project) renderProjectLoading();
-      try {
-        project = await api(`/api/projects/${projectId}`);
-        try { localStorage.setItem(`pm_project_${projectId}`, JSON.stringify(project)); } catch { }
-        render();
-      } catch (e) {
-        if (!project) loadingState.textContent = "Could not load this project.";
-        else notify("Showing the most recently loaded version.");
-      }
-    }
+      const wasMissing = !project;
+      project = latest;
+      if (wasMissing) { render(); return; }
+      remoteRenderPending = true;
+      renderRemoteChanges();
+    });
+    window.addEventListener("pmconnectionchange", () => {
+      updateOnlineOnlyActions();
+      if (!project || !(project.files?.length || project.file_links?.length)) return;
+      remoteRenderPending = true;
+      renderRemoteChanges();
+    });
 
     applyTheme(document.documentElement.dataset.theme || "dark");
     matchMedia("(prefers-color-scheme: light)").addEventListener("change", event => {

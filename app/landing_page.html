@@ -424,24 +424,6 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
   background: var(--accentSoft); border: 1px solid rgba(79,124,255,.25); font-size: 1.25rem; 
 }
 
-.project-card.has-offline-cache { grid-template-columns: auto minmax(0, 1fr) 28px; }
-.project-offline-cache {
-  grid-column: 3;
-  grid-row: 1;
-  align-self: start;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--line));
-  border-radius: 9px;
-  background: color-mix(in srgb, var(--panelBg) 82%, var(--accent));
-  color: var(--accent);
-}
-.project-offline-cache svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.project-offline-cache.is-unavailable { color: var(--muted); opacity: .34; filter: grayscale(1); }
-.project-card.is-offline-unavailable { opacity: .58; cursor: not-allowed; }
-
 .hide-toggle {
   position: absolute; top: 12px; right: 12px;
   padding: 6px 12px; font-size: 0.7rem; text-transform: uppercase;
@@ -545,8 +527,8 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
 
  </style>
   <link rel="stylesheet" href="/static/app-shell.css?v=47">
-  <script src="/static/app-shell.js?v=15"></script>
-  <script src="/static/offline-data.js?v=1"></script>
+  <script src="/static/app-shell.js?v=16"></script>
+  <script src="/static/pm-store.js?v=1"></script>
 </head>
 <body>
   <div class="app-scroll" id="appScroll">
@@ -682,7 +664,6 @@ input:focus, textarea:focus { border-color: rgba(79,124,255,.7); box-shadow: 0 0
     let deleteMode = false;
     let visibilityMode = false;
     let selectedProjectIds = new Set();
-    let projectsRequestSequence = 0;
     let iconSearchTimer = null;
 
 
@@ -1053,15 +1034,11 @@ async function confirmDeleteSelected() {
     destructive: true
   });
   if (!confirmed) return;
-  const ids = [...selectedProjectIds];
-  if (window.pmOffline?.offline()) {
-    ids.forEach(id => window.pmOffline.queueDelete(id));
-    currentProjects = currentProjects.filter(project => !ids.includes(project.id));
-    localStorage.setItem("pm_project_summaries", JSON.stringify(currentProjects));
-  } else await Promise.all(ids.map(id => fetch(`/api/projects/${id}`, { method: "DELETE" })));
-  cancelActionMode();
-  if (window.pmOffline?.offline()) renderProjects();
-  else { await loadProjects(true); await loadDeletedItems(); }
+  selectedProjectIds.forEach(id => window.pmStore.remove(id));
+  deleteMode = false;
+  selectedProjectIds.clear();
+  updateDeleteToolbar();
+  refreshProjects(true);
 }
 
 function togglePendingVisibility(event, id) {
@@ -1137,8 +1114,6 @@ const SWIPE_ICON_SHOW = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none"
 const SWIPE_ICON_DELETE = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>`;
 const VISIBILITY_ICON_VISIBLE = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
 const VISIBILITY_ICON_HIDDEN = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c7 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A16.7 16.7 0 0 0 2 12s3 7 10 7a9.9 9.9 0 0 0 4.4-1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>`;
-const OFFLINE_CACHE_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5h10.5a3.5 3.5 0 0 0 .7-6.9A6.3 6.3 0 0 0 6.4 9.4 4.6 4.6 0 0 0 7 18.5Z"/><path d="m9.5 14.1 1.7 1.7 3.5-3.7"/></svg>`;
-const OFFLINE_NOT_CACHED_ICON = `<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5h10.5a3.5 3.5 0 0 0 .7-6.9A6.3 6.3 0 0 0 6.4 9.4 4.6 4.6 0 0 0 7 18.5Z"/><path d="m10 13 4 4m0-4-4 4"/></svg>`;
 
 window.pmSwipeDisabled = () => deleteMode || visibilityMode;
 
@@ -1158,9 +1133,8 @@ async function swipeDelete(event, id) {
   window.pmSwipeClose?.();
   const confirmed = await confirmSheet({ title: "Delete Project?", message: "This cannot be undone.", confirmLabel: "Delete", destructive: true });
   if (!confirmed) return;
-  await fetch(`/api/projects/${id}`, { method: "DELETE" });
-  await loadProjects(true);
-  await loadDeletedItems();
+  window.pmStore.remove(id);
+  refreshProjects(true);
 }
 
 window.swipeToggleHidden = swipeToggleHidden;
@@ -1178,15 +1152,10 @@ function renderProjects() {
   const renderCard = (p) => {
     const isVisible = visibilityMode ? selectedProjectIds.has(p.id) : !hiddenIds.has(p.id);
     const swipeable = !deleteMode && !visibilityMode;
-    const showOfflineCache = document.documentElement.hasAttribute("data-offline") && !deleteMode && !visibilityMode;
-    // Cache Storage is checked immediately after rendering. Start neutral so a
-    // previously cached project is never briefly presented as unavailable.
-    const offlineUnavailable = false;
     return `
       <div class="swipe-row" style="view-transition-name: p-${String(p.id).replace(/[^a-zA-Z0-9-]/g, "")}">
       ${swipeable ? `<div class="swipe-actions"><button class="swipe-btn swipe-hide" type="button" aria-label="${hiddenIds.has(p.id) ? "Show" : "Hide"}" title="${hiddenIds.has(p.id) ? "Show" : "Hide"}" onclick="swipeToggleHidden(event, '${p.id}')">${hiddenIds.has(p.id) ? SWIPE_ICON_SHOW : SWIPE_ICON_HIDE}<span>${hiddenIds.has(p.id) ? "Show" : "Hide"}</span></button><button class="swipe-btn swipe-delete" type="button" aria-label="Delete" title="Delete" onclick="swipeDelete(event, '${p.id}')">${SWIPE_ICON_DELETE}<span>Delete</span></button></div>` : ""}
-      <${deleteMode || visibilityMode ? "button" : "a"} class="project-card swipe-target${p.finished ? " is-finished" : ""}${showOfflineCache ? " has-offline-cache" : ""}${visibilityMode || deleteMode && selectedProjectIds.has(p.id) ? " has-visibility-toggle" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${offlineUnavailable ? " is-offline-unavailable" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" data-project-id="${escapeHtml(p.id)}" ${deleteMode || visibilityMode ? `type="button" aria-pressed="${deleteMode ? selectedProjectIds.has(p.id) : isVisible}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : `togglePendingVisibility(event, '${p.id}')`}"` : `href="/project?id=${encodeURIComponent(p.id)}" aria-disabled="${offlineUnavailable}"`}>
-        ${showOfflineCache ? `<span class="project-offline-cache" data-project-cache-id="${escapeHtml(p.id)}" role="img" aria-label="Checking offline availability" title="Checking offline availability">${OFFLINE_CACHE_ICON}</span>` : ""}
+      <${deleteMode || visibilityMode ? "button" : "a"} class="project-card swipe-target${p.finished ? " is-finished" : ""}${visibilityMode || deleteMode && selectedProjectIds.has(p.id) ? " has-visibility-toggle" : ""}${deleteMode && selectedProjectIds.has(p.id) ? " selected-for-delete" : ""}${visibilityMode && isVisible ? " visibility-selected" : ""}" data-project-id="${escapeHtml(p.id)}" ${deleteMode || visibilityMode ? `type="button" aria-pressed="${deleteMode ? selectedProjectIds.has(p.id) : isVisible}" onclick="${deleteMode ? `toggleProjectSelection(event, '${p.id}')` : `togglePendingVisibility(event, '${p.id}')`}"` : `href="/project?id=${encodeURIComponent(p.id)}"`}>
         <div class="project-icon">
           ${renderIcon(p.icon, "📌", p.name)}
         </div>
@@ -1227,27 +1196,6 @@ function renderProjects() {
     hSection.hidden = true;
     document.getElementById("hiddenList").innerHTML = "";
   }
-  updateOfflineProjectCacheStates();
-}
-
-async function updateOfflineProjectCacheStates() {
-  if (!document.documentElement.hasAttribute("data-offline") || !("caches" in window)) return;
-  const indicators = [...document.querySelectorAll("[data-project-cache-id]")];
-  try {
-    const cache = await caches.open("project-manager-api-v2");
-    await Promise.all(indicators.map(async indicator => {
-      const id = indicator.dataset.projectCacheId;
-      const localCopy = localStorage.getItem(`pm_project_${id}`);
-      const cached = !!localCopy || !!(await cache.match(`/api/projects/${encodeURIComponent(id)}`));
-      const card = indicator.closest(".project-card");
-      card?.classList.toggle("is-offline-unavailable", !cached);
-      card?.setAttribute("aria-disabled", String(!cached));
-      indicator.classList.toggle("is-unavailable", !cached);
-      indicator.setAttribute("aria-label", cached ? "Saved for offline use" : "Project is not saved offline");
-      indicator.title = cached ? "Saved for offline use" : "Not saved offline";
-      indicator.innerHTML = cached ? OFFLINE_CACHE_ICON : OFFLINE_NOT_CACHED_ICON;
-    }));
-  } catch { }
 }
 
 function updateProjectFiltersInPlace() {
@@ -1321,36 +1269,42 @@ function renderDeletedItems() {
   }).join("");
 }
 
-async function loadDeletedItems() {
-  const res = await fetch("/api/deleted-items", { headers: { "Accept": "application/json" } });
-  if (!res.ok) return;
-  deletedItems = await res.json();
-  renderDeletedItems();
+// The trash lives on the server; restoring needs a connection.
+async function trashRequest(url, method) {
+  try {
+    const res = await fetch(url, { method, cache: "no-store" });
+    if (res.ok) return { ok: true };
+    const body = await res.json().catch(() => ({}));
+    return { ok: false, message: body.error || "The original location is no longer available." };
+  } catch {
+    return { ok: false, message: "This needs a connection to the server. Try again once you are back online." };
+  }
 }
 
 async function restoreDeletedItem(id) {
-  const res = await fetch(`/api/deleted-items/${id}/restore`, { method: "POST" });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    await confirmSheet({ title: "Could Not Restore", message: body.error || "The original location is no longer available.", cancelLabel: null });
+  const result = await trashRequest(`/api/deleted-items/${id}/restore`, "POST");
+  if (!result.ok) {
+    await confirmSheet({ title: "Could Not Restore", message: result.message, cancelLabel: null });
     return;
   }
-  await Promise.all([loadProjects(true), loadDeletedItems()]);
+  await window.pmStore.sync();
+  refreshProjects(true);
 }
 
 async function permanentlyDeleteItem(id) {
   const confirmed = await confirmSheet({ title: "Delete Permanently?", message: "This cannot be undone.", confirmLabel: "Delete", destructive: true });
   if (!confirmed) return;
-  const res = await fetch(`/api/deleted-items/${id}`, { method: "DELETE" });
-  if (res.ok) await loadDeletedItems();
+  const result = await trashRequest(`/api/deleted-items/${id}`, "DELETE");
+  if (!result.ok) {
+    await confirmSheet({ title: "Could Not Delete", message: result.message, cancelLabel: null });
+    return;
+  }
+  await window.pmStore.sync();
+  refreshProjects();
 }
 
-async function loadProjects(animate = false) {
-  const requestSequence = ++projectsRequestSequence;
-  const res = await fetch("/api/projects?summary=1", { headers: { "Accept": "application/json" } });
-  if (!res.ok) throw new Error("Could not load projects");
-  const incomingProjects = await res.json();
-  if (requestSequence !== projectsRequestSequence) return;
+function refreshProjects(animate = false) {
+  const incomingProjects = window.pmStore.summaries();
   if (visibilityMode) {
     const previousIds = new Set(currentProjects.map(project => project.id));
     const incomingIds = new Set(incomingProjects.map(project => project.id));
@@ -1360,48 +1314,22 @@ async function loadProjects(animate = false) {
     }
   }
   currentProjects = incomingProjects;
-  try { localStorage.setItem("pm_project_summaries", JSON.stringify(currentProjects)); } catch { }
+  deletedItems = window.pmStore.trash();
+  renderDeletedItems();
+  if (!currentProjects.length && !window.pmStore.hasSynced()) return;
   if (animate) window.pmAnimate(renderProjects);
   else renderProjects();
 }
 
-function renderCachedProjects() {
-  try {
-    const cachedProjects = JSON.parse(localStorage.getItem("pm_project_summaries") || "null");
-    if (!Array.isArray(cachedProjects)) return false;
-    currentProjects = cachedProjects;
-    renderProjects();
-    return true;
-  } catch {
-    return false;
+async function loadProjects() {
+  refreshProjects();
+  const synced = await window.pmStore.sync();
+  refreshProjects();
+  if (!synced && !window.pmStore.hasSynced() && !currentProjects.length) {
+    projectList.classList.remove("project-list-loading");
+    projectList.removeAttribute("aria-busy");
+    projectList.innerHTML = `<div class="empty">Could not reach the server. Connect once to set up this device.</div>`;
   }
-}
-
-function rememberProjectNavigation(event) {
-  const card = event.target.closest('a.project-card[data-project-id]');
-  if (!card || event.defaultPrevented || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-  const project = currentProjects.find(item => item.id === card.dataset.projectId);
-  if (!project) return;
-  try { sessionStorage.setItem("pm_project_loading_summary", JSON.stringify(project)); } catch { }
-}
-
-async function blockUnavailableOfflineProject(event) {
-  if (!document.documentElement.hasAttribute("data-offline") && navigator.onLine) return;
-  const card = event.target.closest("a.project-card[data-project-id]");
-  if (!card) return;
-  event.preventDefault();
-  event.stopImmediatePropagation();
-  const id = card.dataset.projectId;
-  let cached = !!localStorage.getItem(`pm_project_${id}`);
-  if (!cached && "caches" in window) {
-    const cacheNames = ["project-manager-api-v2", "project-manager-api-v1"];
-    for (const name of cacheNames) {
-      const cache = await caches.open(name);
-      if (await cache.match(`/api/projects/${encodeURIComponent(id)}`)) { cached = true; break; }
-    }
-  }
-  if (cached) location.href = card.href;
-  else confirmSheet({ title: "Project not saved offline", message: "Open this project once while connected to save it on this device.", cancelLabel: null });
 }
 
     projectForm.addEventListener("submit", async (event) => {
@@ -1417,18 +1345,14 @@ async function blockUnavailableOfflineProject(event) {
         links: [],
         steps: []
       };
-      if (window.pmOffline?.offline()) {
-        const created = window.pmOffline.queueProject({ ...payload, id: crypto.randomUUID?.() || `${Date.now()}-${Math.random()}`, created_at: new Date().toISOString(), files: [], file_links: [] });
-        currentProjects.unshift(created);
-        localStorage.setItem("pm_project_summaries", JSON.stringify(currentProjects));
-        closeCreateProjectModal();
-        renderProjects();
+      try {
+        window.pmStore.create(payload);
+      } catch {
+        confirmSheet({ title: "Could Not Create Project", message: "This device has run out of storage space.", cancelLabel: null });
         return;
       }
-      const res = await fetch("/api/projects", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      if (!res.ok) { confirmSheet({ title: "Could Not Create Project", message: "Please check your connection and try again.", cancelLabel: null }); return; }
       closeCreateProjectModal();
-      await loadProjects();
+      refreshProjects(true);
     });
 
     window.openIconPicker = openIconPicker;
@@ -1461,9 +1385,7 @@ async function blockUnavailableOfflineProject(event) {
     settingsBackdrop?.addEventListener("click", (event) => { if (event.target === settingsBackdrop) closeSettingsModal(); });
     createProjectBackdrop?.addEventListener("click", (event) => { if (event.target === createProjectBackdrop) closeCreateProjectModal(); });
     document.addEventListener("click", () => { closeFloatingActions(); closeManagementActions(); });
-    document.addEventListener("click", blockUnavailableOfflineProject, true);
-    document.addEventListener("click", rememberProjectNavigation, true);
-    window.addEventListener("pmconnectionchange", () => renderProjects());
+    window.pmStore.onChange(() => refreshProjects(true));
     document.addEventListener("keydown", (event) => {
       if (event.key !== "Escape") return;
       closeSettingsModal();
@@ -1472,17 +1394,13 @@ async function blockUnavailableOfflineProject(event) {
       closeManagementActions();
     });
     updateDeleteToolbar();
-    renderCachedProjects();
     function syncReturnedProjectList(reloadData = false) {
       const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
       applyTheme(savedTheme === "light" || savedTheme === "dark"
         ? savedTheme
         : (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
       window.pmRefreshConnection?.();
-      if (!reloadData) return;
-      renderCachedProjects();
-      loadProjects().catch(() => {});
-      loadDeletedItems().catch(() => {});
+      if (reloadData) refreshProjects();
     }
     window.addEventListener("pageshow", () => {
       syncReturnedProjectList(true);
@@ -1491,10 +1409,7 @@ async function blockUnavailableOfflineProject(event) {
       if (document.visibilityState === "visible") syncReturnedProjectList(true);
     });
     window.addEventListener("focus", () => syncReturnedProjectList(false));
-    loadProjects().catch(() => {
-      if (!currentProjects.length) projectList.innerHTML = `<div class="empty">Could not load projects.</div>`;
-    });
-    loadDeletedItems().catch(() => {});
+    loadProjects();
   </script>
 </body>
 </html>

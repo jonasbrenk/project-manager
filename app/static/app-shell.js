@@ -410,6 +410,12 @@ document.addEventListener("keydown", event => {
   else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
 });
 
+/* Reloads for an app update without discarding an open sheet or form. */
+function pmReloadWhenIdle() {
+  if (document.querySelector(".show, #confirmSheet, .move-toolbar")) setTimeout(pmReloadWhenIdle, 2000);
+  else location.reload();
+}
+
 function pmInit() {
   pmInitScroll();
   pmInitEdgeBack();
@@ -419,7 +425,7 @@ function pmInit() {
   if ("serviceWorker" in navigator) {
     const initialController = navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (initialController) location.reload();
+      if (initialController) pmReloadWhenIdle();
     }, { once: true });
     navigator.serviceWorker.register("/offline-service-worker.js")
       .then(registration => registration.update())
@@ -440,6 +446,16 @@ function pmInitOfflineStatus() {
   let probeToken = 0;
   let reloadingForUpdate = false;
 
+  // The service worker serves the app shell from its cache. After a deploy,
+  // refresh that cache first, then reload once nothing is open on screen.
+  const refreshShellCache = () => new Promise(resolve => {
+    const worker = navigator.serviceWorker?.controller;
+    if (!worker) return resolve();
+    const channel = new MessageChannel();
+    const timeout = setTimeout(resolve, 8000);
+    channel.port1.onmessage = () => { clearTimeout(timeout); resolve(); };
+    worker.postMessage({ type: "refresh-shell" }, [channel.port2]);
+  });
   const checkAppVersion = response => {
     const version = response.headers.get("X-PM-App-Version");
     if (!version) return;
@@ -448,7 +464,7 @@ function pmInitOfflineStatus() {
       localStorage.setItem("pm_app_version", version);
       if (known && known !== version && !reloadingForUpdate) {
         reloadingForUpdate = true;
-        location.reload();
+        refreshShellCache().then(pmReloadWhenIdle);
       }
     } catch { }
   };
@@ -501,6 +517,15 @@ function pmInitOfflineStatus() {
     }
   };
   window.pmRefreshConnection = probe;
+  // A finished or failed sync is as good as a health check.
+  window.pmReportConnection = reachable => {
+    if (reachable === !offline) return;
+    if (reachable) {
+      update(false);
+      clearTimeout(probeTimer);
+      probeTimer = setTimeout(probe, 45000);
+    } else probe();
+  };
   window.addEventListener("online", probe);
   window.addEventListener("offline", () => probe());
   update(offline);

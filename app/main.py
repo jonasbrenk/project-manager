@@ -6,6 +6,7 @@ import mimetypes
 import os
 import gzip
 from copy import deepcopy
+from functools import wraps
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import RLock
@@ -25,17 +26,26 @@ RUNTIME_FILES = (
     BASE_DIR / "offline-service-worker.js",
     BASE_DIR / "static" / "app-shell.css",
     BASE_DIR / "static" / "app-shell.js",
-    BASE_DIR / "static" / "offline-data.js",
+    BASE_DIR / "static" / "pm-store.js",
 )
 RUNTIME_ASSETS = {
     "/static/app-shell.css",
     "/static/app-shell.js",
-    "/static/offline-data.js",
+    "/static/pm-store.js",
     "/static/iconify-catalog.js",
 }
 
 app = Flask(__name__, static_folder=str(BASE_DIR), static_url_path="")
 app.config["MAX_CONTENT_LENGTH"] = 25 * 1024 * 1024
+
+
+def locked(view):
+    """Serialize read-modify-write requests so concurrent writes cannot drop each other's changes."""
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        with STORAGE_LOCK:
+            return view(*args, **kwargs)
+    return wrapper
 
 
 def utc_now_iso() -> str:
@@ -136,6 +146,8 @@ def read_data() -> dict[str, Any]:
 
 def write_data(data: dict[str, Any]) -> None:
     with STORAGE_LOCK:
+        # Clients compare this counter to skip downloading unchanged data.
+        data["revision"] = int(data.get("revision") or 0) + 1
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         temporary_file = DATA_FILE.with_suffix(".json.tmp")
         with temporary_file.open("w", encoding="utf-8") as f:
@@ -356,6 +368,118 @@ def sanitize_project(payload: dict[str, Any], current: dict[str, Any] | None = N
     }
 
 
+MERGED_LIST_KEYS = {"links", "files", "file_links", "steps", "children"}
+
+
+def merge_value(key: str | None, base: Any, local: Any, server: Any) -> Any:
+    """Three-way merge: a field changed locally wins, otherwise the server's value is kept."""
+    if key in MERGED_LIST_KEYS:
+        return merge_items(base, local, server)
+    if isinstance(local, dict) and isinstance(server, dict):
+        return merge_dict(base, local, server)
+    return local if local != base else server
+
+
+def merge_dict(base: Any, local: dict[str, Any], server: dict[str, Any]) -> dict[str, Any]:
+    base = base if isinstance(base, dict) else {}
+    merged = {}
+    for key in {**server, **local}:
+        merged[key] = merge_value(key, base.get(key), local.get(key, base.get(key)), server.get(key, base.get(key)))
+    return merged
+
+
+def merge_items(base: Any, local: Any, server: Any) -> list[dict[str, Any]]:
+    """Merge lists of items with ids, keeping additions and deletions from both sides."""
+    def by_id(items: Any) -> dict[str, dict[str, Any]]:
+        return {item["id"]: item for item in items or [] if isinstance(item, dict) and item.get("id")}
+
+    base_items, local_items, server_items = by_id(base), by_id(local), by_id(server)
+    local_order, server_order = list(local_items), list(server_items)
+    # The side that reordered (or added/removed) items decides the order.
+    primary, secondary = (local_order, server_order) if local_order != list(base_items) else (server_order, local_order)
+
+    def kept(item_id: str) -> bool:
+        if item_id in base_items:
+            return item_id in local_items and item_id in server_items
+        return True
+
+    order = [item_id for item_id in primary if kept(item_id)]
+    for position, item_id in enumerate(secondary):
+        if item_id in order or not kept(item_id):
+            continue
+        previous = next((other for other in reversed(secondary[:position]) if other in order), None)
+        order.insert(order.index(previous) + 1 if previous else 0, item_id)
+
+    merged = []
+    for item_id in order:
+        if item_id in local_items and item_id in server_items:
+            merged.append(merge_dict(base_items.get(item_id), local_items[item_id], server_items[item_id]))
+        else:
+            merged.append(local_items.get(item_id) or server_items[item_id])
+    return merged
+
+
+def dedupe_steps(steps: list[dict[str, Any]], seen: set[str] | None = None) -> list[dict[str, Any]]:
+    """A task moved on two devices at once could otherwise appear twice."""
+    seen = set() if seen is None else seen
+    result = []
+    for step in steps:
+        if step.get("id") in seen:
+            continue
+        seen.add(step.get("id"))
+        result.append({**step, "children": dedupe_steps(step.get("children") or [], seen)})
+    return result
+
+
+def comparable(project: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in project.items() if key != "updated_at"}
+
+
+def remove_orphaned_uploads(current: dict[str, Any], updated: dict[str, Any]) -> None:
+    kept_ids = {file.get("id") for file in updated.get("files", [])}
+    for file in current.get("files", []):
+        if file.get("id") not in kept_ids:
+            path = upload_path(current["id"], str(file.get("id")))
+            if path.is_file():
+                path.unlink()
+
+
+def apply_sync_change(data: dict[str, Any], change: dict[str, Any]) -> bool:
+    project_id = str(change.get("project_id") or "")
+    if not project_id:
+        return False
+    current = find_project(data, project_id)
+
+    if change.get("op") == "delete":
+        if current:
+            add_deleted_item(data, "project", current, index=data["projects"].index(current))
+            data["projects"] = [project for project in data["projects"] if project.get("id") != project_id]
+        return True
+
+    local = change.get("project")
+    if change.get("op") != "upsert" or not isinstance(local, dict):
+        return False
+    base = change.get("base") if isinstance(change.get("base"), dict) else {}
+
+    if not current:
+        # New on this device, or deleted elsewhere while edited here: keep the local edits.
+        created = sanitize_project(local)
+        created["id"] = project_id
+        created["created_at"] = str(local.get("created_at") or created["created_at"])
+        data["projects"].append(created)
+        return True
+
+    merged = merge_dict(base, local, current)
+    merged["steps"] = dedupe_steps(merged.get("steps") or [])
+    updated = sanitize_project(merged, current=current)
+    if comparable(updated) == comparable(sanitize_project(current, current=current)):
+        return True
+    archive_removed_items(data, current, updated)
+    remove_orphaned_uploads(current, updated)
+    data["projects"][data["projects"].index(current)] = updated
+    return True
+
+
 @app.after_request
 def set_response_headers(response):
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -426,6 +550,7 @@ def get_project(project_id: str):
 
 
 @app.post("/api/projects")
+@locked
 def create_project():
     payload = request.get_json(silent=True) or {}
     data = read_data()
@@ -436,6 +561,7 @@ def create_project():
 
 
 @app.put("/api/projects/<project_id>")
+@locked
 def update_project(project_id: str):
     payload = request.get_json(silent=True) or {}
     data = read_data()
@@ -451,7 +577,35 @@ def update_project(project_id: str):
     return jsonify(enrich_project(updated))
 
 
+@app.post("/api/sync")
+@locked
+def sync():
+    """Apply locally queued project changes and return the merged server state."""
+    payload = request.get_json(silent=True) or {}
+    changes = payload.get("changes") or []
+    if not isinstance(changes, list):
+        return jsonify({"error": "changes must be a list"}), 400
+
+    data = read_data()
+    applied = [
+        str(change.get("project_id"))
+        for change in changes
+        if isinstance(change, dict) and apply_sync_change(data, change)
+    ]
+    if changes:
+        write_data(data)
+    revision = int(data.get("revision") or 0)
+
+    response: dict[str, Any] = {"applied": applied, "revision": revision}
+    if changes or payload.get("revision") != revision:
+        items = sorted(data["deleted_items"], key=lambda record: record.get("deleted_at", ""), reverse=True)
+        response["projects"] = [enrich_project(project) for project in data["projects"]]
+        response["deleted_items"] = [deleted_item_summary(item) for item in items]
+    return jsonify(response)
+
+
 @app.post("/api/offline-changes")
+@locked
 def apply_offline_changes():
     """Apply independently queued local snapshots, newest timestamp wins."""
     payload = request.get_json(silent=True) or {}
@@ -503,6 +657,7 @@ def apply_offline_changes():
 
 
 @app.post("/api/projects/<project_id>/files")
+@locked
 def upload_project_file(project_id: str):
     data = read_data()
     project = find_project(data, project_id)
@@ -544,6 +699,7 @@ def open_project_file(project_id: str, file_id: str):
 
 
 @app.delete("/api/projects/<project_id>/files/<file_id>")
+@locked
 def delete_project_file(project_id: str, file_id: str):
     data = read_data()
     project = find_project(data, project_id)
@@ -562,6 +718,7 @@ def delete_project_file(project_id: str, file_id: str):
 
 
 @app.patch("/api/projects/<project_id>/finish")
+@locked
 def toggle_finished(project_id: str):
     payload = request.get_json(silent=True) or {}
     data = read_data()
@@ -576,6 +733,7 @@ def toggle_finished(project_id: str):
 
 
 @app.delete("/api/projects/<project_id>")
+@locked
 def delete_project(project_id: str):
     data = read_data()
     project = find_project(data, project_id)
@@ -596,6 +754,7 @@ def get_deleted_items():
 
 
 @app.post("/api/deleted-items/<deleted_id>/restore")
+@locked
 def restore_deleted_item(deleted_id: str):
     data = read_data()
     record = next((item for item in data["deleted_items"] if item.get("id") == deleted_id), None)
@@ -642,6 +801,7 @@ def restore_deleted_item(deleted_id: str):
 
 
 @app.delete("/api/deleted-items/<deleted_id>")
+@locked
 def permanently_delete_item(deleted_id: str):
     data = read_data()
     if not any(item.get("id") == deleted_id for item in data["deleted_items"]):

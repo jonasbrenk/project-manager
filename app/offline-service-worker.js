@@ -1,10 +1,10 @@
-const SHELL_CACHE = "project-manager-shell-v24";
-const OFFLINE_API_CACHE = "project-manager-api-v2";
+const SHELL_CACHE = "project-manager-shell-v25";
 const FILE_CACHE = "project-manager-files-v1";
+const PAGES = new Set(["/", "/project"]);
 const RUNTIME_ASSET_PATHS = new Set([
   "/static/app-shell.css",
   "/static/app-shell.js",
-  "/static/offline-data.js",
+  "/static/pm-store.js",
   "/static/iconify-catalog.js",
 ]);
 const SHELL_ASSETS = [
@@ -12,8 +12,8 @@ const SHELL_ASSETS = [
   "/project",
   "/site.webmanifest?v=1",
   "/static/app-shell.css?v=47",
-  "/static/app-shell.js?v=15",
-  "/static/offline-data.js?v=1",
+  "/static/app-shell.js?v=16",
+  "/static/pm-store.js?v=1",
   "/static/iconify-catalog.js?v=1",
   "/static/icon-192.png?v=4",
   "/static/icon-512.png?v=4",
@@ -21,114 +21,96 @@ const SHELL_ASSETS = [
   "/static/icon-placeholder.svg",
 ];
 
-const isCachedApiRequest = url => {
-  if (url.origin !== self.location.origin) return false;
-  if (url.pathname === "/api/deleted-items") return true;
-  return /^\/api\/projects\/(?![^/]+\/files\/)/.test(url.pathname)
-    || url.pathname === "/api/projects";
-};
+// Project data lives in the pages' local store (pm-store.js), so the worker
+// only has to keep the app itself available. It never waits on the network
+// for something it has cached: an unreachable server must not stall the UI.
+
+async function refreshShell() {
+  const cache = await caches.open(SHELL_CACHE);
+  await Promise.all(SHELL_ASSETS.map(async url => {
+    try {
+      const response = await fetch(url, { cache: "reload" });
+      if (response.ok) await cache.put(url, response);
+    } catch { }
+  }));
+}
 
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(SHELL_CACHE).then(cache => cache.addAll(SHELL_ASSETS)).then(() => self.skipWaiting()));
+  event.waitUntil(caches.open(SHELL_CACHE)
+    .then(cache => cache.addAll(SHELL_ASSETS.map(url => new Request(url, { cache: "reload" }))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(keys
-        .filter(key => key.startsWith("project-manager-") && ![SHELL_CACHE, OFFLINE_API_CACHE, FILE_CACHE].includes(key))
+        .filter(key => key.startsWith("project-manager-") && ![SHELL_CACHE, FILE_CACHE].includes(key))
         .map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
 
-async function networkFirst(request, cacheName, forceReload = false) {
-  const cache = await caches.open(cacheName);
-  try {
-    const response = await fetch(forceReload ? new Request(request, { cache: "reload" }) : request);
-    if (response.ok) cache.put(request, response.clone());
+self.addEventListener("message", event => {
+  if (event.data?.type !== "refresh-shell") return;
+  event.waitUntil(refreshShell().then(() => event.ports[0]?.postMessage("done")));
+});
+
+// Answer from the cache immediately and refresh it in the background.
+async function staleWhileRevalidate(event, cacheKey, fetchOptions) {
+  const cache = await caches.open(SHELL_CACHE);
+  const cached = await cache.match(cacheKey);
+  const update = fetch(event.request, fetchOptions).then(response => {
+    if (response.ok) cache.put(cacheKey, response.clone());
     return response;
-  } catch {
-    const cached = await cache.match(request);
-    if (cached) return cached;
-    throw new Error("No cached response available");
-  }
+  });
+  if (!cached) return update;
+  event.waitUntil(update.catch(() => {}));
+  return cached;
+}
+
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  if (response.ok || response.type === "opaque") cache.put(request, response.clone());
+  return response;
 }
 
 self.addEventListener("fetch", event => {
   const { request } = event;
+  if (request.method !== "GET") return;
   const url = new URL(request.url);
 
-  // Project icons come from Iconify. Cache each SVG after its first load so
-  // the same project cards and views retain their icons while offline.
-  if (url.origin === "https://api.iconify.design" && request.method === "GET" && url.pathname.endsWith(".svg")) {
-    event.respondWith((async () => {
-      const cache = await caches.open(SHELL_CACHE);
-      const cached = await cache.match(request);
-      if (cached) return cached;
-      const response = await fetch(request);
-      if (response.ok || response.type === "opaque") cache.put(request, response.clone());
-      return response;
-    })());
+  // Project icons come from Iconify; keep each SVG once it has loaded.
+  if (url.origin === "https://api.iconify.design" && url.pathname.endsWith(".svg")) {
+    event.respondWith(cacheFirst(request, SHELL_CACHE));
     return;
   }
 
   if (url.origin !== self.location.origin) return;
 
-  if (request.method !== "GET") {
-    if (url.pathname.startsWith("/api/")) {
-      event.waitUntil(caches.delete(OFFLINE_API_CACHE));
-    }
-    return;
-  }
-
-  if (request.mode === "navigate") {
-    event.respondWith((async () => {
-      const cache = await caches.open(SHELL_CACHE);
-      const shell = () => cache.match(url.pathname === "/project" ? "/project" : "/");
-      if (!self.navigator.onLine) return (await shell()) || Response.error();
-      return networkFirst(request, SHELL_CACHE).catch(shell);
-    })());
+  if (request.mode === "navigate" && PAGES.has(url.pathname)) {
+    event.respondWith(staleWhileRevalidate(event, url.pathname));
     return;
   }
 
   if (RUNTIME_ASSET_PATHS.has(url.pathname)) {
-    event.respondWith(networkFirst(request, SHELL_CACHE, true));
+    event.respondWith(staleWhileRevalidate(event, request, { cache: "no-cache" }));
     return;
   }
 
+  // Uploaded files never change under the same id. A copy saved for offline
+  // use is therefore always current; everything else goes to the network.
   if (/^\/api\/projects\/[^/]+\/files\/[^/]+$/.test(url.pathname)) {
-    event.respondWith((async () => {
-      const cache = await caches.open(FILE_CACHE);
-      const cached = await cache.match(request);
-      if (!self.navigator.onLine && cached) return cached;
-      try {
-        return await fetch(request);
-      } catch {
-        return cached || Response.error();
-      }
-    })());
-    return;
-  }
-
-  if (isCachedApiRequest(url)) {
-    // navigator.onLine is not a guarantee, but when it says offline never
-    // wait for a network timeout before showing an already cached project.
-    event.respondWith((async () => {
-      const cache = await caches.open(OFFLINE_API_CACHE);
-      if (!self.navigator.onLine) {
-        const cached = await cache.match(request);
-        if (cached) return cached;
-      }
-      return networkFirst(request, OFFLINE_API_CACHE);
-    })());
+    event.respondWith(caches.open(FILE_CACHE)
+      .then(cache => cache.match(request))
+      .then(cached => cached || fetch(request)));
     return;
   }
 
   if (url.pathname.startsWith("/static/") || url.pathname === "/site.webmanifest") {
-    event.respondWith(caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response.ok) caches.open(SHELL_CACHE).then(cache => cache.put(request, response.clone()));
-      return response;
-    })));
+    event.respondWith(cacheFirst(request, SHELL_CACHE));
   }
 });

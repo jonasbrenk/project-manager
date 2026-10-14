@@ -31,6 +31,14 @@ docker compose ps          # container status and health
 
 All projects are stored in `app/data/projects.json`, bind-mounted into the container. The file stays on the host: it survives rebuilds and is not committed to Git. Back it up by copying that one file.
 
+## Offline use
+
+The app is local-first. Every device keeps a full copy of all projects (`app/static/pm-store.js`) and saves each edit there first, so the app works the same whether the server is reachable or not. A service worker keeps the app itself available offline.
+
+Changes sync in the background (`POST /api/sync`) as soon as the server is reachable. Each change is sent together with the version it was based on, and the server merges it field by field and item by item (tasks, links, files), so edits made on different devices while offline are combined. Deleted items stay restorable from "Recently deleted".
+
+Uploading files and restoring from "Recently deleted" need the server. Files can be kept on the device for offline viewing; files uploaded from a device are kept there automatically.
+
 ## Tests
 
 ```bash
@@ -47,6 +55,8 @@ app/
   landing_page.html     Project list view
   project_view.html     Single project view (tasks, links)
   static/app-shell.css  Shared design system
+  static/pm-store.js    Local project store and background sync
+  offline-service-worker.js  Keeps the app available offline
   data/projects.json    Your data (host-owned, not in Git)
 tests/                  API unit tests
 Dockerfile, compose.yaml, up.sh, down.sh
